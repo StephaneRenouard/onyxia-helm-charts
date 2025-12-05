@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: latest
+description: Premyom VSCode environment for Onyxia
+name: premyom-vscode-python
+type: application
+version: 0.1.0
