@@ -3,9 +3,9 @@ entries:
   premyom-vscode-python:
   - apiVersion: v2
     appVersion: latest
-    created: "2025-12-08T18:35:25.065078887Z"
+    created: "2025-12-08T20:56:42.579373492Z"
     description: Premyom VSCode environment for Onyxia
-    digest: da077f430a8f6895cf4d4278ec716a79fab78d16d94eeabcfd76bbd969231798
+    digest: 6af6a7e286d139a867b789263a731ddaff5b7ed2afb3ff38357b92a1493e16a8
     name: premyom-vscode-python
     type: application
     urls:
@@ -13,7 +13,17 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: latest
-    created: "2025-12-08T18:35:25.064885499Z"
+    created: "2025-12-08T20:56:42.579538817Z"
+    description: Premyom VSCode environment for Onyxia
+    digest: 31d5ebf6d238fbf3ad68db0086ac505e2269407943d9a5372d3298184c41133e
+    name: premyom-vscode-python
+    type: application
+    urls:
+    - https://stephanerenouard.github.io/onyxia-helm-charts/premyom-vscode-python/premyom-vscode-python-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: latest
+    created: "2025-12-08T20:56:42.579145899Z"
     description: Premyom VSCode environment for Onyxia
     digest: 81f7f5291d7f269d15cd8052354531785946f35f6703044f7d6969b2da788257
     name: premyom-vscode-python
@@ -21,4 +31,4 @@ entries:
     urls:
     - https://stephanerenouard.github.io/onyxia-helm-charts/premyom-vscode-python-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-08T18:35:25.06454461Z"
+generated: "2025-12-08T20:56:42.578834376Z"
