@@ -1,6 +1,11 @@
 apiVersion: v2
-appVersion: latest
-description: Premyom VSCode environment for Onyxia
 name: premyom-vscode-python
+description: Premyom VSCode environment for Onyxia (wrapper autour du chart officiel vscode-python avec une image custom)
 type: application
 version: 0.1.1
+appVersion: "latest"
+
+dependencies:
+  - name: vscode-python
+    version: 2.4.2
+    repository: https://inseefrlab.github.io/helm-charts-interactive-services

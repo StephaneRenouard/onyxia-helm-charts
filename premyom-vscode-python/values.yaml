@@ -1,29 +1,16 @@
-replicaCount: 1
+vscode-python:
+  image:
+    repository: stephanerenouard/onyxia-vscode
+    tag: latest
+    pullPolicy: IfNotPresent
 
-image:
-  repository: stephanerenouard/onyxia-vscode
-  tag: latest
-  pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 2
+      memory: 4Gi
+    requests:
+      cpu: 1
+      memory: 2Gi
 
-service:
-  type: ClusterIP
-  port: 8080
-
-resources:
-  limits:
-    cpu: 2
-    memory: 4Gi
-  requests:
-    cpu: 1
-    memory: 2Gi
-
-# Ingress géré par Onyxia (hébergé par Traefik)
-ingress:
-  enabled: true
-
-  # Hostname sera injecté par Onyxia (ingress.hostname)
-  hostname: ""
-
-  # ingressClassName + annotations sont peuplés à partir de la région
-  ingressClassName: ""
-  annotations: {}
+  # Onyxia gère déjà l’ingress/hostname/ingressClass via la région,
+  # on laisse le chart officiel appliquer sa logique par défaut.
