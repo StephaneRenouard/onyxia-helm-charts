@@ -12,6 +12,11 @@ RUN apt-get update && \
     apt-get install -y s3fs fuse && \
     rm -rf /var/lib/apt/lists/*
 
+# Entry point: script qui monte le bucket S3 (via s3fs) puis lance code-server
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 USER onyxia
 
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
