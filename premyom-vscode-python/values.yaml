@@ -16,3 +16,14 @@ resources:
   requests:
     cpu: 1
     memory: 2Gi
+
+# Ingress géré par Onyxia (hébergé par Traefik)
+ingress:
+  enabled: true
+
+  # Hostname sera injecté par Onyxia (ingress.hostname)
+  hostname: ""
+
+  # ingressClassName + annotations sont peuplés à partir de la région
+  ingressClassName: ""
+  annotations: {}
