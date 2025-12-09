@@ -2,7 +2,7 @@ apiVersion: v2
 name: premyom-vscode-python
 description: Premyom VSCode environment for Onyxia (wrapper autour du chart officiel vscode-python avec une image custom)
 type: application
-version: 0.1.2
+version: 0.1.3
 appVersion: "latest"
 
 dependencies:
