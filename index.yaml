@@ -3,14 +3,14 @@ entries:
   premyom-vscode-python:
   - apiVersion: v2
     appVersion: latest
-    created: "2025-12-09T07:55:16.838147354Z"
+    created: "2025-12-09T08:57:18.749546385Z"
     dependencies:
     - name: vscode-python
       repository: https://inseefrlab.github.io/helm-charts-interactive-services
       version: 2.4.2
     description: Premyom VSCode environment for Onyxia (wrapper autour du chart officiel
       vscode-python avec une image custom)
-    digest: 71357a6337c75acea4211f0a8b1b9e8628d1bf0ad04202462e5218bac6e7743e
+    digest: 22f48ff457bac859d94df37e48b491e7676f8505e0333d2710aa506530b43a50
     name: premyom-vscode-python
     type: application
     urls:
@@ -18,7 +18,7 @@ entries:
     version: 0.1.2
   - apiVersion: v2
     appVersion: latest
-    created: "2025-12-09T07:55:16.836132767Z"
+    created: "2025-12-09T08:57:18.748021344Z"
     dependencies:
     - name: vscode-python
       repository: https://inseefrlab.github.io/helm-charts-interactive-services
@@ -33,7 +33,7 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: latest
-    created: "2025-12-09T07:55:16.834516918Z"
+    created: "2025-12-09T08:57:18.746412793Z"
     description: Premyom VSCode environment for Onyxia
     digest: 81f7f5291d7f269d15cd8052354531785946f35f6703044f7d6969b2da788257
     name: premyom-vscode-python
@@ -41,4 +41,4 @@ entries:
     urls:
     - https://stephanerenouard.github.io/onyxia-helm-charts/premyom-vscode-python-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-09T07:55:16.834283624Z"
+generated: "2025-12-09T08:57:18.745771397Z"
