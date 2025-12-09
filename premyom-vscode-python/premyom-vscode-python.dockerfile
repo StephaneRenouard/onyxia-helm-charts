@@ -1,6 +1,6 @@
-## PREMYOM version of vscode with fuse support
+## PREMYOM version of vscode with fuse support (base alignée sur Arkam)
 
-FROM inseefrlab/onyxia-vscode-python:py3.13.5
+FROM inseefrlab/onyxia-vscode-python:py3.13.8
 
 USER root
 
@@ -19,4 +19,3 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 USER onyxia
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-
