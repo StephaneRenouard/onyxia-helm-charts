@@ -1,16 +1,22 @@
 {{- /*
 Simple Ingress pour exposer le VSCode custom via Traefik.
 
-On se base uniquement sur les valeurs d’ingress générées par Onyxia
-pour les charts IDE (schemas/ide/ingress.json) :
-- .Values.ingress.enabled
-- .Values.ingress.hostname
-- .Values.ingress.ingressClassName
-
-On laisse la gestion du certificat à Traefik / ACME via les annotations.
+On se base sur les valeurs d’ingress (hostname, ingressClassName, …)
+si elles sont présentes, mais on ne casse pas le rendu si .Values.ingress
+est absent ou typé autrement (cas actuel pour premyom-vscode-python).
 */ -}}
 
-{{- if .Values.ingress.enabled }}
+{{- $ing := dict }}
+{{- if kindIs "map" .Values.ingress }}
+{{-   $ing = .Values.ingress }}
+{{- end }}
+
+{{- $enabled := false }}
+{{- if and $ing (hasKey $ing "enabled") }}
+{{-   $enabled = (index $ing "enabled") }}
+{{- end }}
+
+{{- if $enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -22,14 +28,22 @@ metadata:
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.tls.certresolver: le
 spec:
-  {{- if .Values.ingress.ingressClassName }}
-  ingressClassName: {{ .Values.ingress.ingressClassName | quote }}
+  {{- $className := "" }}
+  {{- if and $ing (hasKey $ing "ingressClassName") }}
+  {{-   $className = (index $ing "ingressClassName") }}
+  {{- end }}
+  {{- if $className }}
+  ingressClassName: {{ $className | quote }}
+  {{- end }}
+  {{- $hostname := "" }}
+  {{- if and $ing (hasKey $ing "hostname") }}
+  {{-   $hostname = (index $ing "hostname") }}
   {{- end }}
   tls:
     - hosts:
-        - {{ .Values.ingress.hostname | quote }}
+        - {{ $hostname | quote }}
   rules:
-    - host: {{ .Values.ingress.hostname | quote }}
+    - host: {{ $hostname | quote }}
       http:
         paths:
           - path: /
@@ -40,4 +54,3 @@ spec:
                 port:
                   number: 8080
 {{- end }}
-
