@@ -2,10 +2,11 @@ apiVersion: v2
 name: premyom-vscode-python
 description: Premyom VSCode environment for Onyxia (wrapper autour du chart officiel vscode-python avec une image custom)
 type: application
-version: 0.1.5
+version: 0.1.6
 appVersion: "latest"
 ## 0.1.4: ajout d'un ingress au niveau du wrapper (tentative).
 ## 0.1.5: ajout d'un `values.schema.json` (x-onyxia) pour que Onyxia injecte `vscode-python.ingress.*` (hostname, ingressClassName, etc.).
+## 0.1.6: ajout de `vscode-python.security.password` dans le schema pour que Onyxia affiche / injecte le mot de passe one-time.
 
 dependencies:
   - name: vscode-python

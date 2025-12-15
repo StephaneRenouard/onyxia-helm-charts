@@ -63,6 +63,22 @@
             }
           }
         },
+        "security": {
+          "title": "Security",
+          "type": "object",
+          "properties": {
+            "password": {
+              "title": "Service password",
+              "type": "string",
+              "default": "changeme",
+              "render": "password",
+              "x-onyxia": {
+                "overwriteDefaultWith": "{{service.oneTimePassword}}",
+                "overwriteSchemaWith": "ide/password.json"
+              }
+            }
+          }
+        },
         "ingress": {
           "title": "Ingress Details",
           "type": "object",
@@ -178,4 +194,3 @@
     }
   }
 }
-
