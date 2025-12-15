@@ -1,6 +1,6 @@
 set -euo pipefail
 
-CHART_VERSION="${IMAGE_TAG:-$(awk -F': ' '$1==\"version\"{print $2; exit}' Chart.yaml)}"
+CHART_VERSION="${IMAGE_TAG:-$(sed -n 's/^version:[[:space:]]*//p' Chart.yaml | head -n 1)}"
 IMAGE_REPOSITORY="${IMAGE_REPOSITORY:-stephanerenouard/onyxia-vscode}"
 DOCKERFILE="${DOCKERFILE:-premyom-vscode-python.dockerfile}"
 
