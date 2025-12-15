@@ -1,8 +1,10 @@
 vscode-python:
-  image:
-    repository: stephanerenouard/onyxia-vscode
-    tag: latest
-    pullPolicy: IfNotPresent
+  service:
+    image:
+      pullPolicy: IfNotPresent
+      custom:
+        enabled: true
+        version: stephanerenouard/onyxia-vscode:latest
 
   resources:
     limits:
