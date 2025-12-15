@@ -4,7 +4,7 @@ vscode-python:
       pullPolicy: IfNotPresent
       custom:
         enabled: true
-        version: stephanerenouard/onyxia-vscode:latest
+        version: stephanerenouard/onyxia-vscode:0.1.7
 
   resources:
     limits:
