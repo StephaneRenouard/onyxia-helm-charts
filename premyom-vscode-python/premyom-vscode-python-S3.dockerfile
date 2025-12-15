@@ -1,6 +1,6 @@
 ## PREMYOM version of vscode with fuse support (base alignée sur Arkam)
 
-FROM inseefrlab/onyxia-vscode-python:py3.13.18
+FROM inseefrlab/onyxia-vscode-python:py3.13.8
 
 USER root
 

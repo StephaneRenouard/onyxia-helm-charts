@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -euo pipefail
 
 CHART_VERSION="${IMAGE_TAG:-$(sed -n 's/^version:[[:space:]]*//p' Chart.yaml | head -n 1)}"
