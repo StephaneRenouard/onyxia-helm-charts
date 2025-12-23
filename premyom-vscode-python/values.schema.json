@@ -63,6 +63,17 @@
             }
           }
         },
+        "persistence": {
+          "title": "Persistence",
+          "type": "object",
+          "properties": {
+            "size": {
+              "title": "Disk size",
+              "type": "string",
+              "default": "2Gi"
+            }
+          }
+        },
         "security": {
           "title": "Security",
           "type": "object",
