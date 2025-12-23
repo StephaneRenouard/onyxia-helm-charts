@@ -1,7 +1,0 @@
-apiVersion: v2
-name: vscode-python
-description: VSCode Python chart embarqué comme dépendance du wrapper premyom-vscode-python.
-type: application
-version: 2.4.2
-appVersion: "2.4.2"
-
