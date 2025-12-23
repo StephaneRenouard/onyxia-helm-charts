@@ -1,0 +1,6 @@
+dependencies:
+- name: vscode-python
+  repository: https://inseefrlab.github.io/helm-charts-interactive-services
+  version: 2.4.2
+digest: sha256:86ade764b935a33286b95a505181f6b6cf3ba1baa97f33feaccf39658adbd19c
+generated: "2025-12-09T16:15:34.093379443Z"
