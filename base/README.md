@@ -13,7 +13,9 @@ Fichiers:
 Contrat minimal visé (compat Onyxia + chart `vscode-python`):
 - script `/opt/onyxia-init.sh` présent (le chart lance `/opt/onyxia-init.sh <cmd...>`)
 - écoute sur `0.0.0.0:8080`
-- auth par mot de passe via la variable d’env `PASSWORD`
+- auth:
+  - par défaut: mot de passe via la variable d’env `PASSWORD`
+  - optionnel: désactivation via `CODE_SERVER_AUTH=none` (utile si l’accès est protégé par SSO en amont)
 - workspace par défaut: `/home/onyxia/work`
 - user: `onyxia`
 
@@ -25,7 +27,7 @@ Via les scripts:
 cd onyxia-helm-charts/base
 
 export IMAGE_REPOSITORY="stephanerenouard/onyxia-code-server"
-export IMAGE_TAG="0.1.0"
+export IMAGE_TAG="0.1.1"
 export CODE_SERVER_VERSION="4.106.3"
 
 ./build.sh
@@ -39,7 +41,7 @@ En direct (équivalent):
 cd onyxia-helm-charts
 
 IMAGE_REPOSITORY="stephanerenouard/onyxia-code-server"
-IMAGE_TAG="0.1.0"
+IMAGE_TAG="0.1.1"
 
 docker build \
   -f base/code-server.dockerfile \
@@ -60,8 +62,13 @@ vscode-python:
     image:
       custom:
         enabled: true
-        version: stephanerenouard/onyxia-code-server:0.1.0
+        version: stephanerenouard/onyxia-code-server:0.1.1
 ```
+
+### Utilisation via le wrapper `premyom-code-server` (SSO / sans mot de passe)
+
+- Ce chart ajoute l’annotation Traefik `forwardAuth` et positionne `CODE_SERVER_AUTH=none`.
+- Pour éviter la “surcouche” d’un tag Docker déjà pull sur un nœud, préfère incrémenter le tag (ex: `0.1.2`) ou utiliser `image.pullPolicy: Always`.
 
 ### Dépannage
 

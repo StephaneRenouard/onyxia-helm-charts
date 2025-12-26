@@ -15,4 +15,3 @@ docker build \
   -f "${DOCKERFILE}" \
   ..
 docker push "${IMAGE_REPOSITORY}:${IMAGE_TAG}"
-

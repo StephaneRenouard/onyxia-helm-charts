@@ -2,11 +2,10 @@ apiVersion: v2
 name: premyom-code-server
 description: "Code-server (image indépendante) pour Onyxia, avec SSO (Traefik forwardAuth) et sans mot de passe."
 type: application
-version: 0.1.0
+version: 0.1.1
 appVersion: "latest"
 
 dependencies:
   - name: vscode-python
     version: 2.4.2
     repository: https://inseefrlab.github.io/helm-charts-interactive-services
-

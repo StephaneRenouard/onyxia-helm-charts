@@ -8,6 +8,7 @@ Repo Helm (GitHub Pages) pour des charts “wrapper” Onyxia (ex. images IDE cu
 helm repo add premyom https://stephanerenouard.github.io/onyxia-helm-charts
 helm search repo premyom
 helm show values premyom/premyom-vscode-python
+helm show values premyom/premyom-code-server
 ```
 
 ## Release (chart wrapper)
@@ -18,7 +19,7 @@ Le repo est un “Helm repo” statique :
 
 Workflow minimal (sans `helm package`) :
 ```bash
-VERSION="0.1.9"
+VERSION="0.1.10"
 # Important sur macOS: éviter les xattrs/AppleDouble, sinon Helm peut planter avec:
 # "chart illegally contains content outside the base directory"
 COPYFILE_DISABLE=1 COPY_EXTENDED_ATTRIBUTES_DISABLE=1 \
@@ -30,3 +31,4 @@ Ensuite, ajouter l’entrée correspondante dans `index.yaml` (version, url, dig
 
 Notes:
 - Garder uniquement les dépendances packagées en `*.tgz` dans `premyom-vscode-python/charts/` (ex: `vscode-python-2.4.2.tgz`), ne pas committer une copie extraite du chart (sinon Helm peut utiliser le dossier et casser la résolution des dépendances).
+- Même règle pour `premyom-code-server/charts/`.
