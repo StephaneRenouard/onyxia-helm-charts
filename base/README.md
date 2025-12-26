@@ -7,14 +7,33 @@ Base d’images “workspaces” indépendantes (sans `inseefrlab/*`), destinée
 Fichiers:
 - `base/code-server.dockerfile`
 - `base/entrypoint.sh`
+- `base/build.sh`
+- `base/build_and_push.sh`
 
 Contrat minimal visé (compat Onyxia + chart `vscode-python`):
+- script `/opt/onyxia-init.sh` présent (le chart lance `/opt/onyxia-init.sh <cmd...>`)
 - écoute sur `0.0.0.0:8080`
 - auth par mot de passe via la variable d’env `PASSWORD`
 - workspace par défaut: `/home/onyxia/work`
 - user: `onyxia`
 
-### Build & push (ex sur une machine de build)
+### Build & push (machine de build)
+
+Via les scripts:
+
+```bash
+cd onyxia-helm-charts/base
+
+export IMAGE_REPOSITORY="stephanerenouard/onyxia-code-server"
+export IMAGE_TAG="0.1.0"
+export CODE_SERVER_VERSION="4.106.3"
+
+./build.sh
+# ou
+./build_and_push.sh
+```
+
+En direct (équivalent):
 
 ```bash
 cd onyxia-helm-charts
@@ -29,7 +48,7 @@ docker build \
 docker push "${IMAGE_REPOSITORY}:${IMAGE_TAG}"
 ```
 
-Note: le Dockerfile installe le paquet `*_amd64.deb`. Si tu builds sur une machine ARM (M1/M2/M3), il faudra soit builder en `--platform linux/amd64`, soit ajouter une variante `arm64`.
+Note: le Dockerfile installe le paquet `code-server_*_${ARCH}.deb` en détectant l’arch via `dpkg --print-architecture` (ex: `amd64`, `arm64`).
 
 ### Utilisation via le wrapper `premyom-vscode-python`
 
@@ -43,3 +62,7 @@ vscode-python:
         enabled: true
         version: stephanerenouard/onyxia-code-server:0.1.0
 ```
+
+### Dépannage
+
+- Si tu vois `/opt/onyxia-init.sh: not found`, l’image n’est pas compatible avec le chart IDE Onyxia: ce script doit exister (même en stub).
