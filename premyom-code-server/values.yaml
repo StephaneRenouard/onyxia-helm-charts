@@ -1,0 +1,27 @@
+vscode-python:
+  service:
+    image:
+      pullPolicy: IfNotPresent
+      custom:
+        enabled: true
+        version: stephanerenouard/onyxia-code-server:0.1.1
+
+  extraEnvVars:
+    - name: CODE_SERVER_AUTH
+      value: none
+
+  ingress:
+    annotations:
+      traefik.ingress.kubernetes.io/router.middlewares: onyxia-workspace-sso@kubernetescrd
+
+  persistence:
+    size: 2Gi
+
+  resources:
+    limits:
+      cpu: "2"
+      memory: 4Gi
+    requests:
+      cpu: "1"
+      memory: 2Gi
+
