@@ -3,6 +3,21 @@ entries:
   premyom-code-server:
   - apiVersion: v2
     appVersion: latest
+    created: "2025-12-26T20:04:03Z"
+    dependencies:
+    - name: vscode-python
+      repository: https://inseefrlab.github.io/helm-charts-interactive-services
+      version: 2.4.2
+    description: Code-server (image indépendante) pour Onyxia, avec SSO (oauth2-proxy) et
+      sans mot de passe.
+    digest: 8bc6b083019b81f9044ce184a66f668b30e6e2c2c45aa9008b6f75f009e05605
+    name: premyom-code-server
+    type: application
+    urls:
+    - https://stephanerenouard.github.io/onyxia-helm-charts/premyom-code-server-0.2.1.tgz
+    version: 0.2.1
+  - apiVersion: v2
+    appVersion: latest
     created: "2025-12-26T17:53:35Z"
     dependencies:
     - name: vscode-python
