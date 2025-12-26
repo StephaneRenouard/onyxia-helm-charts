@@ -57,7 +57,7 @@ fi
 
 exec "$@"
 EOF
-  && chmod +x /opt/onyxia-init.sh
+RUN chmod +x /opt/onyxia-init.sh
 
 COPY base/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
