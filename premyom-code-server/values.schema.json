@@ -2,6 +2,77 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "type": "object",
   "properties": {
+    "sso": {
+      "title": "SSO (oauth2-proxy)",
+      "type": "object",
+      "properties": {
+        "secretName": {
+          "title": "Secret (client/cookie)",
+          "type": "string",
+          "default": "oauth2-proxy",
+          "description": "Secret dans le namespace du workspace (keys: client-id, client-secret, cookie-secret)."
+        },
+        "issuerUrl": {
+          "title": "OIDC issuer URL",
+          "type": "string",
+          "default": "https://auth.datalab.arkam-group.com/auth/realms/onyxia"
+        },
+        "redirectUrl": {
+          "title": "Redirect URL (callback)",
+          "type": "string",
+          "default": "https://datalab.arkam-group.com/oauth2/callback",
+          "description": "On réutilise le callback central (host UI) pour éviter de gérer des wildcards Keycloak."
+        },
+        "cookieDomain": {
+          "title": "Cookie domain",
+          "type": "string",
+          "default": ".datalab.arkam-group.com"
+        },
+        "whitelistDomain": {
+          "title": "Allowed redirect domains",
+          "type": "string",
+          "default": ".datalab.arkam-group.com"
+        },
+        "ingress": {
+          "title": "Ingress (SSO)",
+          "type": "object",
+          "form": true,
+          "x-onyxia": {
+            "overwriteSchemaWith": "ide/ingress.json"
+          },
+          "properties": {
+            "enabled": {
+              "description": "Enable Ingress",
+              "type": "boolean",
+              "default": true,
+              "x-onyxia": {
+                "hidden": true,
+                "overwriteDefaultWith": "k8s.ingress"
+              }
+            },
+            "hostname": {
+              "type": "string",
+              "form": true,
+              "title": "Hostname",
+              "x-onyxia": {
+                "hidden": true,
+                "overwriteDefaultWith": "{{project.id}}-{{k8s.randomSubdomain}}-0.{{k8s.domain}}"
+              }
+            },
+            "ingressClassName": {
+              "type": "string",
+              "form": true,
+              "title": "ingressClassName",
+              "default": "",
+              "x-onyxia": {
+                "hidden": true,
+                "overwriteDefaultWith": "{{k8s.ingressClassName}}"
+              }
+            }
+          }
+        }
+      }
+    },
     "vscode-python": {
       "title": "Code-server (embedded)",
       "type": "object",
@@ -97,10 +168,10 @@
             "enabled": {
               "description": "Enable Ingress",
               "type": "boolean",
-              "default": true,
+              "default": false,
               "x-onyxia": {
                 "hidden": true,
-                "overwriteDefaultWith": "k8s.ingress"
+                "overwriteDefaultWith": false
               }
             },
             "hostname": {
@@ -109,7 +180,7 @@
               "title": "Hostname",
               "x-onyxia": {
                 "hidden": true,
-                "overwriteDefaultWith": "{{project.id}}-{{k8s.randomSubdomain}}-0.{{k8s.domain}}"
+                "overwriteDefaultWith": "unused"
               }
             },
             "ingressClassName": {
@@ -119,7 +190,7 @@
               "default": "",
               "x-onyxia": {
                 "hidden": true,
-                "overwriteDefaultWith": "{{k8s.ingressClassName}}"
+                "overwriteDefaultWith": ""
               }
             }
           }

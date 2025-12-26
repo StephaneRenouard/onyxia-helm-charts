@@ -1,18 +1,17 @@
 vscode-python:
+  ingress:
+    enabled: false
+
   service:
     image:
       pullPolicy: IfNotPresent
       custom:
         enabled: true
-        version: stephanerenouard/onyxia-code-server:0.1.1
+        version: stephanerenouard/onyxia-code-server:0.1.2
 
   extraEnvVars:
     - name: CODE_SERVER_AUTH
       value: none
-
-  ingress:
-    annotations:
-      traefik.ingress.kubernetes.io/router.middlewares: onyxia-workspace-sso-chain@kubernetescrd
 
   persistence:
     size: 2Gi
@@ -24,3 +23,17 @@ vscode-python:
     requests:
       cpu: "1"
       memory: 2Gi
+
+sso:
+  secretName: oauth2-proxy
+  issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia
+  redirectUrl: https://datalab.arkam-group.com/oauth2/callback
+  cookieDomain: .datalab.arkam-group.com
+  whitelistDomain: .datalab.arkam-group.com
+  ingress:
+    enabled: true
+    tls: true
+    ingressClassName: ""
+    annotations: {}
+    hostname: chart-example.local
+    path: /
