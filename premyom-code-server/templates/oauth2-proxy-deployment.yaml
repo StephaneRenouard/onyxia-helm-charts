@@ -38,7 +38,7 @@ spec:
             - --cookie-refresh=1h
             - --cookie-expire=8h
             - --session-store-type=cookie
-            - "--upstream=http://{{ include \"premyom-code-server.fullname\" . }}-vscode-python:8080/"
+            - "--upstream=http://{{ include "premyom-code-server.fullname" . }}-vscode-python:8080/"
           env:
             - name: OAUTH2_PROXY_CLIENT_ID
               valueFrom:
