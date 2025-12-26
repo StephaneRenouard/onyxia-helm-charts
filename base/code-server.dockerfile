@@ -28,14 +28,35 @@ RUN useradd -m -s /bin/bash -g users onyxia \
   && chown -R onyxia:users /home/onyxia
 
 RUN mkdir -p /opt \
-  && printf '%s\n' \
-    '#!/usr/bin/env bash' \
-    'set -euo pipefail' \
-    '' \
-    '# Compat minimale avec les charts IDE Onyxia:' \
-    '# ils appellent /opt/onyxia-init.sh <cmd...> ; ici on passe juste le relai.' \
-    'exec "$@"' \
-    > /opt/onyxia-init.sh \
+  && cat > /opt/onyxia-init.sh <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Compat minimale avec les charts IDE Onyxia:
+# ils appellent /opt/onyxia-init.sh <cmd...>.
+# Ici on injecte uniquement les options nécessaires à notre image.
+
+if [ "${CODE_SERVER_AUTH:-password}" = "none" ]; then
+  if [ "$#" -ge 1 ] && [[ "${1}" == *"code-server" ]]; then
+    if ! printf '%s\n' "$@" | grep -qE '^--auth$|^--auth='; then
+      # Le chart passe le workspace path en dernier argument.
+      # On insère "--auth none" juste avant le dernier élément.
+      args=("$@")
+      last_index=$(( ${#args[@]} - 1 ))
+      new_args=()
+      for i in "${!args[@]}"; do
+        if [ "$i" -eq "$last_index" ]; then
+          new_args+=("--auth" "none")
+        fi
+        new_args+=("${args[$i]}")
+      done
+      set -- "${new_args[@]}"
+    fi
+  fi
+fi
+
+exec "$@"
+EOF
   && chmod +x /opt/onyxia-init.sh
 
 COPY base/entrypoint.sh /usr/local/bin/entrypoint.sh
