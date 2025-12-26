@@ -12,7 +12,7 @@ vscode-python:
 
   ingress:
     annotations:
-      traefik.ingress.kubernetes.io/router.middlewares: onyxia-workspace-sso@kubernetescrd
+      traefik.ingress.kubernetes.io/router.middlewares: onyxia-workspace-sso-chain@kubernetescrd
 
   persistence:
     size: 2Gi
@@ -24,4 +24,3 @@ vscode-python:
     requests:
       cpu: "1"
       memory: 2Gi
-
