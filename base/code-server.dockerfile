@@ -27,6 +27,17 @@ RUN useradd -m -s /bin/bash -g users onyxia \
   && mkdir -p /home/onyxia/work \
   && chown -R onyxia:users /home/onyxia
 
+RUN mkdir -p /opt \
+  && printf '%s\n' \
+    '#!/usr/bin/env bash' \
+    'set -euo pipefail' \
+    '' \
+    '# Compat minimale avec les charts IDE Onyxia:' \
+    '# ils appellent /opt/onyxia-init.sh <cmd...> ; ici on passe juste le relai.' \
+    'exec "$@"' \
+    > /opt/onyxia-init.sh \
+  && chmod +x /opt/onyxia-init.sh
+
 COPY base/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
