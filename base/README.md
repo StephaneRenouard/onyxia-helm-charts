@@ -35,6 +35,19 @@ export CODE_SERVER_VERSION="4.106.3"
 ./build_and_push.sh
 ```
 
+Exemple Harbor (registry locale) :
+
+```bash
+cd onyxia-helm-charts/base
+
+export IMAGE_REGISTRY_HOST="harbor.lan"
+export IMAGE_NAMESPACE="premyom"
+export IMAGE_TAG="0.1.2"
+
+docker login harbor.lan
+./build_and_push.sh
+```
+
 En direct (équivalent):
 
 ```bash
