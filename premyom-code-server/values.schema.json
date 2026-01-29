@@ -144,7 +144,7 @@
                   "enum": ["IfNotPresent", "Always", "Never"]
                 },
                 "custom": {
-                  "title": "Custom image",
+                  "title": "Custom image (imposée)",
                   "type": "object",
                   "properties": {
                     "enabled": {
@@ -152,13 +152,18 @@
                       "type": "boolean",
                       "default": true,
                       "x-onyxia": {
-                        "overwriteSchemaWith": "ide/customImage.json"
+                        "hidden": true,
+                        "readonly": true
                       }
                     },
                     "version": {
                       "title": "Name of the custom image",
                       "type": "string",
-                      "default": "harbor.lan/premyom/onyxia-code-server:0.1.4"
+                      "default": "harbor.lan/premyom/onyxia-code-server:0.1.4",
+                      "x-onyxia": {
+                        "hidden": true,
+                        "readonly": true
+                      }
                     }
                   }
                 }
