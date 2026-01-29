@@ -54,7 +54,9 @@ vscode-python:
 
   vault:
     enabled: true
-    secretName: ""
+    # Secret Kubernetes (namespace onyxia) contenant VAULT_ADDR et VAULT_TOKEN
+    # (token avec accès read-only sur secret/data/premyom/s3/*).
+    secretName: "premyom-vault-read"
     token: ""
     url: ""
     mount: ""
