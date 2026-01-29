@@ -77,6 +77,58 @@
       "title": "Code-server (embedded)",
       "type": "object",
       "properties": {
+        "premyom": {
+          "title": "Premyom (montages S3)",
+          "type": "object",
+          "properties": {
+            "userGroupsJson": {
+              "title": "User groups (JSON)",
+              "type": "string",
+              "default": "[]",
+              "x-onyxia": {
+                "hidden": true,
+                "overwriteDefaultWith": "{{user.decodedIdToken.groups}}"
+              }
+            },
+            "s3Mount": {
+              "title": "S3 mounts",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "title": "Enable mounts",
+                  "type": "string",
+                  "default": "true",
+                  "x-onyxia": { "hidden": true }
+                },
+                "nonHdsEndpointHost": {
+                  "title": "Non-HDS endpoint host",
+                  "type": "string",
+                  "default": "cellar-c2.services.clever-cloud.com"
+                },
+                "hdsEndpointHost": {
+                  "title": "HDS endpoint host",
+                  "type": "string",
+                  "default": "cellar-c2.services.clever-cloud.com"
+                },
+                "vaultNonHdsPath": {
+                  "title": "Vault path non-HDS",
+                  "type": "string",
+                  "default": "secret/data/premyom/s3/nonhds"
+                },
+                "vaultHdsPath": {
+                  "title": "Vault path HDS",
+                  "type": "string",
+                  "default": "secret/data/premyom/s3/hds"
+                },
+                "mountRoot": {
+                  "title": "Mount root",
+                  "type": "string",
+                  "default": "/mnt/s3"
+                }
+              }
+            }
+          }
+        },
         "service": {
           "title": "Service",
           "type": "object",
@@ -162,6 +214,31 @@
           "type": "object",
           "x-onyxia": { "hidden": true },
           "properties": {}
+        },
+        "vault": {
+          "title": "Vault (injecté)",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "x-onyxia": { "hidden": true }
+            },
+            "url": {
+              "type": "string",
+              "default": "",
+              "x-onyxia": { "hidden": true, "overwriteDefaultWith": "{{vault.VAULT_ADDR}}" }
+            },
+            "token": {
+              "type": "string",
+              "default": "",
+              "x-onyxia": { "hidden": true, "overwriteDefaultWith": "{{vault.VAULT_TOKEN}}" }
+            },
+            "mount": { "type": "string", "default": "", "x-onyxia": { "hidden": true } },
+            "secret": { "type": "string", "default": "", "x-onyxia": { "hidden": true } },
+            "directory": { "type": "string", "default": "", "x-onyxia": { "hidden": true } },
+            "secretName": { "type": "string", "default": "", "x-onyxia": { "hidden": true } }
+          }
         }
       }
     }
