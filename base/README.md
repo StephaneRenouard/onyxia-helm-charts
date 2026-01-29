@@ -19,6 +19,22 @@ Contrat minimal visé (compat Onyxia + chart `vscode-python`):
 - workspace par défaut: `/home/onyxia/work`
 - user: `onyxia`
 
+## Image `code-server-python`
+
+Variante “code-server + Python” (sans `inseefrlab/*`), utile pour remplacer progressivement `premyom-vscode-python`.
+
+Fichier:
+- `base/code-server-python.dockerfile`
+
+Build :
+```bash
+cd onyxia-helm-charts/base
+export DOCKERFILE="code-server-python.dockerfile"
+export IMAGE_REGISTRY_HOST="harbor.lan" IMAGE_NAMESPACE="premyom"
+export IMAGE_NAME="onyxia-vscode-python" IMAGE_TAG="0.1.0"
+./build_and_push.sh
+```
+
 ### Build & push (machine de build)
 
 Via les scripts:

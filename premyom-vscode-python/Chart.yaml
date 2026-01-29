@@ -2,7 +2,7 @@ apiVersion: v2
 name: premyom-vscode-python
 description: Premyom VSCode environment for Onyxia (wrapper autour du chart officiel vscode-python avec une image custom)
 type: application
-version: 0.1.10
+version: 0.1.11
 appVersion: "latest"
 ## 0.1.4: ajout d'un ingress au niveau du wrapper (tentative).
 ## 0.1.5: ajout d'un `values.schema.json` (x-onyxia) pour que Onyxia injecte `vscode-python.ingress.*` (hostname, ingressClassName, etc.).
@@ -11,6 +11,7 @@ appVersion: "latest"
 ## 0.1.8: suppression des templates ingress du wrapper (on laisse le chart officiel gérer l’ingress).
 ## 0.1.9: repack chart sans xattrs/AppleDouble (fix erreur Helm "chart illegally contains content outside the base directory").
 ## 0.1.10: réduire la taille par défaut du PVC (lab).
+## 0.1.11: harmonisation image (Harbor) + découplage tag image / version chart.
 
 dependencies:
   - name: vscode-python

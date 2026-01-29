@@ -4,7 +4,7 @@ vscode-python:
       pullPolicy: IfNotPresent
       custom:
         enabled: true
-        version: stephanerenouard/onyxia-vscode:0.1.7
+        version: harbor.lan/premyom/onyxia-vscode-python:0.1.0
   persistence:
     size: 2Gi
 
