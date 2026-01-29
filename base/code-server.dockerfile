@@ -27,7 +27,6 @@ RUN ARCH="$(dpkg --print-architecture)" \
   && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -s /bin/bash -g users onyxia \
-  && usermod -aG fuse onyxia \
   && mkdir -p /home/onyxia/work \
   && chown -R onyxia:users /home/onyxia
 
