@@ -158,11 +158,22 @@
                     "version": {
                       "title": "Name of the custom image",
                       "type": "string",
-                      "default": "harbor.lan/premyom/onyxia-code-server:0.1.3"
+                      "default": "harbor.lan/premyom/onyxia-code-server:0.1.4"
                     }
                   }
                 }
               }
+            }
+          }
+        },
+        "premyomS3fs": {
+          "title": "S3FS (FUSE)",
+          "type": "object",
+          "x-onyxia": { "hidden": true },
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
             }
           }
         },
