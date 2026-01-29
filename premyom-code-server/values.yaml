@@ -13,19 +13,19 @@ vscode-python:
     - name: CODE_SERVER_AUTH
       value: none
     - name: ONYXIA_USER_GROUPS
-      value: '{{ .Values.premyom.userGroupsJson }}'
+      value: '{{- $p := (default dict .premyom) -}}{{- default "[]" $p.userGroupsJson -}}'
     - name: PREMYOM_S3_MOUNT_ENABLED
-      value: '{{ .Values.premyom.s3Mount.enabled }}'
+      value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "false" $s3.enabled -}}'
     - name: PREMYOM_S3_NONHDS_ENDPOINT_HOST
-      value: '{{ .Values.premyom.s3Mount.nonHdsEndpointHost }}'
+      value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "" $s3.nonHdsEndpointHost -}}'
     - name: PREMYOM_S3_HDS_ENDPOINT_HOST
-      value: '{{ .Values.premyom.s3Mount.hdsEndpointHost }}'
+      value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "" $s3.hdsEndpointHost -}}'
     - name: PREMYOM_S3_VAULT_NONHDS_PATH
-      value: '{{ .Values.premyom.s3Mount.vaultNonHdsPath }}'
+      value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "" $s3.vaultNonHdsPath -}}'
     - name: PREMYOM_S3_VAULT_HDS_PATH
-      value: '{{ .Values.premyom.s3Mount.vaultHdsPath }}'
+      value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "" $s3.vaultHdsPath -}}'
     - name: PREMYOM_S3_MOUNT_ROOT
-      value: '{{ .Values.premyom.s3Mount.mountRoot }}'
+      value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "/mnt/s3" $s3.mountRoot -}}'
 
   # s3fs en pod Kubernetes nécessite FUSE: /dev/fuse + droits.
   # Pour la démo, on assume un pod privilégié.
