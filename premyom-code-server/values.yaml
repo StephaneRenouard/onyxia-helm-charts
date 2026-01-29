@@ -1,4 +1,16 @@
 vscode-python:
+  # Nécessaire si Harbor est privé: crée le secret docker-registry côté cluster
+  # puis référence-le ici (format Kubernetes standard).
+  #
+  # Exemple:
+  # kubectl -n onyxia create secret docker-registry harbor-regcred \
+  #   --docker-server=harbor.lan \
+  #   --docker-username='robot$<name>' \
+  #   --docker-password='<token>' \
+  #   --docker-email='none'
+  imagePullSecrets:
+    - name: harbor-regcred
+
   ingress:
     enabled: false
 
