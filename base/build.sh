@@ -3,7 +3,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-IMAGE_TAG="${IMAGE_TAG:-0.1.2}"
+IMAGE_TAG="${IMAGE_TAG:-0.1.3}"
 IMAGE_REPOSITORY="${IMAGE_REPOSITORY:-}"
 IMAGE_REGISTRY_HOST="${IMAGE_REGISTRY_HOST:-}"   # ex: harbor.lan
 IMAGE_NAMESPACE="${IMAGE_NAMESPACE:-}"           # ex: premyom
@@ -19,7 +19,7 @@ if [[ -z "${IMAGE_REPOSITORY}" ]]; then
     fi
     IMAGE_REPOSITORY="${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}"
   else
-    IMAGE_REPOSITORY="stephanerenouard/onyxia-code-server"
+    IMAGE_REPOSITORY="onyxia-code-server"
   fi
 fi
 

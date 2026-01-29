@@ -106,7 +106,7 @@
                     "version": {
                       "title": "Name of the custom image",
                       "type": "string",
-                      "default": "stephanerenouard/onyxia-code-server:0.1.2"
+                      "default": "harbor.lan/premyom/onyxia-code-server:0.1.3"
                     }
                   }
                 }

@@ -26,8 +26,8 @@ Via les scripts:
 ```bash
 cd onyxia-helm-charts/base
 
-export IMAGE_REPOSITORY="stephanerenouard/onyxia-code-server"
-export IMAGE_TAG="0.1.1"
+export IMAGE_REPOSITORY="onyxia-code-server"
+export IMAGE_TAG="0.1.3"
 export CODE_SERVER_VERSION="4.106.3"
 
 ./build.sh
@@ -42,7 +42,7 @@ cd onyxia-helm-charts/base
 
 export IMAGE_REGISTRY_HOST="harbor.lan"
 export IMAGE_NAMESPACE="premyom"
-export IMAGE_TAG="0.1.2"
+export IMAGE_TAG="0.1.3"
 
 docker login harbor.lan
 ./build_and_push.sh
@@ -53,8 +53,8 @@ En direct (équivalent):
 ```bash
 cd onyxia-helm-charts
 
-IMAGE_REPOSITORY="stephanerenouard/onyxia-code-server"
-IMAGE_TAG="0.1.1"
+IMAGE_REPOSITORY="harbor.lan/premyom/onyxia-code-server"
+IMAGE_TAG="0.1.3"
 
 docker build \
   -f base/code-server.dockerfile \
@@ -75,7 +75,7 @@ vscode-python:
     image:
       custom:
         enabled: true
-        version: stephanerenouard/onyxia-code-server:0.1.1
+        version: harbor.lan/premyom/onyxia-code-server:0.1.3
 ```
 
 ### Utilisation via le wrapper `premyom-code-server` (SSO / sans mot de passe)

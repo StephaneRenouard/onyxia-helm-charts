@@ -2,6 +2,8 @@
 
 Repo Helm (GitHub Pages) pour des charts “wrapper” Onyxia (ex. images IDE custom).
 
+Conventions images : `IMAGES.md`.
+
 ## Utilisation
 
 ```bash
