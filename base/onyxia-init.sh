@@ -102,8 +102,8 @@ premyom_mount_s3() {
       name: (sub("^hds-";"") | sub("_(ro|rw)$";"")),
       mode: (capture("_(?<m>ro|rw)$").m)
     }) |
-    reduce .[] as $g ({}; .[(($g.scope)+\"/\"+($g.name))] =
-      (if (.[(($g.scope)+\"/\"+($g.name))] // \"ro\") == \"rw\" or $g.mode == \"rw\" then \"rw\" else \"ro\" end)
+    reduce .[] as $g ({}; .[(($g.scope)+"/"+($g.name))] =
+      (if (.[(($g.scope)+"/"+($g.name))] // "ro") == "rw" or $g.mode == "rw" then "rw" else "ro" end)
     )
   ')"
 
@@ -179,4 +179,3 @@ normalize_codeserver_args "$@" || true
 premyom_mount_s3 || true
 
 exec "$@"
-
