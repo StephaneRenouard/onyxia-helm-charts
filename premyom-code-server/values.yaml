@@ -30,7 +30,7 @@ vscode-python:
     - name: VAULT_K8S_ROLE
       value: 'premyom-s3-read'
     - name: ONYXIA_USER_GROUPS
-      value: '{{- $p := (default dict .premyom) -}}{{- default "[]" $p.userGroupsJson -}}'
+      value: '{{- $p := (default dict .premyom) -}}{{- $g := (default (list) $p.userGroupsJson) -}}{{- if kindIs "string" $g -}}{{- default "[]" $g -}}{{- else -}}{{- toJson $g -}}{{- end -}}'
     - name: PREMYOM_S3_MOUNT_ENABLED
       value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "false" $s3.enabled -}}'
     - name: PREMYOM_S3_NONHDS_ENDPOINT_HOST
