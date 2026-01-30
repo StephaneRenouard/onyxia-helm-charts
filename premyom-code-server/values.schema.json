@@ -83,8 +83,8 @@
           "properties": {
             "userGroupsJson": {
               "title": "User groups (JSON)",
-              "type": "string",
-              "default": "[]",
+              "type": "array",
+              "default": [],
               "x-onyxia": {
                 "hidden": true,
                 "overwriteDefaultWith": "{{user.decodedIdToken.groups}}"
@@ -159,7 +159,7 @@
                     "version": {
                       "title": "Name of the custom image",
                       "type": "string",
-                      "default": "harbor.lan/premyom/onyxia-code-server:0.1.4",
+                      "default": "stephanerenouard/onyxia-code-server:0.1.8",
                       "x-onyxia": {
                         "hidden": true,
                         "readonly": true
@@ -237,7 +237,7 @@
           "properties": {
             "enabled": {
               "type": "boolean",
-              "default": true,
+              "default": false,
               "x-onyxia": { "hidden": true }
             },
             "url": {
