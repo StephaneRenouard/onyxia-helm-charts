@@ -19,7 +19,8 @@ vscode-python:
       pullPolicy: IfNotPresent
       custom:
         enabled: true
-        version: harbor.lan/premyom/onyxia-code-server:0.1.5
+        # Démo: DockerHub (évite dépendances Harbor)
+        version: stephanerenouard/onyxia-code-server:0.1.6
 
   extraEnvVars:
     - name: CODE_SERVER_AUTH
