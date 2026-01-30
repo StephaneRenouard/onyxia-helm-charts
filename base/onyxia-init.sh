@@ -8,10 +8,49 @@ json_get() {
   jq -r "$expr // empty" 2>/dev/null || true
 }
 
+vault_login_kubernetes() {
+  if [ -n "${VAULT_TOKEN:-}" ]; then
+    return 0
+  fi
+  if [ -z "${VAULT_ADDR:-}" ]; then
+    return 1
+  fi
+  local jwt_file="/var/run/secrets/kubernetes.io/serviceaccount/token"
+  if [ ! -r "${jwt_file}" ]; then
+    return 1
+  fi
+  local role="${VAULT_K8S_ROLE:-premyom-s3-read}"
+  local login_url="${VAULT_ADDR%/}/v1/auth/kubernetes/login"
+
+  local jwt
+  jwt="$(cat "${jwt_file}")"
+  [ -n "${jwt}" ] || return 1
+
+  local body
+  body="$(jq -cn --arg role "${role}" --arg jwt "${jwt}" '{role:$role,jwt:$jwt}')"
+
+  local resp
+  resp="$(curl -fsSL -X POST -H 'Content-Type: application/json' --data "${body}" "${login_url}" 2>/dev/null || true)"
+  [ -n "${resp}" ] || return 1
+
+  local token
+  token="$(printf '%s' "${resp}" | json_get '.auth.client_token')"
+  [ -n "${token}" ] || return 1
+
+  export VAULT_TOKEN="${token}"
+  return 0
+}
+
 vault_read_kv() {
   local path="$1"
   local key="$2"
-  if [ -z "${VAULT_ADDR:-}" ] || [ -z "${VAULT_TOKEN:-}" ]; then
+  if [ -z "${VAULT_ADDR:-}" ]; then
+    return 1
+  fi
+  if [ -z "${VAULT_TOKEN:-}" ]; then
+    vault_login_kubernetes >/dev/null 2>&1 || true
+  fi
+  if [ -z "${VAULT_TOKEN:-}" ]; then
     return 1
   fi
   local url="${VAULT_ADDR%/}/v1/${path#/}"

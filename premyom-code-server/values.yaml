@@ -20,11 +20,15 @@ vscode-python:
       custom:
         enabled: true
         # Démo: DockerHub (évite dépendances Harbor)
-        version: stephanerenouard/onyxia-code-server:0.1.6
+        version: stephanerenouard/onyxia-code-server:0.1.8
 
   extraEnvVars:
     - name: CODE_SERVER_AUTH
       value: none
+    - name: VAULT_ADDR
+      value: 'http://vault.vault.svc.cluster.local:8200'
+    - name: VAULT_K8S_ROLE
+      value: 'premyom-s3-read'
     - name: ONYXIA_USER_GROUPS
       value: '{{- $p := (default dict .premyom) -}}{{- default "[]" $p.userGroupsJson -}}'
     - name: PREMYOM_S3_MOUNT_ENABLED
@@ -65,11 +69,11 @@ vscode-python:
       cpu: "1"
       memory: 2Gi
 
+  # On désactive l'intégration Vault "upstream" (sinon le chart crée un secret Vault vide).
+  # L'image `onyxia-code-server` récupère un token Vault via auth/kubernetes à l'exécution.
   vault:
-    enabled: true
-    # Secret Kubernetes (namespace onyxia) contenant VAULT_ADDR et VAULT_TOKEN
-    # (token avec accès read-only sur secret/data/premyom/s3/*).
-    secretName: "premyom-vault-read"
+    enabled: false
+    secretName: ""
     token: ""
     url: ""
     mount: ""
