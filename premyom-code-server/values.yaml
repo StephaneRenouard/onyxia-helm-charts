@@ -92,7 +92,9 @@ vscode-python:
 sso:
   secretName: oauth2-proxy
   issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia
-  redirectUrl: https://datalab.arkam-group.com/oauth2/callback
+  # Laisse vide: le chart calcule automatiquement le callback à partir du hostname
+  # du workspace (ex: https://<workspace-host>/oauth2/callback).
+  redirectUrl: ""
   cookieDomain: .datalab.arkam-group.com
   whitelistDomain: .datalab.arkam-group.com
   ingress:

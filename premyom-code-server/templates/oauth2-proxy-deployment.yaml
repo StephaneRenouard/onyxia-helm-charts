@@ -30,7 +30,7 @@ spec:
             - --cookie-secure=true
             - "--cookie-domain={{ .Values.sso.cookieDomain }}"
             - "--whitelist-domain={{ .Values.sso.whitelistDomain }}"
-            - "--redirect-url={{ .Values.sso.redirectUrl }}"
+            - "--redirect-url={{ include "premyom-code-server.redirectUrl" . }}"
             - --skip-provider-button=true
             - --set-authorization-header=true
             - --pass-access-token=true

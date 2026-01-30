@@ -20,8 +20,9 @@
         "redirectUrl": {
           "title": "Redirect URL (callback)",
           "type": "string",
-          "default": "https://datalab.arkam-group.com/oauth2/callback",
-          "description": "On réutilise le callback central (host UI) pour éviter de gérer des wildcards Keycloak."
+          "default": "",
+          "description": "Laisser vide: le chart calcule automatiquement le callback à partir du hostname du workspace (ex: https://<workspace-host>/oauth2/callback).",
+          "x-onyxia": { "hidden": true }
         },
         "cookieDomain": {
           "title": "Cookie domain",
