@@ -19,7 +19,8 @@ if [[ -z "${IMAGE_REPOSITORY}" ]]; then
     fi
     IMAGE_REPOSITORY="${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}"
   else
-    IMAGE_REPOSITORY="onyxia-code-server"
+    echo "IMAGE_REPOSITORY requis (ex: stephanerenouard/onyxia-code-server) ou définir IMAGE_REGISTRY_HOST+IMAGE_NAMESPACE." >&2
+    exit 1
   fi
 fi
 

@@ -21,7 +21,7 @@ Contrat minimal visé (compat Onyxia + chart `vscode-python`):
 
 ## Image `code-server-python`
 
-Variante “code-server + Python” (sans `inseefrlab/*`), utile pour remplacer progressivement `premyom-vscode-python`.
+Variante “code-server + Python” (sans `inseefrlab/*`), utile si tu veux une image “IDE Python” indépendante.
 
 Fichier:
 - `base/code-server-python.dockerfile`
@@ -42,7 +42,7 @@ Via les scripts:
 ```bash
 cd onyxia-helm-charts/base
 
-export IMAGE_REPOSITORY="onyxia-code-server"
+export IMAGE_REPOSITORY="stephanerenouard/onyxia-code-server"
 export IMAGE_TAG="0.1.3"
 export CODE_SERVER_VERSION="4.106.3"
 
@@ -81,18 +81,12 @@ docker push "${IMAGE_REPOSITORY}:${IMAGE_TAG}"
 
 Note: le Dockerfile installe le paquet `code-server_*_${ARCH}.deb` en détectant l’arch via `dpkg --print-architecture` (ex: `amd64`, `arm64`).
 
-### Utilisation via le wrapper `premyom-vscode-python`
+### Historique (wrapper `premyom-vscode-python`)
 
-Dans Onyxia, dans les valeurs du service, surcharger:
+Ce chart n’est plus maintenu dans ce repo (historique).
+La voie recommandée est d’utiliser `premyom-code-server` (SSO + montages S3).
 
-```yaml
-vscode-python:
-  service:
-    image:
-      custom:
-        enabled: true
-        version: harbor.lan/premyom/onyxia-code-server:0.1.3
-```
+Si besoin ponctuel, la même surcouche d’image peut être appliquée au chart upstream `vscode-python`.
 
 ### Utilisation via le wrapper `premyom-code-server` (SSO / sans mot de passe)
 

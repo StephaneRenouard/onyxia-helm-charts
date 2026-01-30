@@ -23,19 +23,25 @@ Règles :
 
 ## Images actuelles
 
-### `onyxia-code-server`
+### `onyxia-code-server` (image)
 
 Rôle :
-- image “IDE” indépendante (base Debian) avec `code-server`
+- image “IDE” indépendante (base Debian) avec `code-server` + `/opt/onyxia-init.sh`
 - compat Onyxia : `/opt/onyxia-init.sh`, port `8080`
 
 Repo (Harbor) :
 - `harbor.lan/premyom/onyxia-code-server:<tag>`
 
+Repo (DockerHub) :
+- `stephanerenouard/onyxia-code-server:<tag>`
+
 Sources :
 - Dockerfile : `base/code-server.dockerfile`
 - Entrypoint : `base/entrypoint.sh`
 - Build scripts : `base/build.sh`, `base/build_and_push.sh`
+
+Consommation (Onyxia) :
+- via le chart `premyom-code-server` (catalogue “Premyom Workspaces”)
 
 ## Points d’attention (important)
 
@@ -44,4 +50,3 @@ Sources :
 - Le certificat TLS Harbor est auto-signé (LAN) :
   - Docker : `ca.crt` dans `/etc/docker/certs.d/harbor.lan:443/`
   - K3s/containerd : config `registries.yaml` (mirror/hosts) à prévoir si nécessaire.
-
