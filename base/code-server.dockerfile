@@ -37,6 +37,53 @@ RUN mkdir -p /opt \
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Normalize args coming from Insee Onyxia charts.
+# The upstream chart calls:
+#   /opt/onyxia-init.sh /usr/bin/code-server --host 0.0.0.0 /home/onyxia/work
+# but code-server expects --bind-addr host:port.
+normalize_codeserver_args() {
+  if [ "$#" -lt 2 ]; then
+    return 0
+  fi
+  if [ "${1}" != "/usr/bin/code-server" ] && [ "${1##*/}" != "code-server" ]; then
+    return 0
+  fi
+
+  local args=("$@")
+  local out=()
+  local skip_next="false"
+  local host=""
+
+  for i in "${!args[@]}"; do
+    if [ "${skip_next}" = "true" ]; then
+      skip_next="false"
+      continue
+    fi
+    if [ "${args[$i]}" = "--host" ] && [ $((i+1)) -lt ${#args[@]} ]; then
+      host="${args[$((i+1))]}"
+      skip_next="true"
+      continue
+    fi
+    out+=("${args[$i]}")
+  done
+
+  if [ -n "${host}" ]; then
+    # Insert bind-addr right after the binary.
+    local final=()
+    final+=("${out[0]}")
+    final+=("--bind-addr" "${host}:8080")
+    for j in "${!out[@]}"; do
+      if [ "$j" -eq 0 ]; then
+        continue
+      fi
+      final+=("${out[$j]}")
+    done
+    set -- "${final[@]}"
+  fi
+
+  printf '%s\0' "$@"
+}
+
 # --- S3 mounts (Premyom) ----------------------------------------------------
 # Goal: mount non-HDS and HDS buckets using s3fs, based on Keycloak groups
 # passed by Onyxia at launch time.
@@ -214,6 +261,14 @@ if [ "${CODE_SERVER_AUTH:-password}" = "none" ]; then
       done
       set -- "${new_args[@]}"
     fi
+  fi
+fi
+
+# First normalize arguments provided by upstream chart (e.g. --host).
+if [ "$#" -ge 1 ] && [[ "${1}" == *"code-server" ]]; then
+  IFS=$'\0' read -r -d '' -a norm < <(normalize_codeserver_args "$@" || true)
+  if [ "${#norm[@]}" -ge 1 ]; then
+    set -- "${norm[@]}"
   fi
 fi
 
