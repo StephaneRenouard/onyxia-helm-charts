@@ -9,7 +9,7 @@ IMAGE_REGISTRY_HOST="${IMAGE_REGISTRY_HOST:-}"   # ex: harbor.lan
 IMAGE_NAMESPACE="${IMAGE_NAMESPACE:-}"           # ex: premyom
 IMAGE_NAME="${IMAGE_NAME:-onyxia-s3-explorer}"   # image name (sans namespace)
 DOCKERFILE="${DOCKERFILE:-Dockerfile}"
-FILEBROWSER_VERSION="${FILEBROWSER_VERSION:-2.32.0}"
+FILEBROWSER_VERSION="${FILEBROWSER_VERSION:-2.53.1}"
 DOCKER_LOGIN="${DOCKER_LOGIN:-false}"
 
 if [[ -z "${IMAGE_REPOSITORY}" ]]; then
