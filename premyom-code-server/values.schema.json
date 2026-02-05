@@ -160,7 +160,7 @@
                     "version": {
                       "title": "Name of the custom image",
                       "type": "string",
-                      "default": "stephanerenouard/onyxia-code-server:0.1.8",
+                      "default": "stephanerenouard/onyxia-code-server:0.1.9",
                       "x-onyxia": {
                         "hidden": true,
                         "readonly": true

@@ -19,7 +19,7 @@ vscode-python:
       custom:
         enabled: true
         # Démo: DockerHub (évite dépendances Harbor)
-        version: stephanerenouard/onyxia-code-server:0.1.8
+        version: stephanerenouard/onyxia-code-server:0.1.9
 
   extraEnvVars:
     - name: CODE_SERVER_AUTH

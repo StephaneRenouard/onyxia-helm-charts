@@ -135,7 +135,7 @@ premyom_mount_s3() {
   local mounts_json
   mounts_json="$(echo "${groups_json}" | jq -c '
     map(tostring) |
-    map(select(test("^(hds-)?[a-z0-9-]+_(ro|rw)$"))) |
+    map(select(test("^(hds-)?[a-z0-9.-]+_(ro|rw)$"))) |
     map({
       scope: (if startswith("hds-") then "hds" else "nonhds" end),
       name: (sub("^hds-";"") | sub("_(ro|rw)$";"")),
@@ -149,10 +149,11 @@ premyom_mount_s3() {
   echo "${mounts_json}" | jq -r 'to_entries[] | "\(.key)\t\(.value)"' | while IFS=$'\t' read -r key mode; do
     scope="${key%%/*}"
     name="${key#*/}"
+    mount_suffix="${name//./\/}"
     if [ "${scope}" = "hds" ]; then
-      s3fs_mount_bucket "hds-${name}" "${root}/hds/${name}" "${hds_url}" "${hds_access_key}" "${hds_secret_key}" "${mode}"
+      s3fs_mount_bucket "hds-${name}" "${root}/hds/${mount_suffix}" "${hds_url}" "${hds_access_key}" "${hds_secret_key}" "${mode}"
     else
-      s3fs_mount_bucket "${name}" "${root}/nonhds/${name}" "${nonhds_url}" "${nonhds_access_key}" "${nonhds_secret_key}" "${mode}"
+      s3fs_mount_bucket "${name}" "${root}/nonhds/${mount_suffix}" "${nonhds_url}" "${nonhds_access_key}" "${nonhds_secret_key}" "${mode}"
     fi
   done
 }
