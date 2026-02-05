@@ -73,7 +73,7 @@ premyom_mount_s3() {
     groups_json="$(printf '%s' "${groups_json}" | tr ', ' '\n' | awk 'NF{print}' | jq -Rsc 'split(\"\\n\")[:-1]')"
   fi
   mounts_json="$(echo "${groups_json}" | jq -c '
-    map(tostring) |
+    map(tostring | ltrimstr(\"/\") | ascii_downcase) |
     map(select(test(\"^(hds-)?[a-z0-9.-]+_(ro|rw)$\"))) |
     map({scope:(if startswith(\"hds-\") then \"hds\" else \"nonhds\" end),name:(sub(\"^hds-\";\"\")|sub(\"_(ro|rw)$\";\"\")),mode:(capture(\"_(?<m>ro|rw)$\").m)}) |
     reduce .[] as $g ({}; .[(($g.scope)+\"/\"+($g.name))] = (if (.[(($g.scope)+\"/\"+($g.name))] // \"ro\") == \"rw\" or $g.mode == \"rw\" then \"rw\" else \"ro\" end))
@@ -93,4 +93,3 @@ premyom_mount_s3() {
 premyom_mount_s3 || true
 
 exec "$@"
-

@@ -137,7 +137,7 @@ premyom_mount_s3() {
 
   local mounts_json
   mounts_json="$(echo "${groups_json}" | jq -c '
-    map(tostring) |
+    map(tostring | ltrimstr("/") | ascii_downcase) |
     map(select(test("^(hds-)?[a-z0-9.-]+_(ro|rw)$"))) |
     map({
       scope: (if startswith("hds-") then "hds" else "nonhds" end),
@@ -220,4 +220,3 @@ normalize_codeserver_args "$@" || true
 premyom_mount_s3 || true
 
 exec "$@"
-
