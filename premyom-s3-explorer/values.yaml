@@ -55,7 +55,7 @@ premyom:
     mountRoot: "/mnt/s3"
 
 sso:
-  mode: forwardAuth
+  mode: embedded
   forwardAuth:
     middleware: onyxia-workspace-sso-chain@kubernetescrd
 
