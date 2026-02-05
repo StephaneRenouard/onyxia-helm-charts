@@ -61,6 +61,7 @@ sso:
 
   secretName: oauth2-proxy
   issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia
+  redirectUrl: "https://datalab.arkam-group.com/oauth2/callback"
   cookieDomain: .datalab.arkam-group.com
   whitelistDomain: .datalab.arkam-group.com
   ingress:

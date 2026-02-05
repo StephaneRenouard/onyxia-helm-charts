@@ -104,9 +104,10 @@ sso:
 
   secretName: oauth2-proxy
   issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia
-  # Laisse vide: le chart calcule automatiquement le callback à partir du hostname
-  # du workspace (ex: https://<workspace-host>/oauth2/callback).
-  redirectUrl: ""
+  # ⚠️ Important: on force un callback "central" pour éviter les erreurs Keycloak
+  # "Invalid parameter: redirect_uri" liées aux callbacks par sous-domaine workspace.
+  # Le oauth2-proxy renverra ensuite vers le workspace via le paramètre `rd`.
+  redirectUrl: "https://datalab.arkam-group.com/oauth2/callback"
   cookieDomain: .datalab.arkam-group.com
   whitelistDomain: .datalab.arkam-group.com
   ingress:

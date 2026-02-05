@@ -45,8 +45,8 @@
         "redirectUrl": {
           "title": "Redirect URL (callback)",
           "type": "string",
-          "default": "",
-          "description": "Laisser vide: le chart calcule automatiquement le callback à partir du hostname du workspace (ex: https://<workspace-host>/oauth2/callback).",
+          "default": "https://datalab.arkam-group.com/oauth2/callback",
+          "description": "Callback OIDC (recommandé: URL centrale) pour éviter les erreurs Keycloak \"Invalid parameter: redirect_uri\" liées aux callbacks par sous-domaines workspace.",
           "x-onyxia": { "hidden": true }
         },
         "cookieDomain": {
