@@ -3,7 +3,7 @@
 Objectif : garder des noms d’images **compréhensibles**, **prédictibles** et **cohérents** entre :
 - le build (VM DockerBuild),
 - la registry (Harbor),
-- les charts Onyxia (catalogue “Premyom Workspaces”).
+- les charts Onyxia (catalogue “Premyom services”).
 
 ## Convention de nommage
 
@@ -41,7 +41,7 @@ Sources :
 - Build scripts : `premyom-code-server/image/build.sh`, `premyom-code-server/image/build_and_push.sh`
 
 Consommation (Onyxia) :
-- via le chart `premyom-code-server` (catalogue “Premyom Workspaces”)
+- via le chart `premyom-code-server` (catalogue “Premyom services”)
 
 ### `onyxia-s3-explorer` (image)
 
@@ -56,7 +56,7 @@ Sources :
 - Dockerfile : `premyom-s3-explorer/image/Dockerfile`
 
 Consommation (Onyxia) :
-- via le chart `premyom-s3-explorer` (catalogue “Premyom Workspaces”)
+- via le chart `premyom-s3-explorer` (catalogue “Premyom services”)
 
 ## Points d’attention (important)
 

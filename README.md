@@ -15,7 +15,7 @@ helm show values premyom/premyom-s3-explorer
 
 ## Release (chart wrapper)
 
-Le repo contient des charts wrapper (catalogue Onyxia “Premyom Workspaces”) :
+Le repo contient des charts wrapper (catalogue Onyxia “Premyom services”) :
 - `premyom-code-server` (workspace VS Code)
 - `premyom-s3-explorer` (explorateur `/mnt/s3` via Filebrowser)
 
