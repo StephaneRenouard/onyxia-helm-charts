@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "properties": {
+    "sso": {
+      "title": "SSO (oauth2-proxy)",
+      "type": "object",
+      "properties": {
+        "secretName": {
+          "title": "Secret (client/cookie)",
+          "type": "string",
+          "default": "oauth2-proxy",
+          "description": "Secret dans le namespace du service (keys: client-id, client-secret, cookie-secret)."
+        },
+        "issuerUrl": {
+          "title": "OIDC issuer URL",
+          "type": "string",
+          "default": "https://auth.datalab.arkam-group.com/auth/realms/onyxia"
+        },
+        "cookieDomain": {
+          "title": "Cookie domain",
+          "type": "string",
+          "default": ".datalab.arkam-group.com"
+        },
+        "whitelistDomain": {
+          "title": "Allowed redirect domains",
+          "type": "string",
+          "default": ".datalab.arkam-group.com"
+        },
+        "ingress": {
+          "title": "Ingress (SSO)",
+          "type": "object",
+          "form": true,
+          "x-onyxia": { "overwriteSchemaWith": "ide/ingress.json" },
+          "properties": {
+            "enabled": {
+              "description": "Enable Ingress",
+              "type": "boolean",
+              "default": true,
+              "x-onyxia": { "hidden": true, "overwriteDefaultWith": "k8s.ingress" }
+            },
+            "hostname": {
+              "type": "string",
+              "form": true,
+              "title": "Hostname",
+              "x-onyxia": {
+                "hidden": true,
+                "overwriteDefaultWith": "{{project.id}}-{{k8s.randomSubdomain}}-0.{{k8s.domain}}"
+              }
+            },
+            "ingressClassName": {
+              "type": "string",
+              "form": true,
+              "title": "ingressClassName",
+              "default": "",
+              "x-onyxia": { "hidden": true, "overwriteDefaultWith": "{{k8s.ingressClassName}}" }
+            }
+          }
+        }
+      }
+    },
+    "premyom": {
+      "title": "Premyom (montages S3)",
+      "type": "object",
+      "properties": {
+        "userGroupsJson": {
+          "title": "User groups (JSON)",
+          "type": "array",
+          "default": [],
+          "x-onyxia": { "hidden": true, "overwriteDefaultWith": "{{user.decodedIdToken.groups}}" }
+        },
+        "s3Mount": {
+          "title": "S3 mounts",
+          "type": "object",
+          "properties": {
+            "enabled": { "title": "Enable mounts", "type": "string", "default": "true", "x-onyxia": { "hidden": true } },
+            "nonHdsEndpointHost": { "title": "Non-HDS endpoint host", "type": "string", "default": "cellar-c2.services.clever-cloud.com" },
+            "hdsEndpointHost": { "title": "HDS endpoint host", "type": "string", "default": "cellar-c2.services.clever-cloud.com" },
+            "vaultNonHdsPath": { "title": "Vault path non-HDS", "type": "string", "default": "secret/data/premyom/s3/nonhds" },
+            "vaultHdsPath": { "title": "Vault path HDS", "type": "string", "default": "secret/data/premyom/s3/hds" },
+            "mountRoot": { "title": "Mount root", "type": "string", "default": "/mnt/s3" }
+          }
+        }
+      }
+    },
+    "image": {
+      "title": "Image",
+      "type": "object",
+      "x-onyxia": { "hidden": true },
+      "properties": {
+        "repository": { "type": "string", "default": "stephanerenouard/onyxia-s3-explorer" },
+        "tag": { "type": "string", "default": "0.1.0" },
+        "pullPolicy": { "type": "string", "default": "IfNotPresent", "enum": ["IfNotPresent", "Always", "Never"] }
+      }
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "default": [],
+      "x-onyxia": { "hidden": true }
+    }
+  }
+}
+

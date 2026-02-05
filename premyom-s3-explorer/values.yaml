@@ -1,0 +1,68 @@
+image:
+  repository: stephanerenouard/onyxia-s3-explorer
+  tag: 0.1.0
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+# s3fs en pod Kubernetes nécessite FUSE: /dev/fuse + droits.
+securityContext:
+  privileged: true
+  allowPrivilegeEscalation: true
+  runAsUser: 0
+  runAsGroup: 0
+  capabilities:
+    add:
+      - SYS_ADMIN
+
+resources:
+  limits:
+    cpu: "1"
+    memory: 2Gi
+  requests:
+    cpu: "0.2"
+    memory: 256Mi
+
+extraEnvVars:
+  - name: VAULT_ADDR
+    value: 'http://vault.vault.svc.cluster.local:8200'
+  - name: VAULT_K8S_ROLE
+    value: 'premyom-s3-read'
+  - name: ONYXIA_USER_GROUPS
+    value: '{{- $p := (default dict .premyom) -}}{{- $g := (default (list) $p.userGroupsJson) -}}{{- if kindIs "string" $g -}}{{- default "[]" $g -}}{{- else -}}{{- toJson $g -}}{{- end -}}'
+  - name: PREMYOM_S3_MOUNT_ENABLED
+    value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "false" $s3.enabled -}}'
+  - name: PREMYOM_S3_NONHDS_ENDPOINT_HOST
+    value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "" $s3.nonHdsEndpointHost -}}'
+  - name: PREMYOM_S3_HDS_ENDPOINT_HOST
+    value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "" $s3.hdsEndpointHost -}}'
+  - name: PREMYOM_S3_VAULT_NONHDS_PATH
+    value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "" $s3.vaultNonHdsPath -}}'
+  - name: PREMYOM_S3_VAULT_HDS_PATH
+    value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "" $s3.vaultHdsPath -}}'
+  - name: PREMYOM_S3_MOUNT_ROOT
+    value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "/mnt/s3" $s3.mountRoot -}}'
+
+premyom:
+  userGroupsJson: "[]"
+  s3Mount:
+    enabled: "true"
+    nonHdsEndpointHost: "cellar-c2.services.clever-cloud.com"
+    hdsEndpointHost: "cellar-c2.services.clever-cloud.com"
+    vaultNonHdsPath: "secret/data/premyom/s3/nonhds"
+    vaultHdsPath: "secret/data/premyom/s3/hds"
+    mountRoot: "/mnt/s3"
+
+sso:
+  secretName: oauth2-proxy
+  issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia
+  cookieDomain: .datalab.arkam-group.com
+  whitelistDomain: .datalab.arkam-group.com
+  ingress:
+    enabled: true
+    tls: true
+    ingressClassName: ""
+    annotations: {}
+    hostname: chart-example.local
+    path: /
+

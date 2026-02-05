@@ -1,0 +1,33 @@
+{{- if .Values.sso.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "premyom-s3-explorer.fullname" . }}-sso
+  labels:
+    {{- include "premyom-s3-explorer.labels" . | nindent 4 }}
+  {{- with .Values.sso.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.sso.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.sso.ingress.ingressClassName | quote }}
+  {{- end }}
+  {{- if .Values.sso.ingress.tls }}
+  tls:
+    - hosts:
+        - {{ .Values.sso.ingress.hostname | quote }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.sso.ingress.hostname | quote }}
+      http:
+        paths:
+          - path: {{ .Values.sso.ingress.path | default "/" }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "premyom-s3-explorer.fullname" . }}-oauth2-proxy
+                port:
+                  number: 8080
+{{- end }}
+

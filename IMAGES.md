@@ -43,6 +43,21 @@ Sources :
 Consommation (Onyxia) :
 - via le chart `premyom-code-server` (catalogue “Premyom Workspaces”)
 
+### `onyxia-s3-explorer` (image)
+
+Rôle :
+- explorateur de fichiers (Filebrowser) sur `/mnt/s3`
+- mêmes montages S3 (s3fs) basés sur les groupes Keycloak
+
+Repo (DockerHub) :
+- `stephanerenouard/onyxia-s3-explorer:<tag>`
+
+Sources :
+- Dockerfile : `base/filebrowser.dockerfile`
+
+Consommation (Onyxia) :
+- via le chart `premyom-s3-explorer` (catalogue “Premyom Workspaces”)
+
 ## Points d’attention (important)
 
 - Les **pods** n’ont pas besoin de résoudre `harbor.lan` pour *pull* une image, mais le **nœud** (k3s/containerd) oui.

@@ -19,6 +19,22 @@ Contrat minimal visé (compat Onyxia + chart `vscode-python`):
 - workspace par défaut: `/home/onyxia/work`
 - user: `onyxia`
 
+## Image `filebrowser` (S3 Explorer)
+
+Explorateur de fichiers web basé sur Filebrowser, destiné à exposer `/mnt/s3` via SSO (oauth2-proxy) et montages S3 (s3fs) basés sur les groupes Keycloak.
+
+Fichier:
+- `base/filebrowser.dockerfile`
+
+Build :
+```bash
+cd onyxia-helm-charts/base
+export DOCKERFILE="filebrowser.dockerfile"
+export IMAGE_REPOSITORY="stephanerenouard/onyxia-s3-explorer"
+export IMAGE_TAG="0.1.0"
+./build_and_push.sh
+```
+
 ## Image `code-server-python`
 
 Variante “code-server + Python” (sans `inseefrlab/*`), utile si tu veux une image “IDE Python” indépendante.
