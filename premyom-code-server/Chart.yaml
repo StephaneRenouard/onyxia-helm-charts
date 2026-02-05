@@ -1,8 +1,8 @@
 apiVersion: v2
 name: premyom-code-server
-description: "Code-server (image indépendante) pour Onyxia, avec SSO (oauth2-proxy) et sans mot de passe."
+description: "Code-server (image indépendante) pour Onyxia, avec SSO et montages S3 (s3fs) basés sur les groupes Keycloak."
 type: application
-version: 0.2.19
+version: 0.2.20
 appVersion: "latest"
 
 dependencies:

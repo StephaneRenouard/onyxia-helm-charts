@@ -91,6 +91,17 @@ vscode-python:
       mountRoot: "/mnt/s3"
 
 sso:
+  # SSO peut être géré de 2 façons :
+  # - forwardAuth (recommandé) : on s'appuie sur le oauth2-proxy central (Ingress Traefik + middleware).
+  #   => pas de redirect_uri par workspace, donc beaucoup plus robuste.
+  # - embedded : déploie un oauth2-proxy par workspace (ancienne approche).
+  mode: forwardAuth
+
+  forwardAuth:
+    # Middleware Traefik appliqué à l'Ingress du workspace.
+    # Référence KubernetesCRD: "<namespace>-<middleware>@kubernetescrd"
+    middleware: onyxia-workspace-sso-chain@kubernetescrd
+
   secretName: oauth2-proxy
   issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia
   # Laisse vide: le chart calcule automatiquement le callback à partir du hostname

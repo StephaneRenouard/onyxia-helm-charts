@@ -2,13 +2,18 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "premyom-code-server.fullname" . }}-sso
+  name: {{ include "premyom-code-server.fullname" . }}-ingress
   labels:
     {{- include "premyom-code-server.labels" . | nindent 4 }}
-  {{- with .Values.sso.ingress.annotations }}
   annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- if .Values.sso.ingress.annotations }}
+    {{- toYaml .Values.sso.ingress.annotations | nindent 4 }}
+    {{- end }}
+    {{- if eq (default "forwardAuth" .Values.sso.mode) "forwardAuth" }}
+    {{- if not (hasKey (default dict .Values.sso.ingress.annotations) "traefik.ingress.kubernetes.io/router.middlewares") }}
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.sso.forwardAuth.middleware | quote }}
+    {{- end }}
+    {{- end }}
 spec:
   {{- if .Values.sso.ingress.ingressClassName }}
   ingressClassName: {{ .Values.sso.ingress.ingressClassName | quote }}
@@ -26,7 +31,11 @@ spec:
             pathType: Prefix
             backend:
               service:
+                {{- if eq (default "forwardAuth" .Values.sso.mode) "embedded" }}
                 name: {{ include "premyom-code-server.fullname" . }}-oauth2-proxy
+                {{- else }}
+                name: {{ include "premyom-code-server.fullname" . }}-vscode-python
+                {{- end }}
                 port:
                   number: 8080
 {{- end }}

@@ -1,6 +1,6 @@
 apiVersion: v2
 name: premyom-s3-explorer
-description: "Explorateur de fichiers (/mnt/s3) pour Onyxia, avec SSO (oauth2-proxy) et montages S3 (s3fs) basés sur les groupes Keycloak."
+description: "Explorateur de fichiers (/mnt/s3) pour Onyxia, avec SSO et montages S3 (s3fs) basés sur les groupes Keycloak."
 type: application
-version: 0.1.2
+version: 0.1.3
 appVersion: "latest"

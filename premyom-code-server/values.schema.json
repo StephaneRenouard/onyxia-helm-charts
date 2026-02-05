@@ -3,14 +3,39 @@
   "type": "object",
   "properties": {
     "sso": {
-      "title": "SSO (oauth2-proxy)",
+  "title": "SSO",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "title": "Mode",
+      "type": "string",
+      "default": "forwardAuth",
+      "enum": ["forwardAuth", "embedded"],
+      "description": "forwardAuth: s'appuie sur le oauth2-proxy central via middleware Traefik. embedded: déploie un oauth2-proxy par workspace.",
+      "x-onyxia": {
+        "hidden": true
+      }
+    },
+    "forwardAuth": {
+      "title": "ForwardAuth (Traefik)",
       "type": "object",
       "properties": {
-        "secretName": {
-          "title": "Secret (client/cookie)",
+        "middleware": {
+          "title": "Middleware",
           "type": "string",
-          "default": "oauth2-proxy",
-          "description": "Secret dans le namespace du workspace (keys: client-id, client-secret, cookie-secret)."
+          "default": "onyxia-workspace-sso-chain@kubernetescrd",
+          "description": "Référence du middleware Traefik à appliquer (ex: onyxia-workspace-sso-chain@kubernetescrd).",
+          "x-onyxia": {
+            "hidden": true
+          }
+        }
+      }
+    },
+    "secretName": {
+      "title": "Secret (client/cookie)",
+      "type": "string",
+      "default": "oauth2-proxy",
+      "description": "Secret dans le namespace du workspace (keys: client-id, client-secret, cookie-secret)."
         },
         "issuerUrl": {
           "title": "OIDC issuer URL",

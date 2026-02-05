@@ -1,3 +1,4 @@
+{{- if eq (default "forwardAuth" .Values.sso.mode) "embedded" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -70,3 +71,4 @@ spec:
               port: 4180
             initialDelaySeconds: 10
             periodSeconds: 10
+{{- end }}

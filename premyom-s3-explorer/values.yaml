@@ -55,6 +55,10 @@ premyom:
     mountRoot: "/mnt/s3"
 
 sso:
+  mode: forwardAuth
+  forwardAuth:
+    middleware: onyxia-workspace-sso-chain@kubernetescrd
+
   secretName: oauth2-proxy
   issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia
   cookieDomain: .datalab.arkam-group.com

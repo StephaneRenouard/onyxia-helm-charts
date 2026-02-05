@@ -1,3 +1,4 @@
+{{- if eq (default "forwardAuth" .Values.sso.mode) "embedded" -}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -13,4 +14,4 @@ spec:
     - name: http
       port: 8080
       targetPort: 4180
-
+{{- end }}
