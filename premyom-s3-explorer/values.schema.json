@@ -88,7 +88,7 @@
       "type": "object",
       "x-onyxia": { "hidden": true },
       "properties": {
-        "repository": { "type": "string", "default": "stephanerenouard/onyxia-s3-explorer" },
+        "repository": { "type": "string", "default": "harbor.lan/premyom/onyxia-s3-explorer" },
         "tag": { "type": "string", "default": "0.1.0" },
         "pullPolicy": { "type": "string", "default": "IfNotPresent", "enum": ["IfNotPresent", "Always", "Never"] }
       }
@@ -100,4 +100,3 @@
     }
   }
 }
-

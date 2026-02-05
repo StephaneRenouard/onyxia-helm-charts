@@ -1,5 +1,5 @@
 image:
-  repository: stephanerenouard/onyxia-s3-explorer
+  repository: harbor.lan/premyom/onyxia-s3-explorer
   tag: 0.1.0
   pullPolicy: IfNotPresent
 
@@ -65,4 +65,3 @@ sso:
     annotations: {}
     hostname: chart-example.local
     path: /
-
