@@ -36,9 +36,9 @@ Repo (DockerHub) :
 - `stephanerenouard/onyxia-code-server:<tag>`
 
 Sources :
-- Dockerfile : `base/code-server.dockerfile`
-- Entrypoint : `base/entrypoint.sh`
-- Build scripts : `base/build.sh`, `base/build_and_push.sh`
+- Dockerfile : `premyom-code-server/image/Dockerfile`
+- Entrypoint : `premyom-code-server/image/entrypoint.sh`
+- Build scripts : `premyom-code-server/image/build.sh`, `premyom-code-server/image/build_and_push.sh`
 
 Consommation (Onyxia) :
 - via le chart `premyom-code-server` (catalogue “Premyom Workspaces”)
@@ -53,7 +53,7 @@ Repo (DockerHub) :
 - `stephanerenouard/onyxia-s3-explorer:<tag>`
 
 Sources :
-- Dockerfile : `base/filebrowser.dockerfile`
+- Dockerfile : `premyom-s3-explorer/image/Dockerfile`
 
 Consommation (Onyxia) :
 - via le chart `premyom-s3-explorer` (catalogue “Premyom Workspaces”)

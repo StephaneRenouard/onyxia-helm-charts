@@ -27,15 +27,11 @@ RUN set -eux; \
   rm -f /tmp/filebrowser.tgz; \
   chmod +x /usr/local/bin/filebrowser
 
-RUN useradd -m -s /bin/bash -g users onyxia \
-  && mkdir -p /home/onyxia/work /var/lib/filebrowser \
-  && chown -R onyxia:users /home/onyxia /var/lib/filebrowser
-
-COPY base/onyxia-init.sh /opt/onyxia-init.sh
+COPY premyom-s3-explorer/image/onyxia-init.sh /opt/onyxia-init.sh
 RUN chmod +x /opt/onyxia-init.sh
 
 EXPOSE 8080
 
 ENTRYPOINT ["tini", "--", "/opt/onyxia-init.sh"]
-CMD ["/usr/local/bin/filebrowser", "--noauth", "--address", "0.0.0.0", "--port", "8080", "--root", "/mnt/s3", "--database", "/var/lib/filebrowser/filebrowser.db", "--log", "stdout"]
+CMD ["/usr/local/bin/filebrowser", "--noauth", "--address", "0.0.0.0", "--port", "8080", "--root", "/mnt/s3", "--database", "/tmp/filebrowser.db", "--log", "stdout"]
 

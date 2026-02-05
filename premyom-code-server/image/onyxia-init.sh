@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# NOTE: ce script est copié dans plusieurs images (code-server, s3-explorer).
+# Garder la logique commune ici si possible.
+
 # --- Helpers ----------------------------------------------------------------
 
 json_get() {
@@ -175,7 +178,6 @@ normalize_codeserver_args() {
       host="${args[$((i+1))]}"
       continue
     fi
-    # skip the value after --host
     if [ $i -gt 0 ] && [ "${args[$((i-1))]}" = "--host" ]; then
       continue
     fi
@@ -215,7 +217,7 @@ fi
 
 normalize_codeserver_args "$@" || true
 
-# Attempt S3 mounts before launching the main process.
 premyom_mount_s3 || true
 
 exec "$@"
+

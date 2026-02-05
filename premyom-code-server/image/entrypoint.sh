@@ -23,3 +23,4 @@ EOF
 fi
 
 exec /usr/bin/code-server "${WORKDIR}" "$@"
+

@@ -10,11 +10,14 @@ Conventions images : `IMAGES.md`.
 helm repo add premyom https://stephanerenouard.github.io/onyxia-helm-charts
 helm search repo premyom
 helm show values premyom/premyom-code-server
+helm show values premyom/premyom-s3-explorer
 ```
 
 ## Release (chart wrapper)
 
-Le repo contient le chart wrapper `premyom-code-server` (catalogue Onyxia “Premyom Workspaces”).
+Le repo contient des charts wrapper (catalogue Onyxia “Premyom Workspaces”) :
+- `premyom-code-server` (workspace VS Code)
+- `premyom-s3-explorer` (explorateur `/mnt/s3` via Filebrowser)
 
 En production / démo, le packaging & la distribution du chart sont faits via ChartMuseum (Harbor).
 
