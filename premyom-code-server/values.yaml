@@ -8,7 +8,8 @@ vscode-python:
   #   --docker-username='robot$<name>' \
   #   --docker-password='<token>' \
   #   --docker-email='none'
-  imagePullSecrets: []
+  imagePullSecrets:
+    - name: harbor-regcred
 
   ingress:
     enabled: false

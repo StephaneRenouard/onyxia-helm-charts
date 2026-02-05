@@ -3,7 +3,8 @@ image:
   tag: 0.1.0
   pullPolicy: IfNotPresent
 
-imagePullSecrets: []
+imagePullSecrets:
+  - name: harbor-regcred
 
 # s3fs en pod Kubernetes nécessite FUSE: /dev/fuse + droits.
 securityContext:
