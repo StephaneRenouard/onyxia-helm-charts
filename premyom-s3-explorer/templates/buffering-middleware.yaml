@@ -1,4 +1,4 @@
-{{- if and (eq (default "forwardAuth" .Values.sso.mode) "forwardAuth") .Values.sso.ingress.enabled -}}
+{{- if .Values.sso.ingress.enabled -}}
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
@@ -13,4 +13,3 @@ spec:
     maxRequestBodyBytes: 0
     memRequestBodyBytes: 10485760
 {{- end }}
-

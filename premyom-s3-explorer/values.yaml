@@ -44,9 +44,10 @@ premyom:
     mountRoot: "/mnt/s3"
 
 sso:
-  # `forwardAuth` recommandé pour les uploads (Filebrowser utilise TUS/PATCH),
-  # et évite de proxyfier le flux upload via un oauth2-proxy “embedded”.
-  mode: forwardAuth
+  # `embedded` par défaut: évite les surprises liées au middleware forwardAuth (401/403)
+  # et garde un comportement similaire au workspace `premyom-code-server`.
+  # Les uploads TUS sont exposés via un Ingress dédié `/api/tus` vers Filebrowser (sans SSO).
+  mode: embedded
   forwardAuth:
     middleware: onyxia-workspace-sso-chain@kubernetescrd
 
