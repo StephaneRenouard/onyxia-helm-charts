@@ -28,6 +28,11 @@ spec:
             - --scope=openid profile email
             - --http-address=0.0.0.0:4180
             - --reverse-proxy=true
+            # Important: plusieurs workspaces/services peuvent coexister sur le même domain.
+            # On rend les cookies non-collisants pour éviter des 403 (CSRF mismatch) lors des callbacks OIDC.
+            - "--cookie-name={{ include \"premyom-code-server.fullname\" . }}_oauth2_proxy"
+            - --cookie-csrf-per-request=true
+            - --cookie-samesite=lax
             - --cookie-secure=true
             - "--cookie-domain={{ .Values.sso.cookieDomain }}"
             - "--whitelist-domain={{ .Values.sso.whitelistDomain }}"
