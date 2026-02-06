@@ -9,7 +9,7 @@
     "mode": {
       "title": "Mode",
       "type": "string",
-      "default": "embedded",
+      "default": "forwardAuth",
       "enum": ["forwardAuth", "embedded"],
       "description": "forwardAuth: s'appuie sur le oauth2-proxy central via middleware Traefik. embedded: déploie un oauth2-proxy par service.",
       "x-onyxia": {
