@@ -49,7 +49,10 @@ Rôle :
 - explorateur de fichiers (Filebrowser) sur `/mnt/s3`
 - mêmes montages S3 (s3fs) basés sur les groupes Keycloak
 
-Repo (DockerHub) :
+Repo (Harbor) :
+- `harbor.lan/premyom/onyxia-s3-explorer:<tag>`
+
+Repo (DockerHub) (optionnel) :
 - `stephanerenouard/onyxia-s3-explorer:<tag>`
 
 Sources :

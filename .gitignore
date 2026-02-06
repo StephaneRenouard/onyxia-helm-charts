@@ -1,0 +1,7 @@
+## Artefacts de packaging Helm (générés à la racine)
+/*.tgz
+/*.tar.gz
+
+## Mac
+.DS_Store
+
