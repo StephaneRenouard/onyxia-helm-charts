@@ -44,10 +44,10 @@ premyom:
     mountRoot: "/mnt/s3"
 
 sso:
-  # `embedded` par défaut: évite les surprises liées au middleware forwardAuth (401/403)
-  # et garde un comportement similaire au workspace `premyom-code-server`.
+  # `forwardAuth` par défaut : s'appuie sur le oauth2-proxy central (middleware Traefik).
+  # Avantages: pas de callbacks OIDC par sous-domaine, donc pas de souci `redirect_uri` côté Keycloak.
   # Les uploads TUS sont exposés via un Ingress dédié `/api/tus` vers Filebrowser (sans SSO).
-  mode: embedded
+  mode: forwardAuth
   forwardAuth:
     middleware: onyxia-workspace-sso-chain@kubernetescrd
 
