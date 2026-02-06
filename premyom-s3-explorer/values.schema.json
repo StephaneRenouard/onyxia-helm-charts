@@ -123,7 +123,7 @@
       "x-onyxia": { "hidden": true },
       "properties": {
         "repository": { "type": "string", "default": "harbor.lan/premyom/onyxia-s3-explorer" },
-        "tag": { "type": "string", "default": "0.1.4" },
+        "tag": { "type": "string", "default": "0.1.5" },
         "pullPolicy": { "type": "string", "default": "IfNotPresent", "enum": ["IfNotPresent", "Always", "Never"] }
       }
     },

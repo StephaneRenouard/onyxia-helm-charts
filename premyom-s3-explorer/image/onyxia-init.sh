@@ -75,8 +75,17 @@ premyom_mount_s3() {
   fi
   mounts_json="$(echo "${groups_json}" | jq -c '
     map(tostring | ltrimstr("/") | ascii_downcase) |
-    map(select(test("^(hds-)?[a-z0-9.-]+_(ro|rw)$"))) |
-    map({scope:(if startswith("hds-") then "hds" else "nonhds" end),name:(sub("^hds-";"")|sub("_(ro|rw)$";"")),mode:(capture("_(?<m>ro|rw)$").m)}) |
+    # Groupes supportés:
+    # - <bucket>[_ro|_rw]
+    # - hds-<bucket>[_ro|_rw]
+    # Le suffixe _ro/_rw est optionnel pour rester compatible avec des groupes existants.
+    map(select(test("^(hds-)?[a-z0-9.-]+(_(ro|rw))?$"))) |
+    map({
+      scope:(if startswith("hds-") then "hds" else "nonhds" end),
+      name:(sub("^hds-";"")|sub("_(ro|rw)$";"")),
+      # Par défaut, si pas de suffixe, on considère RW (un groupe implique un accès effectif).
+      mode:(if test("_(ro|rw)$") then capture("_(?<m>ro|rw)$").m else "rw" end)
+    }) |
     reduce .[] as $g ({}; .[(($g.scope)+"/"+($g.name))] = (if (.[(($g.scope)+"/"+($g.name))] // "ro") == "rw" or $g.mode == "rw" then "rw" else "ro" end))
   ')"
   echo "${mounts_json}" | jq -r 'to_entries[] | "\(.key)\t\(.value)"' | while IFS=$'\t' read -r key mode; do
