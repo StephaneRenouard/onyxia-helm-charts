@@ -24,25 +24,14 @@ resources:
     cpu: "0.2"
     memory: 256Mi
 
-extraEnvVars:
-  - name: VAULT_ADDR
-    value: 'http://vault.vault.svc.cluster.local:8200'
-  - name: VAULT_K8S_ROLE
-    value: 'premyom-s3-read'
-  - name: ONYXIA_USER_GROUPS
-    value: '{{- $p := (default dict .premyom) -}}{{- $g := (default (list) $p.userGroupsJson) -}}{{- if kindIs "string" $g -}}{{- default "[]" $g -}}{{- else -}}{{- toJson $g -}}{{- end -}}'
-  - name: PREMYOM_S3_MOUNT_ENABLED
-    value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "false" $s3.enabled -}}'
-  - name: PREMYOM_S3_NONHDS_ENDPOINT_HOST
-    value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "" $s3.nonHdsEndpointHost -}}'
-  - name: PREMYOM_S3_HDS_ENDPOINT_HOST
-    value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "" $s3.hdsEndpointHost -}}'
-  - name: PREMYOM_S3_VAULT_NONHDS_PATH
-    value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "" $s3.vaultNonHdsPath -}}'
-  - name: PREMYOM_S3_VAULT_HDS_PATH
-    value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "" $s3.vaultHdsPath -}}'
-  - name: PREMYOM_S3_MOUNT_ROOT
-    value: '{{- $p := (default dict .premyom) -}}{{- $s3 := (default dict $p.s3Mount) -}}{{- default "/mnt/s3" $s3.mountRoot -}}'
+# Vault (optionnel): laisse par défaut pour Arkam.
+extraVault:
+  addr: "http://vault.vault.svc.cluster.local:8200"
+  k8sRole: "premyom-s3-read"
+
+# Variables d'environnement additionnelles (optionnel).
+# Les variables Premyom (Vault + S3 + groupes) sont définies directement dans le template Helm.
+extraEnvVars: []
 
 premyom:
   userGroupsJson: "[]"

@@ -27,7 +27,27 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           env:
-            {{- toYaml .Values.extraEnvVars | nindent 12 }}
+            - name: VAULT_ADDR
+              value: {{ .Values.extraVault.addr | default "http://vault.vault.svc.cluster.local:8200" | quote }}
+            - name: VAULT_K8S_ROLE
+              value: {{ .Values.extraVault.k8sRole | default "premyom-s3-read" | quote }}
+            - name: ONYXIA_USER_GROUPS
+              value: {{ toJson (.Values.premyom.userGroupsJson | default (list)) | quote }}
+            - name: PREMYOM_S3_MOUNT_ENABLED
+              value: {{ (.Values.premyom.s3Mount.enabled | default "false") | quote }}
+            - name: PREMYOM_S3_NONHDS_ENDPOINT_HOST
+              value: {{ (.Values.premyom.s3Mount.nonHdsEndpointHost | default "") | quote }}
+            - name: PREMYOM_S3_HDS_ENDPOINT_HOST
+              value: {{ (.Values.premyom.s3Mount.hdsEndpointHost | default "") | quote }}
+            - name: PREMYOM_S3_VAULT_NONHDS_PATH
+              value: {{ (.Values.premyom.s3Mount.vaultNonHdsPath | default "") | quote }}
+            - name: PREMYOM_S3_VAULT_HDS_PATH
+              value: {{ (.Values.premyom.s3Mount.vaultHdsPath | default "") | quote }}
+            - name: PREMYOM_S3_MOUNT_ROOT
+              value: {{ (.Values.premyom.s3Mount.mountRoot | default "/mnt/s3") | quote }}
+            {{- with .Values.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           ports:
             - name: http
               containerPort: 8080
@@ -49,4 +69,3 @@ spec:
       volumes:
         - name: filebrowser-db
           emptyDir: {}
-
