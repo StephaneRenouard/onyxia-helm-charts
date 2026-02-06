@@ -33,4 +33,5 @@ RUN chmod +x /opt/onyxia-init.sh
 EXPOSE 8080
 
 ENTRYPOINT ["tini", "--", "/opt/onyxia-init.sh"]
-CMD ["/usr/local/bin/filebrowser", "--noauth", "--address", "0.0.0.0", "--port", "8080", "--root", "/mnt/s3", "--database", "/tmp/filebrowser.db", "--log", "stdout"]
+# Défense en profondeur: noauth + auth.method=noauth (selon versions filebrowser)
+CMD ["/usr/local/bin/filebrowser", "--noauth", "--auth.method=noauth", "--address", "0.0.0.0", "--port", "8080", "--root", "/mnt/s3", "--database", "/tmp/filebrowser.db", "--log", "stdout"]
