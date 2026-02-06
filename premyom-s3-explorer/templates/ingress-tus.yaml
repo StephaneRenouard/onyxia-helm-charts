@@ -1,0 +1,49 @@
+{{- /*
+Ingress dédié aux uploads TUS (Filebrowser).
+
+Pourquoi ?
+- Filebrowser utilise TUS via des requêtes PATCH sur `/api/tus/...`.
+- Si on applique le middleware SSO (forwardAuth + errors) sur ces endpoints, un 401/403
+  peut être transformé en redirect HTML (`/oauth2/start?...`) et casser l’upload côté client.
+
+Stratégie :
+- garder SSO sur `/` (UI + API classiques),
+- mais exposer `/api/tus` **sans** middleware SSO,
+- en conservant le middleware `buffering` pour la robustesse des uploads.
+*/ -}}
+{{- if and .Values.sso.ingress.enabled (eq (default "forwardAuth" .Values.sso.mode) "forwardAuth") -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "premyom-s3-explorer.fullname" . }}-tus-ingress
+  labels:
+    {{- include "premyom-s3-explorer.labels" . | nindent 4 }}
+  annotations:
+{{- with .Values.sso.ingress.annotations }}
+{{ toYaml . | nindent 4 }}
+{{ end }}
+    {{/* Buffering uniquement (pas de SSO chain) */}}
+    {{- $bufferingMw := printf "%s-%s-buffering@kubernetescrd" .Release.Namespace (include "premyom-s3-explorer.fullname" .) }}
+    traefik.ingress.kubernetes.io/router.middlewares: {{ $bufferingMw | quote }}
+spec:
+  {{- if .Values.sso.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.sso.ingress.ingressClassName | quote }}
+  {{- end }}
+  {{- if .Values.sso.ingress.tls }}
+  tls:
+    - hosts:
+        - {{ .Values.sso.ingress.hostname | quote }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.sso.ingress.hostname | quote }}
+      http:
+        paths:
+          - path: /api/tus
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "premyom-s3-explorer.fullname" . }}-filebrowser
+                port:
+                  number: 8080
+{{- end }}
+
