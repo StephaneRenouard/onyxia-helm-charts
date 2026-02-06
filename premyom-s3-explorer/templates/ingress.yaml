@@ -11,7 +11,8 @@ metadata:
     {{- end }}
     {{- if eq (default "forwardAuth" .Values.sso.mode) "forwardAuth" }}
     {{- if not (hasKey (default dict .Values.sso.ingress.annotations) "traefik.ingress.kubernetes.io/router.middlewares") }}
-    traefik.ingress.kubernetes.io/router.middlewares: {{ printf "%s-buffering@kubernetescrd,%s" (include "premyom-s3-explorer.fullname" .) .Values.sso.forwardAuth.middleware | quote }}
+    {{- /* kubernetesingress provider: Middlewares CRD must be referenced with <namespace>-<name>@kubernetescrd */ -}}
+    traefik.ingress.kubernetes.io/router.middlewares: {{ printf "%s-%s-buffering@kubernetescrd,%s" .Release.Namespace (include "premyom-s3-explorer.fullname" .) .Values.sso.forwardAuth.middleware | quote }}
     {{- end }}
     {{- end }}
 spec:
