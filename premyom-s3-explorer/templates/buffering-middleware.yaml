@@ -1,0 +1,16 @@
+{{- if and (eq (default "forwardAuth" .Values.sso.mode) "forwardAuth") .Values.sso.ingress.enabled -}}
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "premyom-s3-explorer.fullname" . }}-buffering
+  labels:
+    {{- include "premyom-s3-explorer.labels" . | nindent 4 }}
+spec:
+  buffering:
+    # Objectif: rendre les uploads Filebrowser (TUS/PATCH) plus robustes.
+    # On bufferise côté Traefik (en mémoire puis sur disque) pour découpler
+    # le débit client et l'écriture sur le backend (s3fs/FUSE).
+    maxRequestBodyBytes: 0
+    memRequestBodyBytes: 10485760
+{{- end }}
+
