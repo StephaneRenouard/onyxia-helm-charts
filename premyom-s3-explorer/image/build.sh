@@ -3,7 +3,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-IMAGE_TAG="${IMAGE_TAG:-0.1.3}"
+IMAGE_TAG="${IMAGE_TAG:-0.1.4}"
 IMAGE_REPOSITORY="${IMAGE_REPOSITORY:-}"
 IMAGE_REGISTRY_HOST="${IMAGE_REGISTRY_HOST:-}"   # ex: harbor.lan
 IMAGE_NAMESPACE="${IMAGE_NAMESPACE:-}"           # ex: premyom
