@@ -123,13 +123,13 @@
       "x-onyxia": { "hidden": true },
       "properties": {
         "repository": { "type": "string", "default": "harbor.lan/premyom/onyxia-s3-explorer" },
-        "tag": { "type": "string", "default": "0.1.0" },
+        "tag": { "type": "string", "default": "0.1.4" },
         "pullPolicy": { "type": "string", "default": "IfNotPresent", "enum": ["IfNotPresent", "Always", "Never"] }
       }
     },
     "imagePullSecrets": {
       "type": "array",
-      "default": [],
+      "default": [{ "name": "harbor-regcred" }],
       "x-onyxia": { "hidden": true }
     }
   }
