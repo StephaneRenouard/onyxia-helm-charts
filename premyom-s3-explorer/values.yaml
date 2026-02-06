@@ -1,6 +1,6 @@
 image:
   repository: harbor.lan/premyom/onyxia-s3-explorer
-  tag: 0.1.2
+  tag: 0.1.3
   pullPolicy: IfNotPresent
 
 imagePullSecrets:

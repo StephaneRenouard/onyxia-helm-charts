@@ -54,6 +54,7 @@ premyom_mount_s3() {
   nonhds_path="${PREMYOM_S3_VAULT_NONHDS_PATH:-}"
   hds_path="${PREMYOM_S3_VAULT_HDS_PATH:-}"
   root="${PREMYOM_S3_MOUNT_ROOT:-/mnt/s3}"
+  mkdir -p "${root}/nonhds" "${root}/hds"
   if [ -z "${nonhds_host}" ] || [ -z "${hds_host}" ] || [ -z "${nonhds_path}" ] || [ -z "${hds_path}" ]; then
     echo "[WARN] PREMYOM_S3_MOUNT_ENABLED=true but missing endpoint/path vars; skipping mounts." >&2
     return 0
@@ -70,15 +71,15 @@ premyom_mount_s3() {
   hds_url="https://${hds_host}"
   groups_json="${ONYXIA_USER_GROUPS:-[]}"
   if ! echo "${groups_json}" | jq -e . >/dev/null 2>&1; then
-    groups_json="$(printf '%s' "${groups_json}" | tr ', ' '\n' | awk 'NF{print}' | jq -Rsc 'split(\"\\n\")[:-1]')"
+    groups_json="$(printf '%s' "${groups_json}" | tr ', ' '\n' | awk 'NF{print}' | jq -Rsc 'split("\n")[:-1]')"
   fi
   mounts_json="$(echo "${groups_json}" | jq -c '
-    map(tostring | ltrimstr(\"/\") | ascii_downcase) |
-    map(select(test(\"^(hds-)?[a-z0-9.-]+_(ro|rw)$\"))) |
-    map({scope:(if startswith(\"hds-\") then \"hds\" else \"nonhds\" end),name:(sub(\"^hds-\";\"\")|sub(\"_(ro|rw)$\";\"\")),mode:(capture(\"_(?<m>ro|rw)$\").m)}) |
-    reduce .[] as $g ({}; .[(($g.scope)+\"/\"+($g.name))] = (if (.[(($g.scope)+\"/\"+($g.name))] // \"ro\") == \"rw\" or $g.mode == \"rw\" then \"rw\" else \"ro\" end))
+    map(tostring | ltrimstr("/") | ascii_downcase) |
+    map(select(test("^(hds-)?[a-z0-9.-]+_(ro|rw)$"))) |
+    map({scope:(if startswith("hds-") then "hds" else "nonhds" end),name:(sub("^hds-";"")|sub("_(ro|rw)$";"")),mode:(capture("_(?<m>ro|rw)$").m)}) |
+    reduce .[] as $g ({}; .[(($g.scope)+"/"+($g.name))] = (if (.[(($g.scope)+"/"+($g.name))] // "ro") == "rw" or $g.mode == "rw" then "rw" else "ro" end))
   ')"
-  echo "${mounts_json}" | jq -r 'to_entries[] | \"\\(.key)\\t\\(.value)\"' | while IFS=$'\t' read -r key mode; do
+  echo "${mounts_json}" | jq -r 'to_entries[] | "\(.key)\t\(.value)"' | while IFS=$'\t' read -r key mode; do
     scope="${key%%/*}"
     name="${key#*/}"
     mount_suffix="${name//./\/}"
