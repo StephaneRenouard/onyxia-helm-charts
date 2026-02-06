@@ -88,6 +88,21 @@ Pour rendre l’arborescence lisible, les points `.` dans le nom de bucket sont 
 - Bucket `essilor.equipe1` → `/mnt/s3/nonhds/essilor/equipe1`
 - Bucket `hds-essilor.equipe2` → `/mnt/s3/hds/essilor/equipe2`
 
+### Cas particulier : bucket racine + buckets “dottés”
+
+Si on a **à la fois** :
+- un bucket `essilor`
+- et des buckets `essilor.team1`, `essilor.team2`, etc.
+
+Alors monter `essilor` sur `/mnt/s3/nonhds/essilor` peut **masquer** les sous-montages
+`/mnt/s3/nonhds/essilor/team1`, `/mnt/s3/nonhds/essilor/team2`, … (selon l’ordre de montage et
+l’existence des dossiers côté bucket `essilor`).
+
+Pour éviter cette classe de bug, on monte le bucket “racine” sous :
+
+- `essilor` → `/mnt/s3/nonhds/essilor/_bucket`
+- `hds-essilor` → `/mnt/s3/hds/essilor/_bucket`
+
 Exemples de groupes :
 - `essilor.equipe1_rw`
 - `essilor.equipe2_ro`

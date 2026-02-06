@@ -88,10 +88,38 @@ premyom_mount_s3() {
     }) |
     reduce .[] as $g ({}; .[(($g.scope)+"/"+($g.name))] = (if (.[(($g.scope)+"/"+($g.name))] // "ro") == "rw" or $g.mode == "rw" then "rw" else "ro" end))
   ')"
-  echo "${mounts_json}" | jq -r 'to_entries[] | "\(.key)\t\(.value)"' | while IFS=$'\t' read -r key mode; do
+  # NOTE (important):
+  # If both buckets "essilor" and "essilor.team1" exist (and are mounted), mounting "essilor" on
+  # /.../essilor can *hide* the nested mount points (/.../essilor/team1, /.../essilor/team2, ...)
+  # depending on mount order and on whether the "essilor" bucket has those directory entries.
+  #
+  # To avoid this class of issues, when we detect "dotted buckets" for a given org (ex: essilor.*),
+  # we mount the base bucket (ex: essilor) under /.../essilor/_bucket instead of /.../essilor.
+
+  mapfile -t _mount_lines < <(echo "${mounts_json}" | jq -r 'to_entries[] | "\(.key)\t\(.value)"')
+
+  declare -A _dotted_orgs=()
+  for _line in "${_mount_lines[@]}"; do
+    _key="${_line%%$'\t'*}"
+    _name="${_key#*/}"
+    if [[ "${_name}" == *.* ]]; then
+      _org="${_name%%.*}"
+      _dotted_orgs["${_org}"]=1
+    fi
+  done
+
+  for _line in "${_mount_lines[@]}"; do
+    key="${_line%%$'\t'*}"
+    mode="${_line#*$'\t'}"
     scope="${key%%/*}"
     name="${key#*/}"
-    mount_suffix="${name//./\/}"
+
+    if [[ "${name}" != *.* ]] && [[ -n "${_dotted_orgs[${name}]:-}" ]]; then
+      mount_suffix="${name}/_bucket"
+    else
+      mount_suffix="${name//./\/}"
+    fi
+
     if [ "${scope}" = "hds" ]; then
       s3fs_mount_bucket "hds-${name}" "${root}/hds/${mount_suffix}" "${hds_url}" "${hds_access_key}" "${hds_secret_key}" "${mode}"
     else
