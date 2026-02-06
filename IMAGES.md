@@ -68,3 +68,27 @@ Consommation (Onyxia) :
 - Le certificat TLS Harbor est auto-signé (LAN) :
   - Docker : `ca.crt` dans `/etc/docker/certs.d/harbor.lan:443/`
   - K3s/containerd : config `registries.yaml` (mirror/hosts) à prévoir si nécessaire.
+
+## Montages S3 (groupes Keycloak)
+
+Les images `onyxia-code-server` et `onyxia-s3-explorer` montent les buckets via `s3fs` en se basant sur `ONYXIA_USER_GROUPS`.
+
+### Convention groupes → buckets
+
+- Groupes supportés (le suffixe est optionnel) :
+  - `essilor[_ro|_rw]`
+  - `hds-essilor[_ro|_rw]`
+- Par défaut, si pas de suffixe, on considère **RW** (compatibilité avec des groupes existants).
+- Si plusieurs groupes donnent accès au même bucket, **RW gagne sur RO**.
+
+### Hiérarchie (points dans les noms)
+
+Pour rendre l’arborescence lisible, les points `.` dans le nom de bucket sont traduits en dossiers :
+
+- Bucket `essilor.equipe1` → `/mnt/s3/nonhds/essilor/equipe1`
+- Bucket `hds-essilor.equipe2` → `/mnt/s3/hds/essilor/equipe2`
+
+Exemples de groupes :
+- `essilor.equipe1_rw`
+- `essilor.equipe2_ro`
+- `hds-essilor.equipe1_rw`
