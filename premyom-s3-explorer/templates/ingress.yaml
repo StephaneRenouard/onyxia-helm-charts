@@ -6,15 +6,14 @@ metadata:
   labels:
     {{- include "premyom-s3-explorer.labels" . | nindent 4 }}
   annotations:
-    {{- if .Values.sso.ingress.annotations }}
-    {{- toYaml .Values.sso.ingress.annotations | nindent 4 }}
-    {{- end }}
-    {{- if eq (default "forwardAuth" .Values.sso.mode) "forwardAuth" }}
-    {{- if not (hasKey (default dict .Values.sso.ingress.annotations) "traefik.ingress.kubernetes.io/router.middlewares") }}
-    {{- /* kubernetesingress provider: Middlewares CRD must be referenced with <namespace>-<name>@kubernetescrd */ -}}
-    traefik.ingress.kubernetes.io/router.middlewares: {{ printf "%s-%s-buffering@kubernetescrd,%s" .Release.Namespace (include "premyom-s3-explorer.fullname" .) .Values.sso.forwardAuth.middleware | quote }}
-    {{- end }}
-    {{- end }}
+{{- with .Values.sso.ingress.annotations }}
+{{ toYaml . | nindent 4 }}
+{{ end }}
+{{ if and (eq (default "forwardAuth" .Values.sso.mode) "forwardAuth") (not (hasKey (default dict .Values.sso.ingress.annotations) "traefik.ingress.kubernetes.io/router.middlewares")) }}
+    {{/* Ingress (kubernetesingress provider): reference CRD middleware as <namespace>-<name>@kubernetescrd */}}
+    {{- $bufferingMw := printf "%s-%s-buffering@kubernetescrd" .Release.Namespace (include "premyom-s3-explorer.fullname" .) }}
+    traefik.ingress.kubernetes.io/router.middlewares: {{ printf "%s,%s" $bufferingMw .Values.sso.forwardAuth.middleware | quote }}
+{{ end }}
 spec:
   {{- if .Values.sso.ingress.ingressClassName }}
   ingressClassName: {{ .Values.sso.ingress.ingressClassName | quote }}
