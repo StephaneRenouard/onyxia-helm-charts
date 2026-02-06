@@ -34,7 +34,9 @@ extraVault:
 extraEnvVars: []
 
 premyom:
-  userGroupsJson: "[]"
+  # Array attendu (x-onyxia: overwriteDefaultWith user.decodedIdToken.groups).
+  # Le template convertit en JSON via `toJson`.
+  userGroupsJson: []
   s3Mount:
     enabled: "true"
     nonHdsEndpointHost: "cellar-c2.services.clever-cloud.com"
