@@ -29,8 +29,12 @@ spec:
             - --http-address=0.0.0.0:4180
             - --reverse-proxy=true
             - --cookie-secure=true
+            - '--cookie-name={{ include "premyom-code-server.cookieName" . }}'
             - '--cookie-domain={{ include "premyom-code-server.cookieDomain" . }}'
-            - "--whitelist-domain={{ .Values.sso.whitelistDomain }}"
+            - '--whitelist-domain={{ include "premyom-code-server.whitelistDomain" . }}'
+            - --cookie-samesite=lax
+            - --cookie-csrf-per-request=true
+            - --skip-auth-preflight=true
             - "--redirect-url={{ include "premyom-code-server.redirectUrl" . }}"
             - --skip-provider-button=true
             - --set-authorization-header=true

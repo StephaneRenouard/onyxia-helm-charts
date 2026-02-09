@@ -28,3 +28,15 @@ app.kubernetes.io/managed-by: Helm
 {{- .Values.sso.ingress.hostname -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "premyom-code-server.whitelistDomain" -}}
+{{- if .Values.sso.whitelistDomain -}}
+{{- .Values.sso.whitelistDomain -}}
+{{- else -}}
+{{- .Values.sso.ingress.hostname -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "premyom-code-server.cookieName" -}}
+{{- printf "_p_cs_%s" (.Release.Name | replace "-" "_" | trunc 40) -}}
+{{- end -}}
