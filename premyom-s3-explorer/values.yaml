@@ -46,16 +46,23 @@ premyom:
     mountRoot: "/mnt/s3"
 
 sso:
-  # `forwardAuth` par défaut : s'appuie sur le oauth2-proxy central (middleware Traefik).
-  # Avantages: pas de callbacks OIDC par sous-domaine, donc pas de souci `redirect_uri` côté Keycloak.
-  # Les uploads TUS sont exposés via un Ingress dédié `/api/tus` vers Filebrowser (sans SSO).
+  # SSO peut être géré de 2 façons :
+  # - forwardAuth : s'appuie sur le oauth2-proxy central via middleware Traefik.
+  # - embedded : déploie un oauth2-proxy par service.
+  #
+  # En embedded, le callback OIDC est sur le même host que le service:
+  #   https://single-project-<id>-0.datalab.arkam-group.com/oauth2/callback
+  # => côté Keycloak, prévoir:
+  #   https://*.datalab.arkam-group.com/oauth2/callback
   mode: embedded
   forwardAuth:
     middleware: onyxia-workspace-sso-chain@kubernetescrd
 
   secretName: oauth2-proxy
   issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia
+  # DEPRECATED (compatibilité): n'est plus utilisé.
   centralHost: datalab.arkam-group.com
+  # Optionnel: override du redirect URL oauth2-proxy (sinon oauth2-proxy déduit l'URL depuis la requête).
   redirectUrl: ""
   cookieDomain: .datalab.arkam-group.com
   whitelistDomain: .datalab.arkam-group.com
