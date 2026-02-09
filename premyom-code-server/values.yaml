@@ -97,7 +97,7 @@ sso:
   # - forwardAuth (recommandé) : on s'appuie sur le oauth2-proxy central (Ingress Traefik + middleware).
   #   => pas de redirect_uri par workspace, donc beaucoup plus robuste.
   # - embedded : déploie un oauth2-proxy par workspace (ancienne approche).
-  mode: embedded
+  mode: forwardAuth
 
   forwardAuth:
     # Middleware Traefik appliqué à l'Ingress du workspace.
@@ -106,12 +106,12 @@ sso:
 
   secretName: oauth2-proxy
   issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia
-  # Si vide, le chart calcule un callback par workspace: https://<hostname>/oauth2/callback.
-  # (requis pour le mode embedded, sinon risque de 403/CSRF mismatch)
-  redirectUrl: ""
-  # Si vide, on scope les cookies au hostname du workspace (recommandé).
-  cookieDomain: ""
-  whitelistDomain: ""
+  # Callback OIDC.
+  # En mode forwardAuth, on utilise le callback "central" (pas de wildcard Keycloak nécessaire).
+  # En mode embedded, nécessite d'autoriser les callbacks par sous-domaine dans Keycloak.
+  redirectUrl: "https://datalab.arkam-group.com/oauth2/callback"
+  cookieDomain: .datalab.arkam-group.com
+  whitelistDomain: .datalab.arkam-group.com
   ingress:
     enabled: true
     tls: true
