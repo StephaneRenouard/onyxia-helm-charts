@@ -17,8 +17,12 @@ app.kubernetes.io/managed-by: Helm
 {{- .Values.sso.redirectUrl -}}
 {{- else -}}
 {{- $scheme := ternary "https" "http" (default false .Values.sso.ingress.tls) -}}
-{{- printf "%s://%s/oauth2/callback" $scheme .Values.sso.ingress.hostname -}}
+{{- printf "%s://%s/oauth2/callback/%s" $scheme (include "premyom-s3-explorer.centralHost" .) .Release.Name -}}
 {{- end -}}
+{{- end -}}
+
+{{- define "premyom-s3-explorer.centralHost" -}}
+{{- default "datalab.arkam-group.com" .Values.sso.centralHost -}}
 {{- end -}}
 
 {{- define "premyom-s3-explorer.cookieDomain" -}}

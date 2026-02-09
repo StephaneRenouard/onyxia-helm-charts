@@ -49,13 +49,14 @@ sso:
   # `forwardAuth` par défaut : s'appuie sur le oauth2-proxy central (middleware Traefik).
   # Avantages: pas de callbacks OIDC par sous-domaine, donc pas de souci `redirect_uri` côté Keycloak.
   # Les uploads TUS sont exposés via un Ingress dédié `/api/tus` vers Filebrowser (sans SSO).
-  mode: forwardAuth
+  mode: embedded
   forwardAuth:
     middleware: onyxia-workspace-sso-chain@kubernetescrd
 
   secretName: oauth2-proxy
   issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia
-  redirectUrl: "https://datalab.arkam-group.com/oauth2/callback"
+  centralHost: datalab.arkam-group.com
+  redirectUrl: ""
   cookieDomain: .datalab.arkam-group.com
   whitelistDomain: .datalab.arkam-group.com
   ingress:

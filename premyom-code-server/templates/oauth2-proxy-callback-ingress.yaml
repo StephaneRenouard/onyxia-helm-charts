@@ -1,0 +1,43 @@
+{{- /*
+Ingress dédié au callback OIDC en mode `embedded`.
+
+Pourquoi ?
+- Keycloak legacy ne supporte pas les wildcards sur le hostname (`https://*.domain/...`).
+- On utilise donc un host unique (ex: datalab.arkam-group.com) et un path spécifique par release:
+    /oauth2/callback/<release>
+- Côté Keycloak, il suffit d'autoriser:
+    https://datalab.arkam-group.com/oauth2/callback/*
+*/ -}}
+{{- if and .Values.sso.ingress.enabled (eq (default "forwardAuth" .Values.sso.mode) "embedded") -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "premyom-code-server.fullname" . }}-oauth2-callback-ingress
+  labels:
+    {{- include "premyom-code-server.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Values.sso.ingress.annotations }}
+    {{- toYaml .Values.sso.ingress.annotations | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if .Values.sso.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.sso.ingress.ingressClassName | quote }}
+  {{- end }}
+  {{- if .Values.sso.ingress.tls }}
+  tls:
+    - hosts:
+        - {{ include "premyom-code-server.centralHost" . | quote }}
+  {{- end }}
+  rules:
+    - host: {{ include "premyom-code-server.centralHost" . | quote }}
+      http:
+        paths:
+          - path: {{ printf "/oauth2/callback/%s" .Release.Name }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "premyom-code-server.fullname" . }}-oauth2-proxy
+                port:
+                  number: 8080
+{{- end }}
+

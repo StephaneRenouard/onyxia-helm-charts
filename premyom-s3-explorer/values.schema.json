@@ -9,7 +9,7 @@
     "mode": {
       "title": "Mode",
       "type": "string",
-      "default": "forwardAuth",
+      "default": "embedded",
       "enum": ["forwardAuth", "embedded"],
       "description": "forwardAuth: s'appuie sur le oauth2-proxy central via middleware Traefik. embedded: déploie un oauth2-proxy par service.",
       "x-onyxia": {
@@ -42,11 +42,18 @@
       "type": "string",
       "default": "https://auth.datalab.arkam-group.com/auth/realms/onyxia"
     },
+    "centralHost": {
+      "title": "Central callback host",
+      "type": "string",
+      "default": "datalab.arkam-group.com",
+      "description": "Host unique qui reçoit le callback OIDC en embedded (path: /oauth2/callback/<release>).",
+      "x-onyxia": { "hidden": true }
+    },
     "redirectUrl": {
       "title": "Redirect URL (callback)",
       "type": "string",
-      "default": "https://datalab.arkam-group.com/oauth2/callback",
-      "description": "Callback OIDC (recommandé: URL centrale) en forwardAuth. En embedded, nécessite d'autoriser les callbacks par sous-domaine dans Keycloak.",
+      "default": "",
+      "description": "Si vide, le chart calcule un callback sur le host central: https://<centralHost>/oauth2/callback/<release>.",
       "x-onyxia": {
         "hidden": true
       }
