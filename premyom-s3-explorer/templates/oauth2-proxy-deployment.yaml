@@ -41,6 +41,7 @@ spec:
             - --pass-user-headers=true
             - --cookie-expire=8h
             - --session-store-type=cookie
+            - --session-cookie-minimal
             - "--upstream=http://{{ include "premyom-s3-explorer.fullname" . }}-filebrowser:8080/"
           env:
             - name: OAUTH2_PROXY_CLIENT_ID
