@@ -33,7 +33,7 @@ spec:
             - '--cookie-name={{ printf "_p_s3_%s" (.Release.Name | replace "-" "_" | trunc 40) }}'
             - "--cookie-domain={{ include "premyom-s3-explorer.cookieDomain" . }}"
             - --cookie-samesite=lax
-            - --cookie-csrf-per-request=true
+            - --cookie-csrf-per-request=false
             - --skip-auth-preflight=true
             - "--whitelist-domain={{ include "premyom-s3-explorer.whitelistDomain" . }}"
             - "--redirect-url={{ include "premyom-s3-explorer.redirectUrl" . }}"

@@ -34,7 +34,7 @@ spec:
             - '--cookie-domain={{ include "premyom-code-server.cookieDomain" . }}'
             - '--whitelist-domain={{ include "premyom-code-server.whitelistDomain" . }}'
             - --cookie-samesite=lax
-            - --cookie-csrf-per-request=true
+            - --cookie-csrf-per-request=false
             - --skip-auth-preflight=true
             - "--redirect-url={{ include "premyom-code-server.redirectUrl" . }}"
             - --skip-provider-button=true
