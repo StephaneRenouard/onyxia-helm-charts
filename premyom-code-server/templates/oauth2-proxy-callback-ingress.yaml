@@ -4,9 +4,9 @@ Ingress dédié au callback OIDC en mode `embedded`.
 Pourquoi ?
 - Keycloak legacy ne supporte pas les wildcards sur le hostname (`https://*.domain/...`).
 - On utilise donc un host unique (ex: datalab.arkam-group.com) et un path spécifique par release:
-    /oauth2/callback/<release>
+    /premyom-oauth2/<release>/callback
 - Côté Keycloak, il suffit d'autoriser:
-    https://datalab.arkam-group.com/oauth2/callback/*
+    https://datalab.arkam-group.com/premyom-oauth2/*
 */ -}}
 {{- if and .Values.sso.ingress.enabled (eq (default "forwardAuth" .Values.sso.mode) "embedded") -}}
 apiVersion: networking.k8s.io/v1
@@ -34,7 +34,7 @@ spec:
     - host: {{ include "premyom-code-server.centralHost" . | quote }}
       http:
         paths:
-          - path: {{ printf "/oauth2/%s" .Release.Name }}
+          - path: {{ printf "/premyom-oauth2/%s" .Release.Name }}
             pathType: Prefix
             backend:
               service:

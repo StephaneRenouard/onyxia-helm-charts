@@ -24,7 +24,7 @@ spec:
     - host: {{ include "premyom-s3-explorer.centralHost" . | quote }}
       http:
         paths:
-          - path: {{ printf "/oauth2/%s" .Release.Name }}
+          - path: {{ printf "/premyom-oauth2/%s" .Release.Name }}
             pathType: Prefix
             backend:
               service:

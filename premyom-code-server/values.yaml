@@ -108,12 +108,12 @@ sso:
   issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia
   # Host "central" utilisé pour recevoir le callback OIDC.
   # En embedded, le chart crée un Ingress dédié sur ce host:
-  #   /oauth2/callback/<release>
+  #   /premyom-oauth2/<release>/callback
   # => pas besoin de wildcard sur les sous-domaines, uniquement:
-  #   https://datalab.arkam-group.com/oauth2/callback/*
+  #   https://datalab.arkam-group.com/premyom-oauth2/*
   centralHost: datalab.arkam-group.com
 
-  # Si vide, le chart calcule: https://<centralHost>/oauth2/callback/<release>
+  # Si vide, le chart calcule: https://<centralHost>/premyom-oauth2/<release>/callback
   redirectUrl: ""
   cookieDomain: .datalab.arkam-group.com
   whitelistDomain: .datalab.arkam-group.com

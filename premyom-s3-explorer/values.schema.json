@@ -46,14 +46,14 @@
       "title": "Central callback host",
       "type": "string",
       "default": "datalab.arkam-group.com",
-      "description": "Host unique qui reçoit le callback OIDC en embedded (path: /oauth2/callback/<release>).",
+      "description": "Host unique qui reçoit le callback OIDC en embedded (path: /premyom-oauth2/<release>/callback).",
       "x-onyxia": { "hidden": true }
     },
     "redirectUrl": {
       "title": "Redirect URL (callback)",
       "type": "string",
       "default": "",
-      "description": "Si vide, le chart calcule un callback sur le host central: https://<centralHost>/oauth2/callback/<release>.",
+      "description": "Si vide, le chart calcule un callback sur le host central: https://<centralHost>/premyom-oauth2/<release>/callback.",
       "x-onyxia": {
         "hidden": true
       }
