@@ -6,9 +6,11 @@ metadata:
   labels:
     {{- include "premyom-s3-explorer.labels" . | nindent 4 }}
   annotations:
-{{- with .Values.sso.ingress.annotations }}
-{{ toYaml . | nindent 4 }}
-{{ end }}
+{{- if .Values.sso.ingress.annotations }}
+{{- $ann := deepCopy .Values.sso.ingress.annotations }}
+{{- $_ := unset $ann "traefik.ingress.kubernetes.io/router.middlewares" }}
+{{ toYaml $ann | nindent 4 }}
+{{- end }}
 spec:
   {{- if .Values.sso.ingress.ingressClassName }}
   ingressClassName: {{ .Values.sso.ingress.ingressClassName | quote }}
@@ -22,7 +24,7 @@ spec:
     - host: {{ include "premyom-s3-explorer.centralHost" . | quote }}
       http:
         paths:
-          - path: {{ printf "/oauth2/callback/%s" .Release.Name }}
+          - path: {{ printf "/oauth2/%s" .Release.Name }}
             pathType: Prefix
             backend:
               service:
@@ -30,4 +32,3 @@ spec:
                 port:
                   number: 8080
 {{- end }}
-

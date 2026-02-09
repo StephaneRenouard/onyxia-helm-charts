@@ -17,7 +17,9 @@ metadata:
     {{- include "premyom-code-server.labels" . | nindent 4 }}
   annotations:
     {{- if .Values.sso.ingress.annotations }}
-    {{- toYaml .Values.sso.ingress.annotations | nindent 4 }}
+    {{- $ann := deepCopy .Values.sso.ingress.annotations }}
+    {{- $_ := unset $ann "traefik.ingress.kubernetes.io/router.middlewares" }}
+    {{- toYaml $ann | nindent 4 }}
     {{- end }}
 spec:
   {{- if .Values.sso.ingress.ingressClassName }}
@@ -32,7 +34,7 @@ spec:
     - host: {{ include "premyom-code-server.centralHost" . | quote }}
       http:
         paths:
-          - path: {{ printf "/oauth2/callback/%s" .Release.Name }}
+          - path: {{ printf "/oauth2/%s" .Release.Name }}
             pathType: Prefix
             backend:
               service:
@@ -40,4 +42,3 @@ spec:
                 port:
                   number: 8080
 {{- end }}
-
