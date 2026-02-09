@@ -9,10 +9,15 @@ metadata:
 {{- with .Values.sso.ingress.annotations }}
 {{ toYaml . | nindent 4 }}
 {{ end }}
-{{ if and (eq (default "forwardAuth" .Values.sso.mode) "forwardAuth") (not (hasKey (default dict .Values.sso.ingress.annotations) "traefik.ingress.kubernetes.io/router.middlewares")) }}
+{{- $mode := (default "forwardAuth" .Values.sso.mode) -}}
+{{ if not (hasKey (default dict .Values.sso.ingress.annotations) "traefik.ingress.kubernetes.io/router.middlewares") }}
     {{/* Ingress (kubernetesingress provider): reference CRD middleware as <namespace>-<name>@kubernetescrd */}}
     {{- $bufferingMw := printf "%s-%s-buffering@kubernetescrd" .Release.Namespace (include "premyom-s3-explorer.fullname" .) }}
+    {{- if eq $mode "forwardAuth" }}
     traefik.ingress.kubernetes.io/router.middlewares: {{ printf "%s,%s" $bufferingMw .Values.sso.forwardAuth.middleware | quote }}
+    {{- else }}
+    traefik.ingress.kubernetes.io/router.middlewares: {{ $bufferingMw | quote }}
+    {{- end }}
 {{ end }}
 spec:
   {{- if .Values.sso.ingress.ingressClassName }}

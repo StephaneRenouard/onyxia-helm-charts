@@ -20,3 +20,19 @@ app.kubernetes.io/managed-by: Helm
 {{- printf "%s://%s/oauth2/callback" $scheme .Values.sso.ingress.hostname -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "premyom-s3-explorer.cookieDomain" -}}
+{{- if .Values.sso.cookieDomain -}}
+{{- .Values.sso.cookieDomain -}}
+{{- else -}}
+{{- .Values.sso.ingress.hostname -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "premyom-s3-explorer.whitelistDomain" -}}
+{{- if .Values.sso.whitelistDomain -}}
+{{- .Values.sso.whitelistDomain -}}
+{{- else -}}
+{{- .Values.sso.ingress.hostname -}}
+{{- end -}}
+{{- end -}}

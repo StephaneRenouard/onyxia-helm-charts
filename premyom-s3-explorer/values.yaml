@@ -46,18 +46,21 @@ premyom:
     mountRoot: "/mnt/s3"
 
 sso:
-  # `forwardAuth` par défaut : s'appuie sur le oauth2-proxy central (middleware Traefik).
-  # Avantages: pas de callbacks OIDC par sous-domaine, donc pas de souci `redirect_uri` côté Keycloak.
-  # Les uploads TUS sont exposés via un Ingress dédié `/api/tus` vers Filebrowser (sans SSO).
-  mode: forwardAuth
+  # `embedded` par défaut : oauth2-proxy est déployé avec le service (1 pod dédié).
+  # Objectif: un comportement SSO stable et identique pour tous les services Premyom
+  # (évite les variations browser-side observées avec forwardAuth).
+  mode: embedded
   forwardAuth:
     middleware: onyxia-workspace-sso-chain@kubernetescrd
 
   secretName: oauth2-proxy
   issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia
-  redirectUrl: "https://datalab.arkam-group.com/oauth2/callback"
-  cookieDomain: .datalab.arkam-group.com
-  whitelistDomain: .datalab.arkam-group.com
+  # redirectUrl/cookieDomain/whitelistDomain:
+  # - si vide, le chart calcule une valeur par workspace (hostname du service)
+  # - tu peux surcharger explicitement au besoin
+  redirectUrl: ""
+  cookieDomain: ""
+  whitelistDomain: ""
   ingress:
     enabled: true
     tls: true
