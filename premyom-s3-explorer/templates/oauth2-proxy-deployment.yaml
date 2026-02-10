@@ -27,7 +27,7 @@ spec:
             - --email-domain=*
             - --scope=openid profile email
             - --http-address=0.0.0.0:4180
-            - "--proxy-prefix=/oauth2"
+            - "--proxy-prefix=/premyom-oauth2/{{ .Release.Name }}"
             - --reverse-proxy=true
             - --cookie-secure=true
             - '--cookie-name={{ printf "_p_s3_%s" (.Release.Name | replace "-" "_" | trunc 40) }}'
@@ -36,9 +36,7 @@ spec:
             - --cookie-csrf-per-request=false
             - --skip-auth-preflight=true
             - "--whitelist-domain={{ include "premyom-s3-explorer.whitelistDomain" . }}"
-            {{- if .Values.sso.redirectUrl }}
-            - "--redirect-url={{ .Values.sso.redirectUrl }}"
-            {{- end }}
+            - "--redirect-url={{ include "premyom-s3-explorer.redirectUrl" . }}"
             - --skip-provider-button=true
             - --pass-user-headers=true
             - --cookie-expire=8h

@@ -1,0 +1,27 @@
+{{- if and (eq (default "forwardAuth" .Values.sso.mode) "embedded") (default true .Values.sso.ingress.enabled) -}}
+#
+# Callback OIDC sur host central (datalab.arkam-group.com) pour éviter un redirect_uri par sous-domaine (Keycloak n'accepte
+# généralement pas les wildcards sur le host).
+#
+# On utilise un IngressRoute Traefik (et pas un Ingress Kubernetes) pour éviter qu'Onyxia ouvre l'endpoint de callback
+# (proxy-prefix) au lieu du vrai workspace => écran "not found".
+#
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "premyom-code-server.fullname" . }}-oauth2-callback
+  labels:
+    {{- include "premyom-code-server.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: {{ printf "Host(`%s`) && PathPrefix(`/premyom-oauth2/%s`)" (include "premyom-code-server.centralHost" .) .Release.Name | quote }}
+      kind: Rule
+      services:
+        - name: {{ include "premyom-code-server.fullname" . }}-oauth2-proxy
+          port: 8080
+  tls:
+    certResolver: le
+{{- end }}
+

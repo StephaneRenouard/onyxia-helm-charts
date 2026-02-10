@@ -42,20 +42,20 @@
           "type": "string",
           "default": "https://auth.datalab.arkam-group.com/auth/realms/onyxia"
         },
-        "centralHost": {
-          "title": "Central callback host",
-          "type": "string",
-          "default": "datalab.arkam-group.com",
-          "description": "DEPRECATED (compatibilité): n'est plus utilisé. Le callback OIDC est sur le host du workspace (ex: https://single-project-<id>-0.<domain>/oauth2/callback).",
-          "x-onyxia": { "hidden": true }
-        },
-        "redirectUrl": {
-          "title": "Redirect URL (callback)",
-          "type": "string",
-          "default": "",
-          "description": "Optionnel: override du redirect URL oauth2-proxy. Si vide, oauth2-proxy déduit l'URL depuis la requête (callback: /oauth2/callback).",
-          "x-onyxia": { "hidden": true }
-        },
+    "centralHost": {
+      "title": "Central callback host",
+      "type": "string",
+      "default": "datalab.arkam-group.com",
+          "description": "Host unique qui reçoit le callback OIDC en mode embedded (path: /premyom-oauth2/<release>/callback).",
+      "x-onyxia": { "hidden": true }
+    },
+    "redirectUrl": {
+      "title": "Redirect URL (callback)",
+      "type": "string",
+      "default": "",
+          "description": "Si vide, le chart calcule un callback sur le host central: https://<centralHost>/premyom-oauth2/<release>/callback.",
+      "x-onyxia": { "hidden": true }
+    },
         "cookieDomain": {
           "title": "Cookie domain",
           "type": "string",

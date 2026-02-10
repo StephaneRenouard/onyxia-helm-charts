@@ -16,7 +16,8 @@ app.kubernetes.io/managed-by: Helm
 {{- if .Values.sso.redirectUrl -}}
 {{- .Values.sso.redirectUrl -}}
 {{- else -}}
-{{- "/oauth2/callback" -}}
+{{- $scheme := ternary "https" "http" (default false .Values.sso.ingress.tls) -}}
+{{- printf "%s://%s/premyom-oauth2/%s/callback" $scheme (include "premyom-code-server.centralHost" .) .Release.Name -}}
 {{- end -}}
 {{- end -}}
 
