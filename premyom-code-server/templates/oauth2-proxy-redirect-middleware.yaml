@@ -1,0 +1,13 @@
+{{- if and (eq (default "forwardAuth" .Values.sso.mode) "embedded") (default true .Values.sso.ingress.enabled) -}}
+{{- $scheme := ternary "https" "http" (default false .Values.sso.ingress.tls) -}}
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "premyom-code-server.fullname" . }}-oauth2-redirect
+  labels:
+    {{- include "premyom-code-server.labels" . | nindent 4 }}
+spec:
+  headers:
+    customRequestHeaders:
+      X-Auth-Request-Redirect: {{ printf "%s://%s/" $scheme .Values.sso.ingress.hostname | quote }}
+{{- end }}

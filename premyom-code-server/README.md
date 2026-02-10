@@ -6,6 +6,7 @@ Workspace code-server “Premyom” pour Onyxia.
 
 - Image: `harbor.lan/premyom/onyxia-code-server:<tag>`
 - Sources image: `premyom-code-server/image/`
+- Runtime inclus: `code-server`, `python3.12`, `pip`, `conda` (Miniforge)
 
 ## SSO
 
@@ -19,4 +20,3 @@ Raison : Keycloak n’accepte pas de façon fiable un wildcard sur le host (ex: 
 provoque `Invalid parameter: redirect_uri`.
 
 Pour les détails et le debug, voir `SSO.md` à la racine du repo.
-

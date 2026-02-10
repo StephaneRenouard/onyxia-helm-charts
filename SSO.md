@@ -113,23 +113,29 @@ Signaux utiles :
 - `Authenticated via OAuth2: Session{...}` => login OK
 - `Invalid parameter: redirect_uri` => refus Keycloak (cf. section “Prérequis Keycloak”)
 
-## Bug connu (à investiguer) : “1er lancement KO, 2e OK”
+## Incident résolu (2026-02-10) : “1er lancement KO, 2e OK”
 
-Symptôme (Onyxia UI) :
-- au **premier clic** sur “Ouvrir le service” après création d’un workspace `premyom-code-server`, le navigateur revient sur la page d’accueil Onyxia (ou une redirection “invisible”),
-- le **pod est bien lancé** (Ingress OK),
-- en relançant “Ouvrir le service” une seconde fois, l’UI du workspace est accessible.
+Symptôme observé :
+- au **premier clic** sur “Ouvrir le service” après création d’un workspace `premyom-code-server`, le navigateur revenait sur `https://datalab.arkam-group.com/`,
+- en relançant “Ouvrir le service” une seconde fois, l’UI du workspace devenait accessible.
 
-Statut :
-- **non résolu** à ce stade (comportement intermittent).
+Cause racine (confirmée par logs + en-têtes `Location`) :
+- dans certains cas, `oauth2-proxy` initialisait le flow OIDC avec un `rd=/` (retour relatif),
+- le `state` transmis à Keycloak contenait `...:/` au lieu d’une URL absolue workspace,
+- après callback central, le navigateur revenait donc sur l’UI Onyxia et non sur `single-project-...`.
 
-Hypothèses probables (à confirmer par logs) :
-- course condition / timing entre la création du workspace, la disponibilité de l’Ingress, et l’init OIDC,
-- cookies oauth2-proxy (CSRF / session) non persistés au premier aller/retour (notamment Safari / politiques anti-tracking),
-- redirection initiale vers le callback sans cookie (ce qui est “normal” en direct) puis l’UI Onyxia ré-ouvre l’URL.
+Correction appliquée dans les charts :
+- ajout d’un middleware Traefik `*-oauth2-redirect` (mode `embedded`) qui injecte `X-Auth-Request-Redirect: https://<workspace-host>/`,
+- activation explicite `--cookie-csrf-per-request=true` (en complément, pour éviter les collisions CSRF inter-workspaces).
 
-Workaround (acceptable en démo, mais pas satisfaisant) :
-- relancer “Ouvrir le service” une seconde fois.
+Versions publiées :
+- `premyom-code-server` : `0.2.47`
+- `premyom-s3-explorer` : `0.1.50` (image `0.1.7`)
+
+Validation :
+- le `Location` initial vers Keycloak contient désormais un `state` de la forme  
+  `...:https://single-project-<id>-0.datalab.arkam-group.com/`,
+- le lancement `premyom-code-server` est OK **dès le premier clic**.
 
 ### Logs à capturer quand le bug se reproduit
 
@@ -167,6 +173,7 @@ kubectl -n onyxia logs deploy/onyxia-api --since=10m | tail -n 200
 Marche :
 - `embedded` avec callback central `datalab.arkam-group.com/premyom-oauth2/<release>/callback`
 - callback routé en Traefik `IngressRoute` (évite les “not found” quand Onyxia ouvre le callback)
+- redirection post-login stable vers le workspace (middleware `X-Auth-Request-Redirect` + `cookie-csrf-per-request=true`)
 
 Ne marche pas (dans ce contexte Keycloak) :
 - callback OIDC sur `single-project-.../oauth2/callback` (host wildcard) => `Invalid parameter: redirect_uri`

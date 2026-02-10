@@ -20,7 +20,7 @@ vscode-python:
       custom:
         enabled: true
         # Registry interne (Harbor)
-        version: harbor.lan/premyom/onyxia-code-server:0.1.13
+        version: harbor.lan/premyom/onyxia-code-server:0.1.14
 
   extraEnvVars:
     - name: CODE_SERVER_AUTH

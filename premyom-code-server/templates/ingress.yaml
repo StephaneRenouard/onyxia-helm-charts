@@ -9,8 +9,11 @@ metadata:
     {{- if .Values.sso.ingress.annotations }}
     {{- toYaml .Values.sso.ingress.annotations | nindent 4 }}
     {{- end }}
-    {{- if eq (default "forwardAuth" .Values.sso.mode) "forwardAuth" }}
+    {{- $mode := (default "forwardAuth" .Values.sso.mode) -}}
     {{- if not (hasKey (default dict .Values.sso.ingress.annotations) "traefik.ingress.kubernetes.io/router.middlewares") }}
+    {{- if eq $mode "embedded" }}
+    traefik.ingress.kubernetes.io/router.middlewares: {{ printf "%s-%s-oauth2-redirect@kubernetescrd" .Release.Namespace (include "premyom-code-server.fullname" .) | quote }}
+    {{- else if eq $mode "forwardAuth" }}
     traefik.ingress.kubernetes.io/router.middlewares: {{ .Values.sso.forwardAuth.middleware | quote }}
     {{- end }}
     {{- end }}

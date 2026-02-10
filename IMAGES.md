@@ -27,6 +27,7 @@ Règles :
 
 Rôle :
 - image “IDE” indépendante (base Debian) avec `code-server` + `/opt/onyxia-init.sh`
+- runtime data-science de base : `python3.12`, `pip`, `conda` (Miniforge)
 - compat Onyxia : `/opt/onyxia-init.sh`, port `8080`
 
 Repo (Harbor) :
