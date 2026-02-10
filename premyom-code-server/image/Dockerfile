@@ -50,11 +50,16 @@ RUN set -eux; \
   ln -sf /opt/conda/bin/python /usr/local/bin/python; \
   ln -sf /opt/conda/bin/python /usr/local/bin/python3; \
   ln -sf /opt/conda/bin/python /usr/local/bin/python3.12; \
+  if [ -x /opt/conda/bin/conda ]; then \
+    ln -sf /opt/conda/bin/conda /usr/local/bin/conda; \
+  elif [ -x /opt/conda/condabin/conda ]; then \
+    ln -sf /opt/conda/condabin/conda /usr/local/bin/conda; \
+  fi; \
   ln -sf /opt/conda/bin/pip /usr/local/bin/pip; \
   ln -sf /opt/conda/bin/pip /usr/local/bin/pip3
 
 ENV CONDA_DIR=/opt/conda
-ENV PATH=/opt/conda/bin:$PATH
+ENV PATH=/opt/conda/bin:/opt/conda/condabin:$PATH
 
 RUN useradd -m -s /bin/bash -g users onyxia \
   && mkdir -p /home/onyxia/work \
