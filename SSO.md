@@ -62,6 +62,11 @@ Notes :
 
 ## Vérifications rapides (debug)
 
+### Pré-requis kubeconfig (tunnel)
+
+Sur Arkam, le kubeconfig “tunnel” pointe sur `https://127.0.0.1:6443` (kubectl local).  
+Si la commande renvoie `connection refused`, le tunnel SSH / port-forward n’est pas actif.
+
 ### 1) Vérifier le `redirect_uri` réellement envoyé à Keycloak
 
 Sur le cluster, récupérer le host du workspace, puis lire l’en-tête `Location` :
@@ -108,6 +113,55 @@ Signaux utiles :
 - `Authenticated via OAuth2: Session{...}` => login OK
 - `Invalid parameter: redirect_uri` => refus Keycloak (cf. section “Prérequis Keycloak”)
 
+## Bug connu (à investiguer) : “1er lancement KO, 2e OK”
+
+Symptôme (Onyxia UI) :
+- au **premier clic** sur “Ouvrir le service” après création d’un workspace `premyom-code-server`, le navigateur revient sur la page d’accueil Onyxia (ou une redirection “invisible”),
+- le **pod est bien lancé** (Ingress OK),
+- en relançant “Ouvrir le service” une seconde fois, l’UI du workspace est accessible.
+
+Statut :
+- **non résolu** à ce stade (comportement intermittent).
+
+Hypothèses probables (à confirmer par logs) :
+- course condition / timing entre la création du workspace, la disponibilité de l’Ingress, et l’init OIDC,
+- cookies oauth2-proxy (CSRF / session) non persistés au premier aller/retour (notamment Safari / politiques anti-tracking),
+- redirection initiale vers le callback sans cookie (ce qui est “normal” en direct) puis l’UI Onyxia ré-ouvre l’URL.
+
+Workaround (acceptable en démo, mais pas satisfaisant) :
+- relancer “Ouvrir le service” une seconde fois.
+
+### Logs à capturer quand le bug se reproduit
+
+1) Identifier le release le plus récent (ex: `premyom-code-server-343938`) :
+
+```bash
+REL="$(kubectl -n onyxia get pods --sort-by=.metadata.creationTimestamp \
+  -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' \
+  | grep -E '^premyom-code-server-[0-9]+-vscode-python-0$' \
+  | tail -n 1 \
+  | sed 's/-vscode-python-0$//')"
+echo "REL=$REL"
+```
+
+2) Ingress & callback route :
+
+```bash
+kubectl -n onyxia get ingress,ingressroute | grep "$REL" || true
+```
+
+3) Logs oauth2-proxy du workspace :
+
+```bash
+kubectl -n onyxia logs deploy/${REL}-oauth2-proxy --since=10m | tail -n 200
+```
+
+4) Logs Onyxia API (au moment du clic) :
+
+```bash
+kubectl -n onyxia logs deploy/onyxia-api --since=10m | tail -n 200
+```
+
 ## Ce qui marche / ce qui ne marche pas (historique)
 
 Marche :
@@ -116,4 +170,3 @@ Marche :
 
 Ne marche pas (dans ce contexte Keycloak) :
 - callback OIDC sur `single-project-.../oauth2/callback` (host wildcard) => `Invalid parameter: redirect_uri`
-
