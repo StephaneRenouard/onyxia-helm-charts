@@ -90,7 +90,10 @@ s3fs_mount_bucket() {
     -o "use_path_request_style"
     -o "nonempty"
     -o "allow_other"
-    -o "mp_umask=0022"
+    -o "uid=$(id -u onyxia 2>/dev/null || echo 1000)"
+    -o "gid=$(id -g onyxia 2>/dev/null || echo 100)"
+    -o "umask=0002"
+    -o "mp_umask=0002"
   )
   if [ "${mode}" = "ro" ]; then
     opts+=(-o "ro")
@@ -251,5 +254,12 @@ fi
 normalize_codeserver_args "$@" || true
 
 premyom_mount_s3 || true
+
+if [ "$(id -u)" -eq 0 ] && [ "$#" -ge 1 ] && [[ "${1}" == *"code-server" ]]; then
+  mkdir -p /home/onyxia/work /home/onyxia/.config/code-server
+  chown onyxia:users /home/onyxia /home/onyxia/work
+  chown -R onyxia:users /home/onyxia/.config
+  exec sudo -EHu onyxia -- "$@"
+fi
 
 exec "$@"

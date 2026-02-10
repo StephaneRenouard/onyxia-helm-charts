@@ -31,4 +31,10 @@ cert: false
 EOF
 fi
 
+if [ "$(id -u)" -eq 0 ]; then
+  chown -R onyxia:users /home/onyxia || true
+  chown onyxia:users "${WORKDIR}" || true
+  exec sudo -EHu onyxia -- /usr/bin/code-server "${WORKDIR}" "$@"
+fi
+
 exec /usr/bin/code-server "${WORKDIR}" "$@"

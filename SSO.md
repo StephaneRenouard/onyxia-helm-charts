@@ -129,7 +129,7 @@ Correction appliquée dans les charts :
 - activation explicite `--cookie-csrf-per-request=true` (en complément, pour éviter les collisions CSRF inter-workspaces).
 
 Versions publiées :
-- `premyom-code-server` : `0.2.47`
+- `premyom-code-server` : `0.2.48`
 - `premyom-s3-explorer` : `0.1.50` (image `0.1.7`)
 
 Validation :
