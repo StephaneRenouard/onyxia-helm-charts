@@ -232,6 +232,39 @@ normalize_codeserver_args() {
   fi
 }
 
+configure_codeserver_defaults() {
+  local settings_dir="/home/onyxia/.local/share/code-server/User"
+  local settings_file="${settings_dir}/settings.json"
+  mkdir -p "${settings_dir}"
+
+  if [ -s "${settings_file}" ] && jq -e . "${settings_file}" >/dev/null 2>&1; then
+    local tmp
+    tmp="$(mktemp)"
+    jq '
+      if has("workbench.colorTheme") then . else . + {"workbench.colorTheme":"Default Dark Modern"} end |
+      if has("workbench.preferredDarkColorTheme") then . else . + {"workbench.preferredDarkColorTheme":"Default Dark Modern"} end |
+      if has("workbench.startupEditor") then . else . + {"workbench.startupEditor":"none"} end |
+      if has("security.workspace.trust.enabled") then . else . + {"security.workspace.trust.enabled": false} end |
+      if has("security.workspace.trust.startupPrompt") then . else . + {"security.workspace.trust.startupPrompt":"never"} end |
+      if has("security.workspace.trust.untrustedFiles") then . else . + {"security.workspace.trust.untrustedFiles":"open"} end
+    ' "${settings_file}" > "${tmp}"
+    mv "${tmp}" "${settings_file}"
+  else
+    cat > "${settings_file}" <<'JSON'
+{
+  "workbench.colorTheme": "Default Dark Modern",
+  "workbench.preferredDarkColorTheme": "Default Dark Modern",
+  "workbench.startupEditor": "none",
+  "security.workspace.trust.enabled": false,
+  "security.workspace.trust.startupPrompt": "never",
+  "security.workspace.trust.untrustedFiles": "open"
+}
+JSON
+  fi
+
+  chown -R onyxia:users "/home/onyxia/.local/share/code-server"
+}
+
 # --- Compat minimale avec les charts IDE Onyxia ------------------------------
 
 if [ "${CODE_SERVER_AUTH:-password}" = "none" ]; then
@@ -254,6 +287,7 @@ fi
 normalize_codeserver_args "$@" || true
 
 premyom_mount_s3 || true
+configure_codeserver_defaults || true
 
 if [ "$(id -u)" -eq 0 ] && [ "$#" -ge 1 ] && [[ "${1}" == *"code-server" ]]; then
   mkdir -p /home/onyxia/work /home/onyxia/.config/code-server

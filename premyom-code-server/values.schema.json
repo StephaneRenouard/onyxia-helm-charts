@@ -192,7 +192,7 @@
                     "version": {
                       "title": "Name of the custom image",
                       "type": "string",
-                      "default": "harbor.lan/premyom/onyxia-code-server:0.1.19",
+                      "default": "harbor.lan/premyom/onyxia-code-server:0.1.20",
                       "x-onyxia": {
                         "hidden": true,
                         "readonly": true

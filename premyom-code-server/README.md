@@ -7,6 +7,8 @@ Workspace code-server “Premyom” pour Onyxia.
 - Image: `harbor.lan/premyom/onyxia-code-server:<tag>`
 - Sources image: `premyom-code-server/image/`
 - Runtime inclus: `code-server`, `python3.12`, `pip`, `conda` (Miniforge)
+- Démarrage service: process `code-server` lancé sous l’utilisateur `onyxia`
+- Defaults IDE: thème sombre + workspace trust désactivé par défaut (pas de popup initiale)
 
 ## SSO
 
