@@ -144,16 +144,39 @@ premyom_mount_s3() {
     # Groupes supportés:
     # - <bucket>[_ro|_rw]
     # - hds-<bucket>[_ro|_rw]
+    # - nonhds-<bucket>[_ro|_rw]
     # Le suffixe _ro/_rw est optionnel pour rester compatible avec des groupes existants.
-    map(select(test("^(hds-)?[a-z0-9.-]+(_(ro|rw))?$"))) |
-    map({
-      scope: (if startswith("hds-") then "hds" else "nonhds" end),
-      name: (sub("^hds-";"") | sub("_(ro|rw)$";"")),
-      # Par défaut, si pas de suffixe, on considère RW (un groupe implique un accès effectif).
-      mode: (if test("_(ro|rw)$") then capture("_(?<m>ro|rw)$").m else "rw" end)
-    }) |
-    reduce .[] as $g ({}; .[(($g.scope)+"/"+($g.name))] =
-      (if (.[(($g.scope)+"/"+($g.name))] // "ro") == "rw" or $g.mode == "rw" then "rw" else "ro" end)
+    map(select(test("^(hds-|nonhds-)?[a-z0-9.-]+(_(ro|rw))?$"))) |
+    map(
+      (sub("_(ro|rw)$";"")) as $raw |
+      {
+        scope: (if ($raw | startswith("hds-")) then "hds" else "nonhds" end),
+        bucket: $raw,
+        name: (
+          if ($raw | startswith("hds-")) then ($raw | sub("^hds-";""))
+          elif ($raw | startswith("nonhds-")) then ($raw | sub("^nonhds-";""))
+          else $raw
+          end
+        ),
+        # Par défaut, si pas de suffixe, on considère RW (un groupe implique un accès effectif).
+        mode: (if test("_(ro|rw)$") then capture("_(?<m>ro|rw)$").m else "rw" end)
+      }
+    ) |
+    reduce .[] as $g (
+      {};
+      ($g.scope + "/" + $g.name) as $k |
+      .[$k] = {
+        bucket: (
+          if $g.scope == "nonhds" then
+            if ((.[$k].bucket // "") | startswith("nonhds-")) then .[$k].bucket
+            elif ($g.bucket | startswith("nonhds-")) then $g.bucket
+            else $g.bucket
+            end
+          else $g.bucket
+          end
+        ),
+        mode: (if ((.[$k].mode // "ro") == "rw") or ($g.mode == "rw") then "rw" else "ro" end)
+      }
     )
   ')"
 
@@ -165,11 +188,11 @@ premyom_mount_s3() {
   # To avoid this class of issues, when we detect "dotted buckets" for a given org (ex: essilor.*),
   # we mount the base bucket (ex: essilor) under /.../essilor/_bucket instead of /.../essilor.
 
-  mapfile -t _mount_lines < <(echo "${mounts_json}" | jq -r 'to_entries[] | "\(.key)\t\(.value)"')
+  mapfile -t _mount_lines < <(echo "${mounts_json}" | jq -r 'to_entries[] | "\(.key)\t\(.value.bucket)\t\(.value.mode)"')
 
   declare -A _dotted_orgs=()
   for _line in "${_mount_lines[@]}"; do
-    _key="${_line%%$'\t'*}"
+    IFS=$'\t' read -r _key _bucket _mode <<< "${_line}"
     _name="${_key#*/}"
     if [[ "${_name}" == *.* ]]; then
       _org="${_name%%.*}"
@@ -178,8 +201,7 @@ premyom_mount_s3() {
   done
 
   for _line in "${_mount_lines[@]}"; do
-    key="${_line%%$'\t'*}"
-    mode="${_line#*$'\t'}"
+    IFS=$'\t' read -r key bucket mode <<< "${_line}"
     scope="${key%%/*}"
     name="${key#*/}"
 
@@ -190,9 +212,9 @@ premyom_mount_s3() {
     fi
 
     if [ "${scope}" = "hds" ]; then
-      s3fs_mount_bucket "hds-${name}" "${root}/hds/${mount_suffix}" "${hds_url}" "${hds_access_key}" "${hds_secret_key}" "${mode}"
+      s3fs_mount_bucket "${bucket}" "${root}/hds/${mount_suffix}" "${hds_url}" "${hds_access_key}" "${hds_secret_key}" "${mode}"
     else
-      s3fs_mount_bucket "${name}" "${root}/nonhds/${mount_suffix}" "${nonhds_url}" "${nonhds_access_key}" "${nonhds_secret_key}" "${mode}"
+      s3fs_mount_bucket "${bucket}" "${root}/nonhds/${mount_suffix}" "${nonhds_url}" "${nonhds_access_key}" "${nonhds_secret_key}" "${mode}"
     fi
   done
 }
