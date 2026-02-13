@@ -24,3 +24,4 @@ En production / démo, le packaging & la distribution du chart sont faits via Ch
 
 Notes:
 - Garder uniquement les dépendances packagées en `*.tgz` dans `premyom-code-server/charts/` (ex: `vscode-python-2.4.2.tgz`), ne pas committer une copie extraite du chart (sinon Helm peut utiliser le dossier et casser la résolution des dépendances).
+- Procédure de release sûre `premyom-code-server` (build+push image + package+push chart + vérification du `.tgz`): `premyom-code-server/README.md`.
