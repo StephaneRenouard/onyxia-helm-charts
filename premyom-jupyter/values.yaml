@@ -1,0 +1,66 @@
+image:
+  repository: harbor.lan/premyom/onyxia-jupyter
+  tag: 0.1.0
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: harbor-regcred
+
+securityContext:
+  privileged: true
+  allowPrivilegeEscalation: true
+  runAsUser: 0
+  runAsGroup: 0
+  capabilities:
+    add:
+      - SYS_ADMIN
+
+resources:
+  limits:
+    cpu: "2"
+    memory: 4Gi
+  requests:
+    cpu: "1"
+    memory: 2Gi
+
+extraVault:
+  addr: "http://vault.vault.svc.cluster.local:8200"
+  k8sRole: "premyom-s3-read"
+
+extraEnvVars: []
+
+premyom:
+  userGroupsJson: []
+  s3Mount:
+    enabled: "true"
+    nonHdsEndpointHost: "cellar-c2.services.clever-cloud.com"
+    hdsEndpointHost: "cellar-c2.services.clever-cloud.com"
+    vaultNonHdsPath: "secret/data/premyom/s3/nonhds"
+    vaultHdsPath: "secret/data/premyom/s3/hds"
+    mountRoot: "/mnt/s3"
+
+jupyter:
+  defaultUrl: "/lab"
+  darkTheme: "JupyterLab Dark"
+
+sso:
+  mode: embedded
+  forwardAuth:
+    middleware: onyxia-workspace-sso-chain@kubernetescrd
+
+  secretName: oauth2-proxy
+  issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia
+  centralHost: datalab.arkam-group.com
+  redirectUrl: ""
+  cookieDomain: .datalab.arkam-group.com
+  whitelistDomain: .datalab.arkam-group.com
+  ingress:
+    enabled: true
+    tls: true
+    ingressClassName: ""
+    annotations:
+      kubernetes.io/ingress.class: arkam-traefik
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+    hostname: chart-example.local
+    path: /

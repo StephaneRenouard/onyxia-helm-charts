@@ -62,6 +62,27 @@ Sources :
 Consommation (Onyxia) :
 - via le chart `premyom-s3-explorer` (catalogue “Premyom services”)
 
+### `onyxia-jupyter` (image)
+
+Rôle :
+- image JupyterLab indépendante (base Debian) avec `/opt/onyxia-init.sh`
+- runtime data-science de base : `python3.12`, `pip`, `conda` (Miniforge), `jupyterlab`
+- compat Onyxia : `/opt/onyxia-init.sh`, port `8080`
+
+Repo (Harbor) :
+- `harbor.lan/premyom/onyxia-jupyter:<tag>`
+
+Repo (DockerHub) :
+- `stephanerenouard/onyxia-jupyter:<tag>`
+
+Sources :
+- Dockerfile : `premyom-jupyter/image/Dockerfile`
+- Init + montages : `premyom-jupyter/image/onyxia-init.sh`
+- Build scripts : `premyom-jupyter/image/build.sh`, `premyom-jupyter/image/build_and_push.sh`
+
+Consommation (Onyxia) :
+- via le chart `premyom-jupyter` (catalogue “Premyom services”)
+
 ## Points d’attention (important)
 
 - Les **pods** n’ont pas besoin de résoudre `harbor.lan` pour *pull* une image, mais le **nœud** (k3s/containerd) oui.
@@ -72,7 +93,7 @@ Consommation (Onyxia) :
 
 ## Montages S3 (groupes Keycloak)
 
-Les images `onyxia-code-server` et `onyxia-s3-explorer` montent les buckets via `s3fs` en se basant sur `ONYXIA_USER_GROUPS`.
+Les images `onyxia-code-server`, `onyxia-jupyter` et `onyxia-s3-explorer` montent les buckets via `s3fs` en se basant sur `ONYXIA_USER_GROUPS`.
 
 ### Convention groupes → buckets
 

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "premyom-jupyter.fullname" . }}-jupyter
+  labels:
+    {{- include "premyom-jupyter.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: jupyter
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

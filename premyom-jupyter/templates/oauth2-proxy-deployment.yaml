@@ -1,0 +1,77 @@
+{{- if eq (default "forwardAuth" .Values.sso.mode) "embedded" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "premyom-jupyter.fullname" . }}-oauth2-proxy
+  labels:
+    {{- include "premyom-jupyter.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: oauth2-proxy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: oauth2-proxy
+    spec:
+      containers:
+        - name: oauth2-proxy
+          image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - --provider=oidc
+            - "--oidc-issuer-url={{ .Values.sso.issuerUrl }}"
+            - --email-domain=*
+            - --scope=openid profile email
+            - --http-address=0.0.0.0:4180
+            - "--proxy-prefix=/premyom-oauth2/{{ .Release.Name }}"
+            - --reverse-proxy=true
+            - --cookie-secure=true
+            - '--cookie-name={{ printf "_p_jpy_%s" (.Release.Name | replace "-" "_" | trunc 40) }}'
+            - "--cookie-domain={{ include "premyom-jupyter.cookieDomain" . }}"
+            - --cookie-samesite=lax
+            - --cookie-csrf-per-request=true
+            - --skip-auth-preflight=true
+            - "--whitelist-domain={{ include "premyom-jupyter.whitelistDomain" . }}"
+            - "--redirect-url={{ include "premyom-jupyter.redirectUrl" . }}"
+            - --skip-provider-button=true
+            - --pass-user-headers=true
+            - --cookie-expire=8h
+            - --session-store-type=cookie
+            - --session-cookie-minimal
+            - "--upstream=http://{{ include "premyom-jupyter.fullname" . }}-jupyter:8080/"
+          env:
+            - name: OAUTH2_PROXY_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sso.secretName }}
+                  key: client-id
+            - name: OAUTH2_PROXY_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sso.secretName }}
+                  key: client-secret
+            - name: OAUTH2_PROXY_COOKIE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sso.secretName }}
+                  key: cookie-secret
+          ports:
+            - name: http
+              containerPort: 4180
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 4180
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 4180
+            initialDelaySeconds: 10
+            periodSeconds: 10
+{{- end }}

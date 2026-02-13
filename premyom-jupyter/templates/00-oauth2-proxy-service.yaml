@@ -1,0 +1,17 @@
+{{- if eq (default "forwardAuth" .Values.sso.mode) "embedded" -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "premyom-jupyter.fullname" . }}-oauth2-proxy
+  labels:
+    {{- include "premyom-jupyter.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: oauth2-proxy
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 4180
+{{- end }}

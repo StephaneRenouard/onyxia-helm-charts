@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "$0")"
+
+IMAGE_TAG="${IMAGE_TAG:-0.1.0}"
+IMAGE_REPOSITORY="${IMAGE_REPOSITORY:-}"
+IMAGE_REGISTRY_HOST="${IMAGE_REGISTRY_HOST:-}"
+IMAGE_NAMESPACE="${IMAGE_NAMESPACE:-}"
+IMAGE_NAME="${IMAGE_NAME:-onyxia-jupyter}"
+DOCKERFILE="${DOCKERFILE:-Dockerfile}"
+MINIFORGE_VERSION="${MINIFORGE_VERSION:-latest}"
+JUPYTERLAB_VERSION="${JUPYTERLAB_VERSION:-latest}"
+DOCKER_LOGIN="${DOCKER_LOGIN:-false}"
+
+if [[ -z "${IMAGE_REPOSITORY}" ]]; then
+  if [[ -n "${IMAGE_REGISTRY_HOST}" ]]; then
+    if [[ -z "${IMAGE_NAMESPACE}" ]]; then
+      echo "IMAGE_NAMESPACE requis quand IMAGE_REGISTRY_HOST est défini (ex: premyom)." >&2
+      exit 1
+    fi
+    IMAGE_REPOSITORY="${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}"
+  else
+    IMAGE_REPOSITORY="stephanerenouard/${IMAGE_NAME}"
+  fi
+fi
+
+if [[ "${DOCKER_LOGIN}" == "true" ]]; then
+  if [[ -n "${IMAGE_REGISTRY_HOST}" ]]; then
+    docker login "${IMAGE_REGISTRY_HOST}"
+  else
+    docker login
+  fi
+fi
+
+docker build \
+  --build-arg "MINIFORGE_VERSION=${MINIFORGE_VERSION}" \
+  --build-arg "JUPYTERLAB_VERSION=${JUPYTERLAB_VERSION}" \
+  -t "${IMAGE_REPOSITORY}:${IMAGE_TAG}" \
+  -f "${DOCKERFILE}" \
+  ../..
+
+docker push "${IMAGE_REPOSITORY}:${IMAGE_TAG}"

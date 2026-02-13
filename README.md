@@ -11,6 +11,7 @@ SSO (Keycloak) : `SSO.md`.
 helm repo add premyom https://stephanerenouard.github.io/onyxia-helm-charts
 helm search repo premyom
 helm show values premyom/premyom-code-server
+helm show values premyom/premyom-jupyter
 helm show values premyom/premyom-s3-explorer
 ```
 
@@ -18,6 +19,7 @@ helm show values premyom/premyom-s3-explorer
 
 Le repo contient des charts wrapper (catalogue Onyxia “Premyom services”) :
 - `premyom-code-server` (workspace VS Code)
+- `premyom-jupyter` (workspace JupyterLab)
 - `premyom-s3-explorer` (explorateur `/mnt/s3` via Filebrowser)
 
 En production / démo, le packaging & la distribution du chart sont faits via ChartMuseum (Harbor).
@@ -25,3 +27,4 @@ En production / démo, le packaging & la distribution du chart sont faits via Ch
 Notes:
 - Garder uniquement les dépendances packagées en `*.tgz` dans `premyom-code-server/charts/` (ex: `vscode-python-2.4.2.tgz`), ne pas committer une copie extraite du chart (sinon Helm peut utiliser le dossier et casser la résolution des dépendances).
 - Procédure de release sûre `premyom-code-server` (build+push image + package+push chart + vérification du `.tgz`): `premyom-code-server/README.md`.
+- Procédure de release sûre `premyom-jupyter` (build+push image + package+push chart + vérification du `.tgz`): `premyom-jupyter/README.md`.

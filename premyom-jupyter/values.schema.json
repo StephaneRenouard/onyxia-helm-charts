@@ -1,0 +1,136 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "properties": {
+    "sso": {
+      "title": "SSO",
+      "type": "object",
+      "properties": {
+        "mode": {
+          "title": "Mode",
+          "type": "string",
+          "default": "embedded",
+          "enum": ["forwardAuth", "embedded"],
+          "x-onyxia": { "hidden": true }
+        },
+        "forwardAuth": {
+          "type": "object",
+          "properties": {
+            "middleware": {
+              "type": "string",
+              "default": "onyxia-workspace-sso-chain@kubernetescrd",
+              "x-onyxia": { "hidden": true }
+            }
+          }
+        },
+        "secretName": {
+          "type": "string",
+          "default": "oauth2-proxy"
+        },
+        "issuerUrl": {
+          "type": "string",
+          "default": "https://auth.datalab.arkam-group.com/auth/realms/onyxia"
+        },
+        "centralHost": {
+          "type": "string",
+          "default": "datalab.arkam-group.com",
+          "x-onyxia": { "hidden": true }
+        },
+        "redirectUrl": {
+          "type": "string",
+          "default": "",
+          "x-onyxia": { "hidden": true }
+        },
+        "cookieDomain": {
+          "type": "string",
+          "default": ".datalab.arkam-group.com"
+        },
+        "whitelistDomain": {
+          "type": "string",
+          "default": ".datalab.arkam-group.com"
+        },
+        "ingress": {
+          "title": "Ingress",
+          "type": "object",
+          "form": true,
+          "x-onyxia": { "overwriteSchemaWith": "ide/ingress.json" },
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "x-onyxia": {
+                "hidden": true,
+                "overwriteDefaultWith": "k8s.ingress"
+              }
+            },
+            "hostname": {
+              "type": "string",
+              "x-onyxia": {
+                "hidden": true,
+                "overwriteDefaultWith": "{{project.id}}-{{k8s.randomSubdomain}}-0.{{k8s.domain}}"
+              }
+            },
+            "ingressClassName": {
+              "type": "string",
+              "default": "",
+              "x-onyxia": {
+                "hidden": true,
+                "overwriteDefaultWith": "{{k8s.ingressClassName}}"
+              }
+            }
+          }
+        }
+      }
+    },
+    "premyom": {
+      "title": "Premyom (S3)",
+      "type": "object",
+      "properties": {
+        "userGroupsJson": {
+          "type": "array",
+          "default": [],
+          "x-onyxia": {
+            "hidden": true,
+            "overwriteDefaultWith": "{{user.decodedIdToken.groups}}"
+          }
+        },
+        "s3Mount": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "string", "default": "true", "x-onyxia": { "hidden": true } },
+            "nonHdsEndpointHost": { "type": "string", "default": "cellar-c2.services.clever-cloud.com" },
+            "hdsEndpointHost": { "type": "string", "default": "cellar-c2.services.clever-cloud.com" },
+            "vaultNonHdsPath": { "type": "string", "default": "secret/data/premyom/s3/nonhds" },
+            "vaultHdsPath": { "type": "string", "default": "secret/data/premyom/s3/hds" },
+            "mountRoot": { "type": "string", "default": "/mnt/s3" }
+          }
+        }
+      }
+    },
+    "jupyter": {
+      "type": "object",
+      "properties": {
+        "defaultUrl": { "type": "string", "default": "/lab" },
+        "darkTheme": { "type": "string", "default": "JupyterLab Dark", "x-onyxia": { "hidden": true } }
+      }
+    },
+    "image": {
+      "type": "object",
+      "x-onyxia": { "hidden": true },
+      "properties": {
+        "repository": { "type": "string", "default": "harbor.lan/premyom/onyxia-jupyter" },
+        "tag": { "type": "string", "default": "0.1.0" },
+        "pullPolicy": {
+          "type": "string",
+          "default": "IfNotPresent",
+          "enum": ["IfNotPresent", "Always", "Never"]
+        }
+      }
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "default": [{ "name": "harbor-regcred" }],
+      "x-onyxia": { "hidden": true }
+    }
+  }
+}
