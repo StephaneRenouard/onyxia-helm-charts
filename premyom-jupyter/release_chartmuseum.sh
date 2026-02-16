@@ -45,8 +45,8 @@ rm -f "${CHART_DIR}/values.yaml.bak" "${CHART_DIR}/values.schema.json.bak" "${CH
 
 grep -n "repository: ${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}" "${CHART_DIR}/values.yaml"
 grep -n "tag: ${IMG_TAG}" "${CHART_DIR}/values.yaml"
-grep -n "\"repository\": \"${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}\"" "${CHART_DIR}/values.schema.json"
-grep -n "\"tag\": \"${IMG_TAG}\"" "${CHART_DIR}/values.schema.json"
+grep -n "\"default\": \"${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}\"" "${CHART_DIR}/values.schema.json"
+grep -n "\"default\": \"${IMG_TAG}\"" "${CHART_DIR}/values.schema.json"
 grep -n "^version: ${CHART_VERSION}$" "${CHART_DIR}/Chart.yaml"
 
 echo "[STEP] building and pushing image"
@@ -76,8 +76,8 @@ trap 'rm -rf "${TMP_DIR}"' EXIT
 tar -xzf "${REPO_DIR}/${TARBALL}" -C "${TMP_DIR}"
 grep -n "repository: ${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}" "${TMP_DIR}/premyom-jupyter/values.yaml"
 grep -n "tag: ${IMG_TAG}" "${TMP_DIR}/premyom-jupyter/values.yaml"
-grep -n "\"repository\": \"${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}\"" "${TMP_DIR}/premyom-jupyter/values.schema.json"
-grep -n "\"tag\": \"${IMG_TAG}\"" "${TMP_DIR}/premyom-jupyter/values.schema.json"
+grep -n "\"default\": \"${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}\"" "${TMP_DIR}/premyom-jupyter/values.schema.json"
+grep -n "\"default\": \"${IMG_TAG}\"" "${TMP_DIR}/premyom-jupyter/values.schema.json"
 grep -n "^version: ${CHART_VERSION}$" "${TMP_DIR}/premyom-jupyter/Chart.yaml"
 
 echo "[STEP] pushing chart to ChartMuseum"
