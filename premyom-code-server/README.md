@@ -51,3 +51,5 @@ Ensuite (arkam-master):
 k -n onyxia rollout restart deploy/onyxia-api
 k -n onyxia rollout status deploy/onyxia-api --timeout=180s
 ```
+
+Runbook exploitation (tunnel/kubectl/checks) : `../OPERATIONS.md`.

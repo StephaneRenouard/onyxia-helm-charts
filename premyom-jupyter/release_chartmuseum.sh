@@ -62,7 +62,7 @@ echo "[STEP] building and pushing image"
 
 echo "[STEP] smoke-testing image"
 docker run --rm --entrypoint /bin/bash "${IMAGE_REF}" -lc \
-  'python3.12 --version && source /opt/conda/etc/profile.d/conda.sh && conda --version && jupyter lab --version && nano --version | head -n1'
+  'python3.12 --version && source /opt/conda/etc/profile.d/conda.sh && conda --version && jupyter lab --version && nano --version | head -n1 && su -s /bin/bash -c "sudo -n true && echo sudo-nopasswd=OK" onyxia'
 
 echo "[STEP] packaging chart"
 (

@@ -131,6 +131,7 @@ Correction appliquée dans les charts :
 Versions publiées :
 - `premyom-code-server` : `0.2.51`
 - `premyom-s3-explorer` : `0.1.50` (image `0.1.7`)
+- `premyom-jupyter` : `0.1.0`
 
 Validation :
 - le `Location` initial vers Keycloak contient désormais un `state` de la forme  
@@ -177,3 +178,10 @@ Marche :
 
 Ne marche pas (dans ce contexte Keycloak) :
 - callback OIDC sur `single-project-.../oauth2/callback` (host wildcard) => `Invalid parameter: redirect_uri`
+
+## Notes d’exploitation (2026-02-16)
+
+- Il est possible que le catalogue UI n’affiche pas immédiatement un chart nouvellement publié, même si `onyxia-api` le voit déjà.
+  - Vérifier côté API : `https://datalab.arkam-group.com/api/public/catalogs`
+  - Puis faire un hard refresh navigateur (`Cmd+Shift+R`) ou une reconnexion.
+- Sur `premyom-jupyter`, les warnings `oauth2-proxy` de type `cookie domain` et `PKCE` sont observés mais non bloquants dans l’état actuel.

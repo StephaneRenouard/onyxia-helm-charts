@@ -60,7 +60,9 @@ ENV PATH=/opt/conda/bin:/opt/conda/condabin:$PATH
 
 RUN useradd -m -s /bin/bash -g users onyxia \
   && mkdir -p /home/onyxia/work \
-  && chown -R onyxia:users /home/onyxia
+  && chown -R onyxia:users /home/onyxia \
+  && printf 'onyxia ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/onyxia \
+  && chmod 0440 /etc/sudoers.d/onyxia
 
 COPY premyom-jupyter/image/onyxia-init.sh /opt/onyxia-init.sh
 RUN chmod +x /opt/onyxia-init.sh

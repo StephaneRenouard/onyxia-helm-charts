@@ -36,3 +36,23 @@ Le script:
 - package le chart,
 - vérifie le contenu du `.tgz` (repository/tag image + version chart),
 - push vers ChartMuseum puis vérifie `index.yaml`.
+
+Ensuite (arkam-master) :
+
+```bash
+k -n onyxia rollout restart deploy/onyxia-api
+k -n onyxia rollout status deploy/onyxia-api --timeout=180s
+```
+
+## Contrôle rapide après lancement
+
+```bash
+kubectl -n onyxia get pods --sort-by=.metadata.creationTimestamp | grep premyom-jupyter | tail -n 4
+kubectl -n onyxia logs deploy/<release> --since=10m | tail -n 120
+kubectl -n onyxia logs deploy/<release>-oauth2-proxy --since=10m | tail -n 120
+```
+
+Note : si le service n’apparaît pas immédiatement dans l’UI, vérifier d’abord
+`/api/public/catalogs` puis faire un hard refresh navigateur.
+
+Runbook exploitation (tunnel/kubectl/checks) : `../OPERATIONS.md`.
