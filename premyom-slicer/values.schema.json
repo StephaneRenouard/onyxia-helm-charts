@@ -1,0 +1,164 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "properties": {
+    "sso": {
+      "title": "SSO",
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "default": "embedded",
+          "enum": ["forwardAuth", "embedded"],
+          "x-onyxia": { "hidden": true }
+        },
+        "forwardAuth": {
+          "type": "object",
+          "properties": {
+            "middleware": {
+              "type": "string",
+              "default": "onyxia-workspace-sso-chain@kubernetescrd",
+              "x-onyxia": { "hidden": true }
+            }
+          }
+        },
+        "secretName": { "type": "string", "default": "oauth2-proxy" },
+        "issuerUrl": {
+          "type": "string",
+          "default": "https://auth.datalab.arkam-group.com/auth/realms/onyxia"
+        },
+        "centralHost": {
+          "type": "string",
+          "default": "datalab.arkam-group.com",
+          "x-onyxia": { "hidden": true }
+        },
+        "redirectUrl": { "type": "string", "default": "", "x-onyxia": { "hidden": true } },
+        "cookieDomain": { "type": "string", "default": ".datalab.arkam-group.com" },
+        "whitelistDomain": { "type": "string", "default": ".datalab.arkam-group.com" },
+        "ingress": {
+          "type": "object",
+          "x-onyxia": { "overwriteSchemaWith": "ide/ingress.json" },
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "x-onyxia": { "hidden": true, "overwriteDefaultWith": "k8s.ingress" }
+            },
+            "hostname": {
+              "type": "string",
+              "x-onyxia": {
+                "hidden": true,
+                "overwriteDefaultWith": "{{project.id}}-{{k8s.randomSubdomain}}-0.{{k8s.domain}}"
+              }
+            },
+            "ingressClassName": {
+              "type": "string",
+              "default": "",
+              "x-onyxia": {
+                "hidden": true,
+                "overwriteDefaultWith": "{{k8s.ingressClassName}}"
+              }
+            }
+          }
+        }
+      }
+    },
+    "premyom": {
+      "type": "object",
+      "properties": {
+        "userGroupsJson": {
+          "type": "array",
+          "default": [],
+          "x-onyxia": { "hidden": true, "overwriteDefaultWith": "{{user.decodedIdToken.groups}}" }
+        },
+        "s3Mount": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "string", "default": "true", "x-onyxia": { "hidden": true } },
+            "nonHdsEndpointHost": { "type": "string", "default": "cellar-c2.services.clever-cloud.com" },
+            "hdsEndpointHost": { "type": "string", "default": "cellar-c2.services.clever-cloud.com" },
+            "vaultNonHdsPath": { "type": "string", "default": "secret/data/premyom/s3/nonhds" },
+            "vaultHdsPath": { "type": "string", "default": "secret/data/premyom/s3/hds" },
+            "mountRoot": { "type": "string", "default": "/mnt/s3" }
+          }
+        }
+      }
+    },
+    "slicer": {
+      "type": "object",
+      "properties": {
+        "releaseSeries": { "type": "string", "default": "5.8", "x-onyxia": { "hidden": true } },
+        "downloadUrl": { "type": "string", "default": "", "x-onyxia": { "hidden": true } },
+        "appPath": { "type": "string", "default": "/opt/slicer/Slicer", "x-onyxia": { "hidden": true } },
+        "webDefaultPath": { "type": "string", "default": "/vnc.html?autoconnect=1&resize=remote", "x-onyxia": { "hidden": true } },
+        "display": {
+          "type": "object",
+          "properties": {
+            "width": { "type": "string", "default": "1920", "x-onyxia": { "hidden": true } },
+            "height": { "type": "string", "default": "1080", "x-onyxia": { "hidden": true } },
+            "depth": { "type": "string", "default": "24", "x-onyxia": { "hidden": true } }
+          }
+        }
+      }
+    },
+    "workspace": {
+      "type": "object",
+      "properties": {
+        "mountPath": { "type": "string", "default": "/home/onyxia/work", "x-onyxia": { "hidden": true } },
+        "emptyDir": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": true, "x-onyxia": { "hidden": true } },
+            "sizeLimit": { "type": "string", "default": "50Gi", "x-onyxia": { "hidden": true } }
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "x-onyxia": {
+        "overwriteSchemaWith": "k8s/resources.json",
+        "useRegionSliderConfig": "true"
+      },
+      "properties": {
+        "requests": {
+          "type": "object",
+          "properties": {
+            "cpu": { "type": "string", "default": "8" },
+            "memory": { "type": "string", "default": "16Gi" }
+          }
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "cpu": { "type": "string", "default": "12" },
+            "memory": { "type": "string", "default": "16Gi" }
+          }
+        }
+      }
+    },
+    "nodeSelector": {
+      "type": "object",
+      "default": { "kubernetes.io/hostname": "worker1" },
+      "x-onyxia": { "hidden": true }
+    },
+    "image": {
+      "type": "object",
+      "x-onyxia": { "hidden": true },
+      "properties": {
+        "repository": { "type": "string", "default": "harbor.lan/premyom/onyxia-slicer" },
+        "tag": { "type": "string", "default": "0.1.0" },
+        "pullPolicy": {
+          "type": "string",
+          "default": "IfNotPresent",
+          "enum": ["IfNotPresent", "Always", "Never"]
+        }
+      }
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "default": [{ "name": "harbor-regcred" }],
+      "x-onyxia": { "hidden": true }
+    }
+  }
+}

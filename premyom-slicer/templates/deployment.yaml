@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "premyom-slicer.fullname" . }}
+  labels:
+    {{- include "premyom-slicer.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: slicer
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: slicer
+    spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: slicer
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          env:
+            - name: VAULT_ADDR
+              value: {{ .Values.extraVault.addr | default "http://vault.vault.svc.cluster.local:8200" | quote }}
+            - name: VAULT_K8S_ROLE
+              value: {{ .Values.extraVault.k8sRole | default "premyom-s3-read" | quote }}
+            - name: ONYXIA_USER_GROUPS
+              value: {{ toJson (.Values.premyom.userGroupsJson | default (list)) | quote }}
+            - name: PREMYOM_S3_MOUNT_ENABLED
+              value: {{ (.Values.premyom.s3Mount.enabled | default "false") | quote }}
+            - name: PREMYOM_S3_NONHDS_ENDPOINT_HOST
+              value: {{ (.Values.premyom.s3Mount.nonHdsEndpointHost | default "") | quote }}
+            - name: PREMYOM_S3_HDS_ENDPOINT_HOST
+              value: {{ (.Values.premyom.s3Mount.hdsEndpointHost | default "") | quote }}
+            - name: PREMYOM_S3_VAULT_NONHDS_PATH
+              value: {{ (.Values.premyom.s3Mount.vaultNonHdsPath | default "") | quote }}
+            - name: PREMYOM_S3_VAULT_HDS_PATH
+              value: {{ (.Values.premyom.s3Mount.vaultHdsPath | default "") | quote }}
+            - name: PREMYOM_S3_MOUNT_ROOT
+              value: {{ (.Values.premyom.s3Mount.mountRoot | default "/mnt/s3") | quote }}
+            - name: SLICER_WEB_DEFAULT_PATH
+              value: {{ (.Values.slicer.webDefaultPath | default "/vnc.html?autoconnect=1&resize=remote") | quote }}
+            - name: SLICER_APP_PATH
+              value: {{ (.Values.slicer.appPath | default "/opt/slicer/Slicer") | quote }}
+            - name: SLICER_SCREEN_WIDTH
+              value: {{ (.Values.slicer.display.width | default "1920") | quote }}
+            - name: SLICER_SCREEN_HEIGHT
+              value: {{ (.Values.slicer.display.height | default "1080") | quote }}
+            - name: SLICER_SCREEN_DEPTH
+              value: {{ (.Values.slicer.display.depth | default "24") | quote }}
+            {{- with .Values.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - name: workspace
+              mountPath: {{ (.Values.workspace.mountPath | default "/home/onyxia/work") | quote }}
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /vnc.html
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /vnc.html
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: workspace
+          {{- if and .Values.workspace.emptyDir .Values.workspace.emptyDir.enabled }}
+          emptyDir:
+            {{- if .Values.workspace.emptyDir.sizeLimit }}
+            sizeLimit: {{ .Values.workspace.emptyDir.sizeLimit | quote }}
+            {{- end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}

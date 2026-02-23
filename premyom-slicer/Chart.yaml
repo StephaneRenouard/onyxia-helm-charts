@@ -1,0 +1,6 @@
+apiVersion: v2
+name: premyom-slicer
+description: "POC 3D Slicer Premyom pour Onyxia (desktop web CPU-only), avec SSO et montages S3 (s3fs) basés sur les groupes Keycloak."
+type: application
+version: 0.1.0
+appVersion: "latest"

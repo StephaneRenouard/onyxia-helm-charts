@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "premyom-slicer.fullname" . }}-slicer
+  labels:
+    {{- include "premyom-slicer.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: slicer
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
