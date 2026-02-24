@@ -60,7 +60,13 @@ spec:
             - name: PREMYOM_S3_MOUNT_ROOT
               value: {{ (.Values.premyom.s3Mount.mountRoot | default "/mnt/s3") | quote }}
             - name: SLICER_WEB_DEFAULT_PATH
-              value: {{ printf "/vnc_lite.html?autoconnect=%s&resize=%s" (ternary "true" "false" (default true .Values.slicer.web.autoconnect)) (default "scale" .Values.slicer.web.resizeMode) | quote }}
+              {{- $resizeMode := (default "scale" .Values.slicer.web.resizeMode) -}}
+              {{- $autoconnect := (ternary "true" "false" (default true .Values.slicer.web.autoconnect)) -}}
+              {{- if eq $resizeMode "remote" }}
+              value: {{ printf "/vnc.html?autoconnect=%s&resize=remote" $autoconnect | quote }}
+              {{- else }}
+              value: {{ printf "/vnc_lite.html?scale=%s" (ternary "true" "false" (eq $resizeMode "scale")) | quote }}
+              {{- end }}
             - name: SLICER_APP_PATH
               value: {{ (.Values.slicer.appPath | default "/opt/slicer/Slicer") | quote }}
             - name: SLICER_SCREEN_WIDTH
