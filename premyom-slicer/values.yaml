@@ -51,7 +51,9 @@ slicer:
   releaseSeries: "5.8"
   downloadUrl: ""
   appPath: "/opt/slicer/Slicer"
-  webDefaultPath: "/vnc.html?autoconnect=1&resize=remote"
+  web:
+    resizeMode: "scale"
+    autoconnect: true
   display:
     width: "1920"
     height: "1080"

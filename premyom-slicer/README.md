@@ -22,6 +22,8 @@ Service Onyxia **3D Slicer** (desktop web via noVNC/websockify), orienté POC CP
 - `workspace.emptyDir.sizeLimit=50Gi`
 - `slicer.releaseSeries` : série de release 3D Slicer (ex `5.8`)
 - `slicer.downloadUrl` : override URL de téléchargement (si besoin)
+- `slicer.web.resizeMode` : `scale` / `remote` / `off` (UX noVNC)
+- `slicer.display.width` / `slicer.display.height` : résolution desktop virtuelle
 
 ## Release (dockerbuild -> Harbor -> ChartMuseum)
 

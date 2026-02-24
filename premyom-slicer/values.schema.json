@@ -90,12 +90,27 @@
         "releaseSeries": { "type": "string", "default": "5.8", "x-onyxia": { "hidden": true } },
         "downloadUrl": { "type": "string", "default": "", "x-onyxia": { "hidden": true } },
         "appPath": { "type": "string", "default": "/opt/slicer/Slicer", "x-onyxia": { "hidden": true } },
-        "webDefaultPath": { "type": "string", "default": "/vnc.html?autoconnect=1&resize=remote", "x-onyxia": { "hidden": true } },
+        "web": {
+          "type": "object",
+          "properties": {
+            "resizeMode": {
+              "type": "string",
+              "default": "scale",
+              "enum": ["scale", "remote", "off"],
+              "description": "Mode de redimensionnement noVNC."
+            },
+            "autoconnect": {
+              "type": "boolean",
+              "default": true,
+              "description": "Connexion VNC automatique à l'ouverture."
+            }
+          }
+        },
         "display": {
           "type": "object",
           "properties": {
-            "width": { "type": "string", "default": "1920", "x-onyxia": { "hidden": true } },
-            "height": { "type": "string", "default": "1080", "x-onyxia": { "hidden": true } },
+            "width": { "type": "string", "default": "1920" },
+            "height": { "type": "string", "default": "1080" },
             "depth": { "type": "string", "default": "24", "x-onyxia": { "hidden": true } }
           }
         }
