@@ -235,8 +235,6 @@ start_slicer_web_session() {
     exit 1
   }
 
-  mkdir -p /tmp/.X11-unix
-  chmod 1777 /tmp/.X11-unix || true
   rm -f /tmp/.X1-lock || true
 
   Xvfb "${display_num}" -screen 0 "${width}x${height}x${depth}" -ac +extension GLX +render -noreset &
@@ -267,6 +265,9 @@ main() {
   if [ "${1:-}" != "--as-onyxia" ]; then
     premyom_mount_s3 || true
     configure_slicer_workspace || true
+    mkdir -p /tmp/.X11-unix || true
+    chown root:root /tmp/.X11-unix || true
+    chmod 1777 /tmp/.X11-unix || true
   fi
 
   if [ "$(id -u)" -eq 0 ]; then

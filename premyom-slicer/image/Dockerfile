@@ -42,6 +42,17 @@ RUN apt-get update \
     libxi6 \
     libxrandr2 \
     libxkbcommon0 \
+    libxkbcommon-x11-0 \
+    libx11-xcb1 \
+    libxcb1 \
+    libxcb-cursor0 \
+    libxcb-shape0 \
+    libxcb-shm0 \
+    libxcb-randr0 \
+    libxcb-sync1 \
+    libxcb-xfixes0 \
+    libxcb-render0 \
+    libxcb-xkb1 \
     libxcb-icccm4 \
     libxcb-image0 \
     libxcb-keysyms1 \
