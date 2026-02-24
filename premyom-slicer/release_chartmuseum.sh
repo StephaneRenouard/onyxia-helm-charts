@@ -30,7 +30,12 @@ for cmd in docker helm curl tar grep sed mktemp; do
   require_cmd "$cmd"
 done
 
+GIT_COMMIT="$(git -C "${REPO_DIR}" rev-parse --short HEAD 2>/dev/null || echo unknown)"
+GIT_DIRTY_COUNT="$(git -C "${REPO_DIR}" status --porcelain --untracked-files=no 2>/dev/null | wc -l | tr -d ' ')"
+
 echo "[INFO] repo: ${REPO_DIR}"
+echo "[INFO] git commit: ${GIT_COMMIT}"
+echo "[INFO] git dirty files: ${GIT_DIRTY_COUNT}"
 echo "[INFO] image: ${IMAGE_REF}"
 echo "[INFO] chart: premyom-slicer:${CHART_VERSION}"
 echo "[INFO] chartmuseum: ${CHARTMUSEUM_URL}"
@@ -48,6 +53,11 @@ grep -n "tag: ${IMG_TAG}" "${CHART_DIR}/values.yaml"
 grep -n "\"default\": \"${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}\"" "${CHART_DIR}/values.schema.json"
 grep -n "\"default\": \"${IMG_TAG}\"" "${CHART_DIR}/values.schema.json"
 grep -n "^version: ${CHART_VERSION}$" "${CHART_DIR}/Chart.yaml"
+
+echo "[STEP] validating source content guardrails"
+grep -n "resizeMode" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
+grep -n "autoconnect" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
+grep -n "vnc_lite.html" "${CHART_DIR}/templates/deployment.yaml"
 
 echo "[STEP] building and pushing image"
 (
@@ -79,6 +89,9 @@ grep -n "tag: ${IMG_TAG}" "${TMP_DIR}/premyom-slicer/values.yaml"
 grep -n "\"default\": \"${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}\"" "${TMP_DIR}/premyom-slicer/values.schema.json"
 grep -n "\"default\": \"${IMG_TAG}\"" "${TMP_DIR}/premyom-slicer/values.schema.json"
 grep -n "^version: ${CHART_VERSION}$" "${TMP_DIR}/premyom-slicer/Chart.yaml"
+grep -n "resizeMode" "${TMP_DIR}/premyom-slicer/values.yaml" "${TMP_DIR}/premyom-slicer/values.schema.json"
+grep -n "autoconnect" "${TMP_DIR}/premyom-slicer/values.yaml" "${TMP_DIR}/premyom-slicer/values.schema.json"
+grep -n "vnc_lite.html" "${TMP_DIR}/premyom-slicer/templates/deployment.yaml"
 
 echo "[STEP] pushing chart to ChartMuseum"
 curl --fail-with-body --data-binary "@${REPO_DIR}/${TARBALL}" "${CHARTMUSEUM_URL%/}/api/charts"
