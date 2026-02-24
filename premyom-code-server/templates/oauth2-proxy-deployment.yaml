@@ -31,7 +31,9 @@ spec:
             - --reverse-proxy=true
             - --cookie-secure=true
             - '--cookie-name={{ include "premyom-code-server.cookieName" . }}'
-            - '--cookie-domain={{ include "premyom-code-server.cookieDomain" . }}'
+            {{- if .Values.sso.cookieDomain }}
+            - '--cookie-domain={{ .Values.sso.cookieDomain }}'
+            {{- end }}
             - '--whitelist-domain={{ include "premyom-code-server.whitelistDomain" . }}'
             - --cookie-samesite=lax
             - --cookie-csrf-per-request=true

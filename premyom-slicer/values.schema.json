@@ -33,7 +33,7 @@
           "x-onyxia": { "hidden": true }
         },
         "redirectUrl": { "type": "string", "default": "", "x-onyxia": { "hidden": true } },
-        "cookieDomain": { "type": "string", "default": ".datalab.arkam-group.com" },
+        "cookieDomain": { "type": "string", "default": "" },
         "whitelistDomain": { "type": "string", "default": ".datalab.arkam-group.com" },
         "ingress": {
           "type": "object",

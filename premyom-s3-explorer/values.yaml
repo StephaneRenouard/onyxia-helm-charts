@@ -63,7 +63,7 @@ sso:
   centralHost: datalab.arkam-group.com
   # Si vide, le chart calcule: https://<centralHost>/premyom-oauth2/<release>/callback
   redirectUrl: ""
-  cookieDomain: .datalab.arkam-group.com
+  cookieDomain: ""
   whitelistDomain: .datalab.arkam-group.com
   ingress:
     enabled: true

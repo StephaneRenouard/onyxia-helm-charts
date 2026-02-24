@@ -61,7 +61,7 @@
     "cookieDomain": {
       "title": "Cookie domain",
       "type": "string",
-      "default": ".datalab.arkam-group.com"
+      "default": ""
     },
         "whitelistDomain": {
           "title": "Allowed redirect domains",

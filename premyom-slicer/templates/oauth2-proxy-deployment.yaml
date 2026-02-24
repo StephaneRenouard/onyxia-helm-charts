@@ -31,7 +31,9 @@ spec:
             - --reverse-proxy=true
             - --cookie-secure=true
             - '--cookie-name={{ printf "_p_jpy_%s" (.Release.Name | replace "-" "_" | trunc 40) }}'
-            - "--cookie-domain={{ include "premyom-slicer.cookieDomain" . }}"
+            {{- if .Values.sso.cookieDomain }}
+            - "--cookie-domain={{ .Values.sso.cookieDomain }}"
+            {{- end }}
             - --cookie-samesite=lax
             - --cookie-csrf-per-request=true
             - --skip-auth-preflight=true
