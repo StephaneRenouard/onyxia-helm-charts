@@ -220,9 +220,71 @@ EOF
 
 configure_novnc_root_redirect() {
   local novnc_root="/usr/share/novnc"
-  local target_path="${SLICER_WEB_DEFAULT_PATH:-/vnc_lite.html?autoconnect=1&resize=scale}"
+  local target_path="${SLICER_WEB_DEFAULT_PATH:-/slicer_vnc.html?scale=true}"
 
   [ -d "${novnc_root}" ] || return 0
+
+  cat > "${novnc_root}/slicer_vnc.html" <<'EOF'
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Slicer Remote Desktop</title>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: #111;
+      overflow: hidden;
+    }
+    #screen {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      touch-action: none;
+    }
+  </style>
+  <script type="module">
+    import RFB from './core/rfb.js';
+
+    function q(name, fallback) {
+      const re = new RegExp('(?:[?#&])' + name + '=([^&#]*)');
+      const match = (window.location.href + window.location.hash).match(re);
+      return match ? decodeURIComponent(match[1]) : fallback;
+    }
+
+    const host = q('host', window.location.hostname);
+    const port = q('port', window.location.port);
+    const path = q('path', 'websockify');
+    const scale = q('scale', 'true') === 'true';
+    const viewOnly = q('view_only', 'false') === 'true';
+    const password = q('password', undefined);
+
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const wsUrl = `${wsProtocol}://${host}${port ? `:${port}` : ''}/${path}`;
+
+    const rfb = new RFB(document.getElementById('screen'), wsUrl, {
+      credentials: password ? { password } : undefined
+    });
+    rfb.scaleViewport = scale;
+    rfb.viewOnly = viewOnly;
+    rfb.background = '#111';
+
+    rfb.addEventListener('credentialsrequired', () => {
+      const promptedPassword = window.prompt('VNC password required');
+      if (promptedPassword !== null) {
+        rfb.sendCredentials({ password: promptedPassword });
+      }
+    });
+  </script>
+</head>
+<body>
+  <div id="screen"></div>
+</body>
+</html>
+EOF
 
   cat > "${novnc_root}/index.html" <<EOF
 <!doctype html>

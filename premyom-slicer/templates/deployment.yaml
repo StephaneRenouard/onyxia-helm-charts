@@ -65,7 +65,7 @@ spec:
               {{- if eq $resizeMode "remote" }}
               value: {{ printf "/vnc.html?autoconnect=%s&resize=remote" $autoconnect | quote }}
               {{- else }}
-              value: {{ printf "/vnc_lite.html?scale=%s" (ternary "true" "false" (eq $resizeMode "scale")) | quote }}
+              value: {{ printf "/slicer_vnc.html?scale=%s" (ternary "true" "false" (eq $resizeMode "scale")) | quote }}
               {{- end }}
             - name: SLICER_APP_PATH
               value: {{ (.Values.slicer.appPath | default "/opt/slicer/Slicer") | quote }}
