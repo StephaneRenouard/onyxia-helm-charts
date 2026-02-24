@@ -235,6 +235,8 @@ start_slicer_web_session() {
     exit 1
   }
 
+  mkdir -p /tmp/.X11-unix
+  chmod 1777 /tmp/.X11-unix || true
   rm -f /tmp/.X1-lock || true
 
   Xvfb "${display_num}" -screen 0 "${width}x${height}x${depth}" -ac +extension GLX +render -noreset &

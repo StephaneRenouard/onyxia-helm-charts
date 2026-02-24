@@ -36,6 +36,7 @@ RUN apt-get update \
     libnss3 \
     libasound2 \
     libpulse0 \
+    libpulse-mainloop-glib0 \
     libxcomposite1 \
     libxcursor1 \
     libxi6 \
