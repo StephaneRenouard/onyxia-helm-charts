@@ -38,6 +38,8 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           env:
             - name: VAULT_ADDR
               value: {{ .Values.extraVault.addr | default "http://vault.vault.svc.cluster.local:8200" | quote }}
