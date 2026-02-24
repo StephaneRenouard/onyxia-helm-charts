@@ -218,6 +218,26 @@ EOF
   chown -R onyxia:users /home/onyxia
 }
 
+configure_novnc_root_redirect() {
+  local novnc_root="/usr/share/novnc"
+  local target_path="${SLICER_WEB_DEFAULT_PATH:-/vnc.html?autoconnect=1&resize=remote}"
+
+  [ -d "${novnc_root}" ] || return 0
+
+  cat > "${novnc_root}/index.html" <<EOF
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0; url=${target_path}" />
+    <script>location.replace(${target_path@Q});</script>
+    <title>Redirecting…</title>
+  </head>
+  <body>Redirecting to noVNC…</body>
+</html>
+EOF
+}
+
 start_slicer_web_session() {
   local display_num="${SLICER_DISPLAY:-:1}"
   local width="${SLICER_SCREEN_WIDTH:-1920}"
@@ -265,6 +285,7 @@ main() {
   if [ "${1:-}" != "--as-onyxia" ]; then
     premyom_mount_s3 || true
     configure_slicer_workspace || true
+    configure_novnc_root_redirect || true
     mkdir -p /tmp/.X11-unix || true
     chown root:root /tmp/.X11-unix || true
     chmod 1777 /tmp/.X11-unix || true
