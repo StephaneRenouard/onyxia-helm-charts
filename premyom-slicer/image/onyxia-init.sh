@@ -220,7 +220,7 @@ EOF
 
 configure_novnc_root_redirect() {
   local novnc_root="/usr/share/novnc"
-  local target_path="${SLICER_WEB_DEFAULT_PATH:-/vnc.html?autoconnect=1&resize=remote}"
+  local target_path="${SLICER_WEB_DEFAULT_PATH:-/vnc_lite.html?autoconnect=1&resize=scale}"
 
   [ -d "${novnc_root}" ] || return 0
 
