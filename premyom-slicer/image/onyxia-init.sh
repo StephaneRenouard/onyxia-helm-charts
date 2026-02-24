@@ -259,6 +259,8 @@ configure_novnc_root_redirect() {
     const port = q('port', window.location.port);
     const path = q('path', 'websockify');
     const scale = q('scale', 'true') === 'true';
+    const clip = q('clip', scale ? 'false' : 'true') === 'true';
+    const drag = q('drag', scale ? 'false' : 'true') === 'true';
     const viewOnly = q('view_only', 'false') === 'true';
     const password = q('password', undefined);
 
@@ -269,6 +271,8 @@ configure_novnc_root_redirect() {
       credentials: password ? { password } : undefined
     });
     rfb.scaleViewport = scale;
+    rfb.clipViewport = clip;
+    rfb.dragViewport = drag;
     rfb.viewOnly = viewOnly;
     rfb.background = '#111';
 
