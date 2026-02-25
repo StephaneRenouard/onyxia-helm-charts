@@ -38,6 +38,7 @@ RUN apt-get update \
     libxcursor1 \
     libxi6 \
     libxrandr2 \
+    libxdamage1 \
     libxkbcommon0 \
     libxkbcommon-x11-0 \
     libx11-xcb1 \
