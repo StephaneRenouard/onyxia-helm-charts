@@ -231,6 +231,8 @@ start_slicer_web_session() {
   local display_index="${display_num#:}"
   local vnc_home="/home/onyxia/.vnc"
   local xstartup="${vnc_home}/xstartup"
+  local kasm_user="${KASMVNC_USER:-onyxia}"
+  local kasm_password="${KASMVNC_PASSWORD:-onyxia-temporary-password}"
 
   export LIBGL_ALWAYS_SOFTWARE="${LIBGL_ALWAYS_SOFTWARE:-1}"
   export HOME="/home/onyxia"
@@ -258,6 +260,11 @@ exec "${app_path}" --no-splash >/tmp/slicer.log 2>&1
 EOF
   chmod +x "${xstartup}"
 
+  if [ ! -f "/home/onyxia/.kasmpasswd" ]; then
+    echo "[INFO] Initializing KasmVNC local user metadata"
+    printf '%s\n%s\n' "${kasm_password}" "${kasm_password}" | vncpasswd -u "${kasm_user}" -w >/dev/null
+  fi
+
   cat > "${vnc_home}/kasmvnc.yaml" <<EOF
 desktop:
   resolution: "${width}x${height}"
@@ -269,14 +276,52 @@ network:
 EOF
 
   echo "[INFO] Starting 3D Slicer on ${display_num} with KasmVNC (${width}x${height}x${depth})"
-  printf '2\n1\n' | vncserver "${display_num}" -fg \
+  vncserver "${display_num}" -fg \
     -geometry "${width}x${height}" \
     -depth "${depth}" \
     -localhost no \
-    -xstartup "${xstartup}" \
+    -noxstartup \
     -SecurityTypes None \
     -disableBasicAuth \
-    -websocketPort 8080
+    -websocketPort 8080 &
+  local vnc_pid=$!
+
+  local launched=0
+  for _ in $(seq 1 30); do
+    if [ -S "/tmp/.X11-unix/X${display_index}" ]; then
+      launched=1
+      break
+    fi
+    sleep 1
+  done
+  if [ "${launched}" != "1" ]; then
+    echo "[ERROR] KasmVNC X display did not become ready" >&2
+    wait "${vnc_pid}" || true
+    exit 1
+  fi
+
+  fluxbox >/tmp/fluxbox.log 2>&1 &
+  local fluxbox_pid=$!
+  "${app_path}" --no-splash >/tmp/slicer.log 2>&1 &
+  local slicer_pid=$!
+
+  while true; do
+    if ! kill -0 "${vnc_pid}" 2>/dev/null; then
+      wait "${vnc_pid}" || true
+      kill "${slicer_pid}" "${fluxbox_pid}" >/dev/null 2>&1 || true
+      wait "${slicer_pid}" "${fluxbox_pid}" >/dev/null 2>&1 || true
+      exit 1
+    fi
+    if ! kill -0 "${slicer_pid}" 2>/dev/null; then
+      local slicer_rc=0
+      wait "${slicer_pid}" || slicer_rc=$?
+      kill "${fluxbox_pid}" >/dev/null 2>&1 || true
+      vncserver -kill "${display_num}" >/dev/null 2>&1 || kill "${vnc_pid}" >/dev/null 2>&1 || true
+      wait "${vnc_pid}" "${fluxbox_pid}" >/dev/null 2>&1 || true
+      exit "${slicer_rc}"
+    fi
+    sleep 2
+  done
 }
 
 main() {
