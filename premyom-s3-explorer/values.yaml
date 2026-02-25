@@ -50,21 +50,24 @@ sso:
   # - forwardAuth : s'appuie sur le oauth2-proxy central via middleware Traefik.
   # - embedded : déploie un oauth2-proxy par service.
   #
-  # En embedded, le callback OIDC est exposé sur un host central:
-  #   https://<centralHost>/premyom-oauth2/<release>/callback
-  # => côté Keycloak, prévoir:
-  #   https://datalab.arkam-group.com/premyom-oauth2/*
+  # En embedded (pattern Premyom), on privilégie un callback same-host:
+  #   https://<service-host>/oauth2/callback
+  # => cookies host-only compatibles (pas de cookieDomain global)
+  # Mode legacy possible: callback central sur datalab via callbackMode=central
   mode: embedded
   forwardAuth:
     middleware: onyxia-workspace-sso-chain@kubernetescrd
 
   secretName: oauth2-proxy
   issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia
+  callbackMode: sameHost # sameHost (recommandé) | central (legacy)
   centralHost: datalab.arkam-group.com
-  # Si vide, le chart calcule: https://<centralHost>/premyom-oauth2/<release>/callback
+  # Si vide, le chart calcule selon callbackMode:
+  # - sameHost: https://<service-host>/oauth2/callback
+  # - central:  https://<centralHost>/premyom-oauth2/<release>/callback
   redirectUrl: ""
   cookieDomain: ""
-  whitelistDomain: .datalab.arkam-group.com
+  whitelistDomain: ""
   ingress:
     enabled: true
     tls: true

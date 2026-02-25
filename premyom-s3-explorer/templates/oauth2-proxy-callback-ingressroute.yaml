@@ -1,4 +1,4 @@
-{{- if and (eq (default "forwardAuth" .Values.sso.mode) "embedded") (default true .Values.sso.ingress.enabled) -}}
+{{- if and (eq (default "forwardAuth" .Values.sso.mode) "embedded") (default true .Values.sso.ingress.enabled) (eq (default "sameHost" .Values.sso.callbackMode) "central") -}}
 #
 # Callback OIDC sur host central pour éviter les wildcards de sous-domaines (Keycloak n'accepte généralement pas
 # les wildcards sur le host).
@@ -23,4 +23,3 @@ spec:
   tls:
     certResolver: le
 {{- end }}
-

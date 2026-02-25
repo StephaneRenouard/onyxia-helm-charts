@@ -98,6 +98,10 @@ echo "[STEP] validating source content guardrails"
 grep -n "redirectUrl" "${CHART_DIR}/templates/_helpers.tpl" "${CHART_DIR}/templates/oauth2-proxy-deployment.yaml"
 grep -n "cookieDomain" "${CHART_DIR}/templates/_helpers.tpl" "${CHART_DIR}/templates/oauth2-proxy-deployment.yaml" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
 grep -n "whitelistDomain" "${CHART_DIR}/templates/_helpers.tpl" "${CHART_DIR}/templates/oauth2-proxy-deployment.yaml" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
+grep -n "callbackMode" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
+grep -n "/oauth2/callback" "${CHART_DIR}/templates/_helpers.tpl"
+grep -n "oauth2ProxyPrefix" "${CHART_DIR}/templates/_helpers.tpl" "${CHART_DIR}/templates/oauth2-proxy-deployment.yaml"
+grep -n "callbackMode" "${CHART_DIR}/templates/oauth2-proxy-callback-ingressroute.yaml"
 
 echo "[STEP] building and pushing image"
 (
@@ -133,6 +137,10 @@ grep -n "^version: ${CHART_VERSION}$" "${TMP_DIR}/premyom-s3-explorer/Chart.yaml
 grep -n "redirectUrl" "${TMP_DIR}/premyom-s3-explorer/templates/_helpers.tpl" "${TMP_DIR}/premyom-s3-explorer/templates/oauth2-proxy-deployment.yaml"
 grep -n "cookieDomain" "${TMP_DIR}/premyom-s3-explorer/templates/_helpers.tpl" "${TMP_DIR}/premyom-s3-explorer/templates/oauth2-proxy-deployment.yaml" "${TMP_DIR}/premyom-s3-explorer/values.yaml" "${TMP_DIR}/premyom-s3-explorer/values.schema.json"
 grep -n "whitelistDomain" "${TMP_DIR}/premyom-s3-explorer/templates/_helpers.tpl" "${TMP_DIR}/premyom-s3-explorer/templates/oauth2-proxy-deployment.yaml" "${TMP_DIR}/premyom-s3-explorer/values.yaml" "${TMP_DIR}/premyom-s3-explorer/values.schema.json"
+grep -n "callbackMode" "${TMP_DIR}/premyom-s3-explorer/values.yaml" "${TMP_DIR}/premyom-s3-explorer/values.schema.json"
+grep -n "/oauth2/callback" "${TMP_DIR}/premyom-s3-explorer/templates/_helpers.tpl"
+grep -n "oauth2ProxyPrefix" "${TMP_DIR}/premyom-s3-explorer/templates/_helpers.tpl" "${TMP_DIR}/premyom-s3-explorer/templates/oauth2-proxy-deployment.yaml"
+grep -n "callbackMode" "${TMP_DIR}/premyom-s3-explorer/templates/oauth2-proxy-callback-ingressroute.yaml"
 
 echo "[STEP] pushing chart to ChartMuseum"
 curl --fail-with-body --data-binary "@${REPO_DIR}/${TARBALL}" "${CHARTMUSEUM_URL%/}/api/charts"
