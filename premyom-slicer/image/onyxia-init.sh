@@ -269,7 +269,7 @@ network:
 EOF
 
   echo "[INFO] Starting 3D Slicer on ${display_num} with KasmVNC (${width}x${height}x${depth})"
-  exec vncserver "${display_num}" -fg \
+  printf '2\n' | vncserver "${display_num}" -fg \
     -geometry "${width}x${height}" \
     -depth "${depth}" \
     -localhost no \
