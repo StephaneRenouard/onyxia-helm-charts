@@ -292,7 +292,6 @@ EOF
     -SecurityTypes None \
     -disableBasicAuth \
     -websocketPort 8080 &
-  local vnc_pid=$!
 
   local launched=0
   for _ in $(seq 1 30); do
@@ -314,8 +313,7 @@ EOF
   local slicer_pid=$!
 
   while true; do
-    if ! kill -0 "${vnc_pid}" 2>/dev/null; then
-      wait "${vnc_pid}" || true
+    if ! pgrep -f "Xvnc.*:${display_index}" >/dev/null 2>&1; then
       kill "${slicer_pid}" "${fluxbox_pid}" >/dev/null 2>&1 || true
       wait "${slicer_pid}" "${fluxbox_pid}" >/dev/null 2>&1 || true
       exit 1
@@ -324,8 +322,8 @@ EOF
       local slicer_rc=0
       wait "${slicer_pid}" || slicer_rc=$?
       kill "${fluxbox_pid}" >/dev/null 2>&1 || true
-      vncserver -kill "${display_num}" >/dev/null 2>&1 || kill "${vnc_pid}" >/dev/null 2>&1 || true
-      wait "${vnc_pid}" "${fluxbox_pid}" >/dev/null 2>&1 || true
+      vncserver -kill "${display_num}" >/dev/null 2>&1 || true
+      wait "${fluxbox_pid}" >/dev/null 2>&1 || true
       exit "${slicer_rc}"
     fi
     sleep 2
