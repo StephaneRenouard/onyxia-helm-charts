@@ -98,7 +98,8 @@ grep -n "^version: ${CHART_VERSION}$" "${CHART_DIR}/Chart.yaml"
 echo "[STEP] validating source content guardrails"
 grep -n "resizeMode" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
 grep -n "autoconnect" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
-grep -n "value: {{ printf \"/?scale=%s\"" "${CHART_DIR}/templates/deployment.yaml"
+grep -n "name: SLICER_WEB_DEFAULT_PATH" "${CHART_DIR}/templates/deployment.yaml"
+grep -n "scale=%s" "${CHART_DIR}/templates/deployment.yaml"
 
 echo "[STEP] building and pushing image"
 (
@@ -134,15 +135,18 @@ grep -n "\"default\": \"${IMG_TAG}\"" "${TMP_DIR}/premyom-slicer/values.schema.j
 grep -n "^version: ${CHART_VERSION}$" "${TMP_DIR}/premyom-slicer/Chart.yaml"
 grep -n "resizeMode" "${TMP_DIR}/premyom-slicer/values.yaml" "${TMP_DIR}/premyom-slicer/values.schema.json"
 grep -n "autoconnect" "${TMP_DIR}/premyom-slicer/values.yaml" "${TMP_DIR}/premyom-slicer/values.schema.json"
-grep -n "value: {{ printf \"/?scale=%s\"" "${TMP_DIR}/premyom-slicer/templates/deployment.yaml"
+grep -n "name: SLICER_WEB_DEFAULT_PATH" "${TMP_DIR}/premyom-slicer/templates/deployment.yaml"
+grep -n "scale=%s" "${TMP_DIR}/premyom-slicer/templates/deployment.yaml"
 
 echo "[STEP] validating KasmVNC source markers"
 grep -n "kasmvncserver" "${CHART_DIR}/image/Dockerfile"
 grep -n "vncserver .* -fg" "${CHART_DIR}/image/onyxia-init.sh"
+grep -n "websocketPort 8080" "${CHART_DIR}/image/onyxia-init.sh"
 
 echo "[STEP] validating KasmVNC packaged markers"
 grep -n "kasmvncserver" "${TMP_DIR}/premyom-slicer/image/Dockerfile"
 grep -n "vncserver .* -fg" "${TMP_DIR}/premyom-slicer/image/onyxia-init.sh"
+grep -n "websocketPort 8080" "${TMP_DIR}/premyom-slicer/image/onyxia-init.sh"
 
 echo "[STEP] pushing chart to ChartMuseum"
 curl --fail-with-body --data-binary "@${REPO_DIR}/${TARBALL}" "${CHARTMUSEUM_URL%/}/api/charts"
