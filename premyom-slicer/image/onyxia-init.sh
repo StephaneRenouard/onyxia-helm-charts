@@ -219,89 +219,7 @@ EOF
 }
 
 configure_novnc_root_redirect() {
-  local novnc_root="/usr/share/novnc"
-  local target_path="${SLICER_WEB_DEFAULT_PATH:-/slicer_vnc.html?scale=true}"
-
-  [ -d "${novnc_root}" ] || return 0
-
-  cat > "${novnc_root}/slicer_vnc.html" <<'EOF'
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Slicer Remote Desktop</title>
-  <style>
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      background: #111;
-      overflow: hidden;
-    }
-    #screen {
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      touch-action: none;
-    }
-  </style>
-  <script type="module">
-    import RFB from './core/rfb.js';
-
-    function q(name, fallback) {
-      const re = new RegExp('(?:[?#&])' + name + '=([^&#]*)');
-      const match = (window.location.href + window.location.hash).match(re);
-      return match ? decodeURIComponent(match[1]) : fallback;
-    }
-
-    const host = q('host', window.location.hostname);
-    const port = q('port', window.location.port);
-    const path = q('path', 'websockify');
-    const scale = q('scale', 'true') === 'true';
-    const clip = q('clip', scale ? 'false' : 'true') === 'true';
-    const drag = q('drag', scale ? 'false' : 'true') === 'true';
-    const viewOnly = q('view_only', 'false') === 'true';
-    const password = q('password', undefined);
-
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const wsUrl = `${wsProtocol}://${host}${port ? `:${port}` : ''}/${path}`;
-
-    const rfb = new RFB(document.getElementById('screen'), wsUrl, {
-      credentials: password ? { password } : undefined
-    });
-    rfb.scaleViewport = scale;
-    rfb.clipViewport = clip;
-    rfb.dragViewport = drag;
-    rfb.viewOnly = viewOnly;
-    rfb.background = '#111';
-
-    rfb.addEventListener('credentialsrequired', () => {
-      const promptedPassword = window.prompt('VNC password required');
-      if (promptedPassword !== null) {
-        rfb.sendCredentials({ password: promptedPassword });
-      }
-    });
-  </script>
-</head>
-<body>
-  <div id="screen"></div>
-</body>
-</html>
-EOF
-
-  cat > "${novnc_root}/index.html" <<EOF
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="refresh" content="0; url=${target_path}" />
-    <script>location.replace(${target_path@Q});</script>
-    <title>Redirecting…</title>
-  </head>
-  <body>Redirecting to noVNC…</body>
-</html>
-EOF
+  :
 }
 
 start_slicer_web_session() {
@@ -310,41 +228,55 @@ start_slicer_web_session() {
   local height="${SLICER_SCREEN_HEIGHT:-1080}"
   local depth="${SLICER_SCREEN_DEPTH:-24}"
   local app_path="${SLICER_APP_PATH:-/opt/slicer/Slicer}"
+  local display_index="${display_num#:}"
+  local vnc_home="/home/onyxia/.vnc"
+  local xstartup="${vnc_home}/xstartup"
 
-  export DISPLAY="${display_num}"
   export LIBGL_ALWAYS_SOFTWARE="${LIBGL_ALWAYS_SOFTWARE:-1}"
   export HOME="/home/onyxia"
   export USER="onyxia"
+  export DISPLAY="${display_num}"
 
   [ -x "${app_path}" ] || {
     echo "[ERROR] Slicer binary not found/executable: ${app_path}" >&2
     exit 1
   }
 
-  rm -f /tmp/.X1-lock || true
+  mkdir -p "${vnc_home}" /home/onyxia/.config/fluxbox
+  rm -f "${vnc_home}"/*.pid "/tmp/.X${display_index}-lock" || true
 
-  Xvfb "${display_num}" -screen 0 "${width}x${height}x${depth}" -ac +extension GLX +render -noreset &
-  local xvfb_pid=$!
-  sleep 1
+  cat > "${xstartup}" <<EOF
+#!/bin/sh
+export DISPLAY=${display_num}
+export HOME=/home/onyxia
+export USER=onyxia
+export LIBGL_ALWAYS_SOFTWARE=${LIBGL_ALWAYS_SOFTWARE}
+xsetroot -solid "#111111" || true
+fluxbox >/tmp/fluxbox.log 2>&1 &
+sleep 1
+exec "${app_path}" --no-splash >/tmp/slicer.log 2>&1
+EOF
+  chmod +x "${xstartup}"
 
-  fluxbox >/tmp/fluxbox.log 2>&1 &
-  local fluxbox_pid=$!
+  cat > "${vnc_home}/kasmvnc.yaml" <<EOF
+desktop:
+  resolution: "${width}x${height}"
+  pixel_depth: ${depth}
+network:
+  protocol: http
+  interface: 0.0.0.0
+  websocket_port: 8080
+EOF
 
-  x11vnc -display "${display_num}" -forever -shared -nopw -rfbport 5900 -localhost >/tmp/x11vnc.log 2>&1 &
-  local x11vnc_pid=$!
-
-  websockify --web=/usr/share/novnc/ 8080 localhost:5900 >/tmp/websockify.log 2>&1 &
-  local websockify_pid=$!
-
-  trap 'kill ${websockify_pid} ${x11vnc_pid} ${fluxbox_pid} ${xvfb_pid} 2>/dev/null || true' EXIT INT TERM
-
-  echo "[INFO] Starting 3D Slicer on ${display_num} (${width}x${height}x${depth})"
-  "${app_path}" --no-splash >/tmp/slicer.log 2>&1 || {
-    code=$?
-    echo "[ERROR] 3D Slicer exited with code ${code}" >&2
-    tail -n 50 /tmp/slicer.log >&2 || true
-    exit "${code}"
-  }
+  echo "[INFO] Starting 3D Slicer on ${display_num} with KasmVNC (${width}x${height}x${depth})"
+  exec vncserver "${display_num}" -fg \
+    -geometry "${width}x${height}" \
+    -depth "${depth}" \
+    -localhost no \
+    -xstartup "${xstartup}" \
+    -SecurityTypes None \
+    -disableBasicAuth \
+    -websocketPort 8080
 }
 
 main() {

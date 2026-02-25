@@ -57,7 +57,7 @@ grep -n "^version: ${CHART_VERSION}$" "${CHART_DIR}/Chart.yaml"
 echo "[STEP] validating source content guardrails"
 grep -n "resizeMode" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
 grep -n "autoconnect" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
-grep -n "slicer_vnc.html" "${CHART_DIR}/templates/deployment.yaml"
+grep -n "value: {{ printf \"/?scale=%s\"" "${CHART_DIR}/templates/deployment.yaml"
 
 echo "[STEP] building and pushing image"
 (
@@ -72,7 +72,7 @@ echo "[STEP] building and pushing image"
 
 echo "[STEP] smoke-testing image"
 docker run --rm --entrypoint /bin/bash "${IMAGE_REF}" -lc \
-  'test -x /opt/slicer/Slicer && test -x /usr/local/bin/Slicer && command -v websockify >/dev/null && command -v x11vnc >/dev/null && su -s /bin/bash -c "sudo -n true && echo sudo-nopasswd=OK" onyxia'
+  'test -x /opt/slicer/Slicer && test -x /usr/local/bin/Slicer && command -v vncserver >/dev/null && su -s /bin/bash -c "sudo -n true && echo sudo-nopasswd=OK" onyxia'
 
 echo "[STEP] packaging chart"
 (
@@ -91,7 +91,7 @@ grep -n "\"default\": \"${IMG_TAG}\"" "${TMP_DIR}/premyom-slicer/values.schema.j
 grep -n "^version: ${CHART_VERSION}$" "${TMP_DIR}/premyom-slicer/Chart.yaml"
 grep -n "resizeMode" "${TMP_DIR}/premyom-slicer/values.yaml" "${TMP_DIR}/premyom-slicer/values.schema.json"
 grep -n "autoconnect" "${TMP_DIR}/premyom-slicer/values.yaml" "${TMP_DIR}/premyom-slicer/values.schema.json"
-grep -n "slicer_vnc.html" "${TMP_DIR}/premyom-slicer/templates/deployment.yaml"
+grep -n "value: {{ printf \"/?scale=%s\"" "${TMP_DIR}/premyom-slicer/templates/deployment.yaml"
 
 echo "[STEP] pushing chart to ChartMuseum"
 curl --fail-with-body --data-binary "@${REPO_DIR}/${TARBALL}" "${CHARTMUSEUM_URL%/}/api/charts"

@@ -2,6 +2,7 @@ FROM debian:bookworm-slim
 
 ARG SLICER_VERSION=5.8
 ARG SLICER_DOWNLOAD_URL=""
+ARG KASMVNC_VERSION=1.4.0
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -18,10 +19,6 @@ RUN apt-get update \
     python3 \
     procps \
     dbus-x11 \
-    xvfb \
-    x11vnc \
-    novnc \
-    websockify \
     fluxbox \
     xterm \
     xauth \
@@ -60,6 +57,21 @@ RUN apt-get update \
     libxcb-xinerama0 \
     libxcb-xinput0 \
   && rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+  arch="$(dpkg --print-architecture)"; \
+  case "$arch" in \
+    amd64) kasm_arch="amd64" ;; \
+    arm64) kasm_arch="arm64" ;; \
+    *) echo "Unsupported arch for KasmVNC: $arch" >&2; exit 1 ;; \
+  esac; \
+  kasm_pkg="kasmvncserver_bookworm_${KASMVNC_VERSION}_${kasm_arch}.deb"; \
+  kasm_url="https://github.com/kasmtech/KasmVNC/releases/download/v${KASMVNC_VERSION}/${kasm_pkg}"; \
+  curl -fL "${kasm_url}" -o /tmp/kasmvnc.deb; \
+  apt-get update; \
+  apt-get install -y /tmp/kasmvnc.deb; \
+  rm -f /tmp/kasmvnc.deb; \
+  rm -rf /var/lib/apt/lists/*
 
 RUN set -eux; \
   arch="$(dpkg --print-architecture)"; \
