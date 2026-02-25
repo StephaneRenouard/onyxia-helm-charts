@@ -260,19 +260,27 @@ exec "${app_path}" --no-splash >/tmp/slicer.log 2>&1
 EOF
   chmod +x "${xstartup}"
 
+  touch "${vnc_home}/.de-was-selected"
+
   if [ ! -f "/home/onyxia/.kasmpasswd" ]; then
     echo "[INFO] Initializing KasmVNC local user metadata"
-    printf '%s\n%s\n' "${kasm_password}" "${kasm_password}" | vncpasswd -u "${kasm_user}" -w >/dev/null
+    printf '%s\n%s\n' "${kasm_password}" "${kasm_password}" | vncpasswd -u "${kasm_user}" -w "/home/onyxia/.kasmpasswd" >/dev/null
   fi
 
   cat > "${vnc_home}/kasmvnc.yaml" <<EOF
 desktop:
-  resolution: "${width}x${height}"
+  resolution:
+    width: ${width}
+    height: ${height}
   pixel_depth: ${depth}
 network:
   protocol: http
   interface: 0.0.0.0
   websocket_port: 8080
+  ssl:
+    require_ssl: false
+    pem_certificate: /dev/null
+    pem_key: /dev/null
 EOF
 
   echo "[INFO] Starting 3D Slicer on ${display_num} with KasmVNC (${width}x${height}x${depth})"
