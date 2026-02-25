@@ -138,11 +138,11 @@ grep -n "value: {{ printf \"/?scale=%s\"" "${TMP_DIR}/premyom-slicer/templates/d
 
 echo "[STEP] validating KasmVNC source markers"
 grep -n "kasmvncserver" "${CHART_DIR}/image/Dockerfile"
-grep -n "exec vncserver" "${CHART_DIR}/image/onyxia-init.sh"
+grep -n "vncserver .* -fg" "${CHART_DIR}/image/onyxia-init.sh"
 
 echo "[STEP] validating KasmVNC packaged markers"
 grep -n "kasmvncserver" "${TMP_DIR}/premyom-slicer/image/Dockerfile"
-grep -n "exec vncserver" "${TMP_DIR}/premyom-slicer/image/onyxia-init.sh"
+grep -n "vncserver .* -fg" "${TMP_DIR}/premyom-slicer/image/onyxia-init.sh"
 
 echo "[STEP] pushing chart to ChartMuseum"
 curl --fail-with-body --data-binary "@${REPO_DIR}/${TARBALL}" "${CHARTMUSEUM_URL%/}/api/charts"
