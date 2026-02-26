@@ -307,6 +307,23 @@ if marker not in text:
     path.write_text(text, encoding="utf-8")
 PY
     echo "[INFO] Xpra HTML5 client patch applied: ${marker:-premyom-slicer-xpra-pasteboard-fix}"
+    if [ -f "${xpra_www}/js/Client.js" ]; then
+      python3 - "${xpra_www}/js/Client.js" <<'PY'
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+marker = "premyom-slicer-xpra-clipboard-guard"
+if marker not in text:
+    needle = "XpraClient.prototype._poll_clipboard = function(e) {"
+    replacement = needle + "\n\t// " + marker + "\n\tif (!this.clipboard_enabled) {\n\t\treturn;\n\t}"
+    if needle in text:
+        text = text.replace(needle, replacement, 1)
+        path.write_text(text, encoding="utf-8")
+PY
+      echo "[INFO] Xpra HTML5 client patch applied: premyom-slicer-xpra-clipboard-guard"
+    fi
     return 0
   fi
   if [ -f "/usr/lib/python3/dist-packages/xpra/net/http/html5/index.html" ]; then
