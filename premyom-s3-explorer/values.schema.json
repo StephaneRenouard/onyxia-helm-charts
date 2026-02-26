@@ -47,13 +47,13 @@
       "type": "string",
       "default": "central",
       "enum": ["sameHost", "central"],
-      "description": "central (recommandé Premyom): callback sur host central apps.datalab... ; sameHost: callback sur le host du service (nécessite redirect URIs Keycloak dynamiques).",
+      "description": "central (recommandé Premyom): callback sur host central oauth.apps.datalab... ; sameHost: callback sur le host du service (nécessite redirect URIs Keycloak dynamiques).",
       "x-onyxia": { "hidden": true }
     },
     "centralHost": {
       "title": "Central callback host",
       "type": "string",
-      "default": "apps.datalab.arkam-group.com",
+      "default": "oauth.apps.datalab.arkam-group.com",
       "description": "Host central legacy pour callback OIDC en embedded (utilisé si callbackMode=central).",
       "x-onyxia": { "hidden": true }
     },

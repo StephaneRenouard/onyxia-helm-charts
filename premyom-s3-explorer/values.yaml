@@ -61,7 +61,7 @@ sso:
   secretName: oauth2-proxy
   issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia
   callbackMode: central # central (Premyom apps subdomain) | sameHost (si KC accepte les redirect dynamiques)
-  centralHost: apps.datalab.arkam-group.com
+  centralHost: oauth.apps.datalab.arkam-group.com
   # Si vide, le chart calcule selon callbackMode:
   # - sameHost: https://<service-host>/oauth2/callback
   # - central:  https://<centralHost>/premyom-oauth2/<release>/callback
