@@ -219,8 +219,28 @@ EOF
 }
 
 configure_xpra_html_client() {
-  if [ -f "/usr/share/xpra/www/index.html" ]; then
-    echo "[INFO] Xpra HTML5 client detected: /usr/share/xpra/www/index.html"
+  local xpra_www="/usr/share/xpra/www"
+  if [ -f "${xpra_www}/index.html" ]; then
+    echo "[INFO] Xpra HTML5 client detected: ${xpra_www}/index.html"
+    mkdir -p "${xpra_www}/js/lib" || true
+    if [ ! -f "${xpra_www}/js/lib/jquery.js" ]; then
+      local jquery_src=""
+      for candidate in \
+        /usr/share/javascript/jquery/jquery.js \
+        /usr/share/javascript/jquery/jquery.min.js
+      do
+        if [ -f "${candidate}" ]; then
+          jquery_src="${candidate}"
+          break
+        fi
+      done
+      if [ -n "${jquery_src}" ]; then
+        ln -sfn "${jquery_src}" "${xpra_www}/js/lib/jquery.js"
+        echo "[INFO] Xpra HTML5 asset fallback: linked jquery.js -> ${jquery_src}"
+      else
+        echo "[WARN] Xpra HTML5 asset fallback: jquery.js missing and no system jquery found" >&2
+      fi
+    fi
     return 0
   fi
   if [ -f "/usr/lib/python3/dist-packages/xpra/net/http/html5/index.html" ]; then

@@ -17,6 +17,7 @@ RUN apt-get update \
     python3 \
     procps \
     xpra \
+    libjs-jquery \
     dbus-x11 \
     xauth \
     xvfb \
