@@ -64,7 +64,7 @@ spec:
               {{- if eq $resizeMode "remote" }}
               value: "/"
               {{- else }}
-              value: {{ printf "/screen.html?scale=%s" (ternary "true" "false" (eq $resizeMode "scale")) | quote }}
+              value: {{ printf "/premyom_slicer.html?scale=%s" (ternary "true" "false" (eq $resizeMode "scale")) | quote }}
               {{- end }}
             - name: SLICER_APP_PATH
               value: {{ (.Values.slicer.appPath | default "/opt/slicer/Slicer") | quote }}

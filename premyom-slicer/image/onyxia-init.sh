@@ -219,7 +219,33 @@ EOF
 }
 
 configure_novnc_root_redirect() {
-  :
+  local kasm_www="/usr/share/kasmvnc/www"
+  local src="${kasm_www}/index.html"
+  local dst="${kasm_www}/premyom_slicer.html"
+
+  [ -f "${src}" ] || return 0
+
+  python3 - "${src}" "${dst}" <<'PY'
+import sys
+src, dst = sys.argv[1], sys.argv[2]
+html = open(src, "r", encoding="utf-8", errors="ignore").read()
+marker = "premyom-slicer-kasm-ui"
+if marker not in html:
+    injected = (
+        '<style id="premyom-slicer-kasm-ui">'
+        '#noVNC_control_bar_anchor,#noVNC_control_bar,#noVNC_control_bar_handle,#noVNC_connection_stats{display:none!important;}'
+        'html,body{margin:0!important;width:100%!important;height:100%!important;overflow:hidden!important;}'
+        '</style>'
+        '<script id="premyom-slicer-kasm-js">'
+        '(function(){'
+        'function hide(){["#noVNC_control_bar_anchor","#noVNC_control_bar","#noVNC_control_bar_handle","#noVNC_connection_stats"].forEach(function(sel){document.querySelectorAll(sel).forEach(function(el){el.style.display="none";});});}'
+        'window.addEventListener("DOMContentLoaded",function(){hide();try{new MutationObserver(hide).observe(document.documentElement,{childList:true,subtree:true});}catch(e){}});'
+        '})();'
+        '</script>'
+    )
+    html = html.replace("</head>", injected + "</head>", 1)
+open(dst, "w", encoding="utf-8").write(html)
+PY
 }
 
 start_slicer_web_session() {
