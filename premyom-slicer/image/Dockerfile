@@ -22,6 +22,7 @@ RUN apt-get update \
     python3-netifaces \
     dbus-x11 \
     xauth \
+    wmctrl \
     xvfb \
     libglu1-mesa \
     libgl1 \

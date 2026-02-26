@@ -362,6 +362,13 @@ start_slicer_web_session() {
 
   local xvfb_cmd
   xvfb_cmd="Xvfb -screen 0 ${width}x${height}x${depth} -nolisten tcp -noreset +extension GLX +extension RANDR"
+  local start_child_cmd
+  start_child_cmd="/bin/sh -lc '(
+    for i in \$(seq 1 60); do
+      wmctrl -r \"3D Slicer\" -b add,maximized_vert,maximized_horz >/dev/null 2>&1 && break
+      sleep 1
+    done
+  ) >/tmp/wmctrl.log 2>&1 & exec \"${app_path}\" --no-splash >>/tmp/slicer.log 2>&1'"
   local xdg_runtime_dir="/tmp/xdg-runtime-onyxia"
   mkdir -p "${xdg_runtime_dir}"
   chmod 700 "${xdg_runtime_dir}"
@@ -381,7 +388,7 @@ start_slicer_web_session() {
     --tcp-auth=none \
     --resize-display=no \
     --xvfb="${xvfb_cmd}" \
-    --start-child="/bin/sh -lc 'exec \"${app_path}\" --no-splash >>/tmp/slicer.log 2>&1'" \
+    --start-child="${start_child_cmd}" \
     --env=LIBGL_ALWAYS_SOFTWARE="${LIBGL_ALWAYS_SOFTWARE}"
 }
 

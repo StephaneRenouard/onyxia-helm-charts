@@ -49,6 +49,7 @@ SLICER_VERSION=5.8 IMG_TAG=0.1.0 CHART_VERSION=0.1.0 ./premyom-slicer/release_ch
 - Le service expose Xpra HTML5 sur le port `8080`.
 - Readiness/liveness probe sur `/`.
 - Le viewer HTML5 Xpra est servi sur `/` (redirection OAuth vers `/` ou `/?desktop_scaling=auto` selon `resizeMode`), avec menu flottant et clipboard client désactivés par défaut (`floating_menu=false&clipboard=false`) ; le serveur Xpra est lancé avec `--clipboard=no` et le client HTML reçoit un patch runtime Safari (neutralisation `#pasteboard`, désactivation du `tablet input`, garde `_poll_clipboard` quand `clipboard=false`) pour éviter le toast “Coller”.
+- Au démarrage, un helper `wmctrl` tente de maximiser automatiquement la fenêtre `3D Slicer` pour mieux occuper la surface du desktop Xpra.
 - POC **CPU-only** (pas de GPU Kubernetes détecté sur `worker1` à date).
 
 ## Validation POC (Essilor)
