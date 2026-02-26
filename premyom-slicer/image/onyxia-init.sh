@@ -218,54 +218,16 @@ EOF
   chown -R onyxia:users /home/onyxia
 }
 
-configure_novnc_root_redirect() {
-  local kasm_www="/usr/share/kasmvnc/www"
-  local src="${kasm_www}/index.html"
-  local dst="${kasm_www}/premyom_slicer.html"
-
-  [ -f "${src}" ] || return 0
-
-  python3 - "${src}" "${dst}" <<'PY'
-import sys
-src, dst = sys.argv[1], sys.argv[2]
-html = open(src, "r", encoding="utf-8", errors="ignore").read()
-marker = "premyom-slicer-kasm-ui"
-if marker not in html:
-    injected = (
-        '<style id="premyom-slicer-kasm-ui">'
-        '#noVNC_control_bar_anchor,#noVNC_control_bar,#noVNC_control_bar_handle,#noVNC_connection_stats{display:none!important;}'
-        'html,body{margin:0!important;width:100%!important;height:100%!important;overflow:hidden!important;background:#000!important;}'
-        '#noVNC_container{position:fixed!important;inset:0!important;overflow:hidden!important;background:#000!important;}'
-        '#noVNC_container canvas{transform-origin:top left!important;}'
-        '</style>'
-        '<script id="premyom-slicer-kasm-js">'
-        '(function(){'
-        'var fitMarker="premyom-slicer-fit-window";'
-        'var tickTimer=null;'
-        'function qScale(){try{return new URLSearchParams(window.location.search).get("scale");}catch(e){return null;}}'
-        'function hide(){["#noVNC_control_bar_anchor","#noVNC_control_bar","#noVNC_control_bar_handle","#noVNC_connection_stats"].forEach(function(sel){document.querySelectorAll(sel).forEach(function(el){el.style.display="none";});});}'
-        'function dispatchChanged(el){try{el.dispatchEvent(new Event("change",{bubbles:true}));el.dispatchEvent(new Event("input",{bubbles:true}));}catch(e){}}'
-        'function forceSelect(id,value){var el=document.getElementById(id);if(!el||el.value===value){return false;}el.value=value;dispatchChanged(el);return true;}'
-        'function forceCheckbox(id,value){var el=document.getElementById(id);if(!el||!!el.checked===!!value){return false;}el.checked=!!value;dispatchChanged(el);return true;}'
-        'function applyViewerMode(){'
-        'var mode=qScale()==="true"?"scale":"off";'
-        'var changed=false;'
-        'changed=forceSelect("noVNC_setting_resize",mode)||changed;'
-        'changed=forceCheckbox("noVNC_setting_view_clip",mode!=="scale")||changed;'
-        'forceCheckbox("noVNC_setting_enable_hidpi",false);'
-        'document.documentElement.setAttribute("data-"+fitMarker,mode);'
-        'return changed;'
-        '}'
-        'function tick(){hide();applyViewerMode();}'
-        'function startTicks(){if(tickTimer!==null){return;}tick();tickTimer=window.setInterval(tick,500);window.setTimeout(function(){if(tickTimer!==null){window.clearInterval(tickTimer);tickTimer=null;}},30000);}'
-        'window.addEventListener("resize",tick);'
-        'window.addEventListener("DOMContentLoaded",function(){startTicks();try{new MutationObserver(tick).observe(document.documentElement,{childList:true,subtree:true,attributes:true});}catch(e){}});'
-        '})();'
-        '</script>'
-    )
-    html = html.replace("</head>", injected + "</head>", 1)
-open(dst, "w", encoding="utf-8").write(html)
-PY
+configure_xpra_html_client() {
+  if [ -f "/usr/share/xpra/www/index.html" ]; then
+    echo "[INFO] Xpra HTML5 client detected: /usr/share/xpra/www/index.html"
+    return 0
+  fi
+  if [ -f "/usr/lib/python3/dist-packages/xpra/net/http/html5/index.html" ]; then
+    echo "[INFO] Xpra HTML5 client detected (python package html5 assets)"
+    return 0
+  fi
+  echo "[WARN] Xpra HTML5 assets not found in expected locations." >&2
 }
 
 start_slicer_web_session() {
@@ -274,11 +236,6 @@ start_slicer_web_session() {
   local height="${SLICER_SCREEN_HEIGHT:-1080}"
   local depth="${SLICER_SCREEN_DEPTH:-24}"
   local app_path="${SLICER_APP_PATH:-/opt/slicer/Slicer}"
-  local display_index="${display_num#:}"
-  local vnc_home="/home/onyxia/.vnc"
-  local xstartup="${vnc_home}/xstartup"
-  local kasm_user="${KASMVNC_USER:-onyxia}"
-  local kasm_password="${KASMVNC_PASSWORD:-onyxia-temporary-password}"
 
   export LIBGL_ALWAYS_SOFTWARE="${LIBGL_ALWAYS_SOFTWARE:-1}"
   export HOME="/home/onyxia"
@@ -290,97 +247,41 @@ start_slicer_web_session() {
     exit 1
   }
 
-  mkdir -p "${vnc_home}" /home/onyxia/.config/fluxbox
-  rm -f "${vnc_home}"/*.pid "/tmp/.X${display_index}-lock" || true
+  mkdir -p /home/onyxia/.xpra
+  rm -f "/tmp/.X${display_num#:}-lock" || true
 
-  cat > "${xstartup}" <<EOF
-#!/bin/sh
-export DISPLAY=${display_num}
-export HOME=/home/onyxia
-export USER=onyxia
-export LIBGL_ALWAYS_SOFTWARE=${LIBGL_ALWAYS_SOFTWARE}
-xsetroot -solid "#111111" || true
-fluxbox >/tmp/fluxbox.log 2>&1 &
-sleep 1
-exec "${app_path}" --no-splash >/tmp/slicer.log 2>&1
-EOF
-  chmod +x "${xstartup}"
-
-  touch "${vnc_home}/.de-was-selected"
-
-  if [ ! -f "/home/onyxia/.kasmpasswd" ]; then
-    echo "[INFO] Initializing KasmVNC local user metadata"
-    printf '%s\n%s\n' "${kasm_password}" "${kasm_password}" | vncpasswd -u "${kasm_user}" -w "/home/onyxia/.kasmpasswd" >/dev/null
+  local scaling_mode="off"
+  if [ "${SLICER_XPRA_DESKTOP_SCALING:-}" = "auto" ]; then
+    scaling_mode="auto"
+  elif [ "${SLICER_XPRA_DESKTOP_SCALING:-}" = "off" ]; then
+    scaling_mode="off"
   fi
 
-  cat > "${vnc_home}/kasmvnc.yaml" <<EOF
-desktop:
-  resolution:
-    width: ${width}
-    height: ${height}
-  pixel_depth: ${depth}
-network:
-  protocol: http
-  interface: 0.0.0.0
-  websocket_port: 8080
-  ssl:
-    require_ssl: false
-    pem_certificate: /dev/null
-    pem_key: /dev/null
-EOF
+  local xvfb_cmd
+  xvfb_cmd="Xvfb -screen 0 ${width}x${height}x${depth} -nolisten tcp -noreset +extension GLX +extension RANDR"
 
-  echo "[INFO] Starting 3D Slicer on ${display_num} with KasmVNC (${width}x${height}x${depth})"
-  vncserver "${display_num}" -fg \
-    -geometry "${width}x${height}" \
-    -depth "${depth}" \
-    -localhost no \
-    -noxstartup \
-    -SecurityTypes None \
-    -disableBasicAuth \
-    -websocketPort 8080 &
-
-  local launched=0
-  for _ in $(seq 1 30); do
-    if [ -S "/tmp/.X11-unix/X${display_index}" ]; then
-      launched=1
-      break
-    fi
-    sleep 1
-  done
-  if [ "${launched}" != "1" ]; then
-    echo "[ERROR] KasmVNC X display did not become ready" >&2
-    wait "${vnc_pid}" || true
-    exit 1
-  fi
-
-  fluxbox >/tmp/fluxbox.log 2>&1 &
-  local fluxbox_pid=$!
-  "${app_path}" --no-splash >/tmp/slicer.log 2>&1 &
-  local slicer_pid=$!
-
-  while true; do
-    if ! pgrep -f "Xvnc.*:${display_index}" >/dev/null 2>&1; then
-      kill "${slicer_pid}" "${fluxbox_pid}" >/dev/null 2>&1 || true
-      wait "${slicer_pid}" "${fluxbox_pid}" >/dev/null 2>&1 || true
-      exit 1
-    fi
-    if ! kill -0 "${slicer_pid}" 2>/dev/null; then
-      local slicer_rc=0
-      wait "${slicer_pid}" || slicer_rc=$?
-      kill "${fluxbox_pid}" >/dev/null 2>&1 || true
-      vncserver -kill "${display_num}" >/dev/null 2>&1 || true
-      wait "${fluxbox_pid}" >/dev/null 2>&1 || true
-      exit "${slicer_rc}"
-    fi
-    sleep 2
-  done
+  echo "[INFO] Starting 3D Slicer on ${display_num} with Xpra HTML5 (${width}x${height}x${depth}, scaling=${scaling_mode})"
+  exec xpra start "${display_num}" \
+    --daemon=no \
+    --mdns=no \
+    --notifications=no \
+    --printing=no \
+    --pulseaudio=no \
+    --html=on \
+    --exit-with-children=yes \
+    --bind-tcp=0.0.0.0:8080,auth=none \
+    --tcp-auth=none \
+    --resize-display=no \
+    --xvfb="${xvfb_cmd}" \
+    --start-child="/bin/sh -lc 'exec \"${app_path}\" --no-splash >>/tmp/slicer.log 2>&1'" \
+    --env=LIBGL_ALWAYS_SOFTWARE="${LIBGL_ALWAYS_SOFTWARE}"
 }
 
 main() {
   if [ "${1:-}" != "--as-onyxia" ]; then
     premyom_mount_s3 || true
     configure_slicer_workspace || true
-    configure_novnc_root_redirect || true
+    configure_xpra_html_client || true
     mkdir -p /tmp/.X11-unix || true
     chown root:root /tmp/.X11-unix || true
     chmod 1777 /tmp/.X11-unix || true

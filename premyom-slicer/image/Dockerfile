@@ -2,8 +2,6 @@ FROM debian:bookworm-slim
 
 ARG SLICER_VERSION=5.8
 ARG SLICER_DOWNLOAD_URL=""
-ARG KASMVNC_VERSION=1.4.0
-
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
@@ -18,11 +16,10 @@ RUN apt-get update \
     tini \
     python3 \
     procps \
+    xpra \
     dbus-x11 \
-    fluxbox \
-    xterm \
     xauth \
-    mesa-utils \
+    xvfb \
     libglu1-mesa \
     libgl1 \
     libegl1 \
@@ -62,21 +59,6 @@ RUN apt-get update \
 RUN set -eux; \
   arch="$(dpkg --print-architecture)"; \
   case "$arch" in \
-    amd64) kasm_arch="amd64" ;; \
-    arm64) kasm_arch="arm64" ;; \
-    *) echo "Unsupported arch for KasmVNC: $arch" >&2; exit 1 ;; \
-  esac; \
-  kasm_pkg="kasmvncserver_bookworm_${KASMVNC_VERSION}_${kasm_arch}.deb"; \
-  kasm_url="https://github.com/kasmtech/KasmVNC/releases/download/v${KASMVNC_VERSION}/${kasm_pkg}"; \
-  curl -fL "${kasm_url}" -o /tmp/kasmvnc.deb; \
-  apt-get update; \
-  apt-get install -y /tmp/kasmvnc.deb; \
-  rm -f /tmp/kasmvnc.deb; \
-  rm -rf /var/lib/apt/lists/*
-
-RUN set -eux; \
-  arch="$(dpkg --print-architecture)"; \
-  case "$arch" in \
     amd64) slicer_arch="amd64" ;; \
     *) echo "Unsupported arch for 3D Slicer: $arch" >&2; exit 1 ;; \
   esac; \
@@ -95,7 +77,7 @@ RUN set -eux; \
   ln -sfn /opt/slicer/Slicer /usr/local/bin/Slicer
 
 RUN useradd -m -s /bin/bash -g users onyxia \
-  && mkdir -p /home/onyxia/work /home/onyxia/.vnc \
+  && mkdir -p /home/onyxia/work /home/onyxia/.xpra \
   && chown -R onyxia:users /home/onyxia \
   && printf 'onyxia ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/onyxia \
   && chmod 0440 /etc/sudoers.d/onyxia

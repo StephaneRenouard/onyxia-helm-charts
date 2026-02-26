@@ -1,9 +1,9 @@
 {{- if and (eq (default "forwardAuth" .Values.sso.mode) "embedded") (default true .Values.sso.ingress.enabled) -}}
 {{- $scheme := ternary "https" "http" (default false .Values.sso.ingress.tls) -}}
 {{- $mode := default "scale" .Values.slicer.web.resizeMode -}}
-{{- $defaultPath := printf "/premyom_slicer.html?scale=%s" (ternary "true" "false" (eq $mode "scale")) -}}
-{{- if eq $mode "remote" -}}
-{{- $defaultPath = "/vnc.html?resize=remote" -}}
+{{- $defaultPath := "/" -}}
+{{- if eq $mode "scale" -}}
+{{- $defaultPath = "/?desktop_scaling=auto" -}}
 {{- end -}}
 apiVersion: traefik.io/v1alpha1
 kind: Middleware

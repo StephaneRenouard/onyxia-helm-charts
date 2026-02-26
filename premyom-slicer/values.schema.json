@@ -102,12 +102,12 @@
               "type": "string",
               "default": "scale",
               "enum": ["scale", "remote", "off"],
-              "description": "Mode de redimensionnement noVNC."
+              "description": "Mode d'affichage du viewer Xpra (\"remote\" traité comme \"off\")."
             },
             "autoconnect": {
               "type": "boolean",
               "default": true,
-              "description": "Connexion VNC automatique à l'ouverture."
+              "description": "Connexion automatique à l'ouverture du viewer."
             }
           }
         },
