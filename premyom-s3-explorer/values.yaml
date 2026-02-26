@@ -71,6 +71,7 @@ sso:
   ingress:
     enabled: true
     tls: true
+    tlsSecretName: wildcard-datalab-apps-arkam
     ingressClassName: ""
     annotations:
       kubernetes.io/ingress.class: arkam-traefik

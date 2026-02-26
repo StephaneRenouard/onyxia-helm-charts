@@ -13,10 +13,11 @@ metadata:
 {{ if not (hasKey (default dict .Values.sso.ingress.annotations) "traefik.ingress.kubernetes.io/router.middlewares") }}
     {{/* Ingress (kubernetesingress provider): reference CRD middleware as <namespace>-<name>@kubernetescrd */}}
     {{- $bufferingMw := printf "%s-%s-buffering@kubernetescrd" .Release.Namespace (include "premyom-s3-explorer.fullname" .) }}
+    {{- $oauth2RedirectMw := printf "%s-%s-oauth2-redirect@kubernetescrd" .Release.Namespace (include "premyom-s3-explorer.fullname" .) }}
     {{- if eq $mode "forwardAuth" }}
     traefik.ingress.kubernetes.io/router.middlewares: {{ printf "%s,%s" $bufferingMw .Values.sso.forwardAuth.middleware | quote }}
     {{- else }}
-    traefik.ingress.kubernetes.io/router.middlewares: {{ $bufferingMw | quote }}
+    traefik.ingress.kubernetes.io/router.middlewares: {{ printf "%s,%s" $bufferingMw $oauth2RedirectMw | quote }}
     {{- end }}
 {{ end }}
 spec:
@@ -27,6 +28,9 @@ spec:
   tls:
     - hosts:
         - {{ .Values.sso.ingress.hostname | quote }}
+      {{- if .Values.sso.ingress.tlsSecretName }}
+      secretName: {{ .Values.sso.ingress.tlsSecretName | quote }}
+      {{- end }}
   {{- end }}
   rules:
     - host: {{ .Values.sso.ingress.hostname | quote }}

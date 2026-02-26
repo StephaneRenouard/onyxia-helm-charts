@@ -103,6 +103,13 @@
               "title": "ingressClassName",
               "default": "",
               "x-onyxia": { "hidden": true, "overwriteDefaultWith": "{{k8s.ingressClassName}}" }
+            },
+            "tlsSecretName": {
+              "type": "string",
+              "form": true,
+              "title": "TLS secret",
+              "default": "wildcard-datalab-apps-arkam",
+              "x-onyxia": { "hidden": true }
             }
           }
         }
