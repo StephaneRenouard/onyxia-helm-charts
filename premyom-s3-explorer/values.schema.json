@@ -80,7 +80,7 @@
           "title": "Ingress (SSO)",
           "type": "object",
           "form": true,
-          "x-onyxia": { "overwriteSchemaWith": "ide/ingress.json" },
+          "description": "Ingress SSO Premyom. Le hostname est forcé sur *.apps.<k8s.domain> pour isoler les cookies des services de l'app Onyxia.",
           "properties": {
             "enabled": {
               "description": "Enable Ingress",
