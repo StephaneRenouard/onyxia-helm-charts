@@ -1,6 +1,6 @@
 # premyom-slicer (POC)
 
-Service Onyxia **3D Slicer** (desktop web via noVNC/websockify), orienté POC CPU-only pour segmentation DICOM.
+Service Onyxia **3D Slicer** (desktop web via **KasmVNC**), orienté POC CPU-only pour segmentation DICOM.
 
 ## Objectif POC
 
@@ -22,7 +22,7 @@ Service Onyxia **3D Slicer** (desktop web via noVNC/websockify), orienté POC CP
 - `workspace.emptyDir.sizeLimit=50Gi`
 - `slicer.releaseSeries` : série de release 3D Slicer (ex `5.8`)
 - `slicer.downloadUrl` : override URL de téléchargement (si besoin)
-- `slicer.web.resizeMode` : `scale` / `remote` / `off` (UX noVNC)
+- `slicer.web.resizeMode` : `scale` / `remote` / `off` (UX KasmVNC)
 - `slicer.display.width` / `slicer.display.height` : résolution desktop virtuelle
 
 ## Release (dockerbuild -> Harbor -> ChartMuseum)
@@ -46,8 +46,9 @@ SLICER_VERSION=5.8 IMG_TAG=0.1.0 CHART_VERSION=0.1.0 ./premyom-slicer/release_ch
 ## Notes techniques
 
 - Le build télécharge 3D Slicer depuis `download.slicer.org` (release Linux).
-- Le service expose noVNC/websockify sur le port `8080`.
-- Readiness/liveness probe sur `/vnc.html`.
+- Le service expose KasmVNC sur le port `8080`.
+- Readiness/liveness probe sur `/`.
+- Une page viewer Kasm custom `premyom_slicer.html` est générée pour masquer la barre Kasm et forcer le mode d'affichage client (`scale/off`) via JS.
 - POC **CPU-only** (pas de GPU Kubernetes détecté sur `worker1` à date).
 
 ## Validation POC (Essilor)
