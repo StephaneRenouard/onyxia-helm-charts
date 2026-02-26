@@ -249,6 +249,7 @@ path = pathlib.Path(sys.argv[1])
 text = path.read_text(encoding="utf-8")
 marker = "premyom-slicer-xpra-pasteboard-fix"
 if marker not in text:
+    text = text.replace("init_tablet_input(client);", "/* premyom-slicer-xpra-pasteboard-fix: disable tablet pasteboard capture */ // init_tablet_input(client);", 1)
     patch = """<style id="premyom-slicer-xpra-pasteboard-fix-style">
 #pasteboard {
   pointer-events: none !important;
@@ -265,8 +266,13 @@ if marker not in text:
       pb.setAttribute("tabindex", "-1");
       pb.setAttribute("autocomplete", "off");
       pb.spellcheck = false;
+      pb.readOnly = true;
       pb.style.pointerEvents = "none";
       pb.style.opacity = "0";
+    } catch (e) {}
+    try {
+      pb.focus = function() { return false; };
+      pb.select = function() { return false; };
     } catch (e) {}
     try {
       pb.addEventListener("focus", function() {
@@ -275,7 +281,8 @@ if marker not in text:
     } catch (e) {}
     try {
       if (window.jQuery) {
-        window.jQuery(pb).off("blur");
+        window.jQuery(pb).off("blur paste copy cut input");
+        window.jQuery("#screen").off("click");
       }
     } catch (e) {}
     return true;
