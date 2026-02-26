@@ -46,6 +46,12 @@ git status --short
 
 Si le repo n’est pas propre, éviter `git pull --ff-only` direct.
 
+Règle de release (critique) :
+
+- Si un changement touche une **image** (Dockerfile, `onyxia-init.sh`, entrypoint, scripts image), **toujours bump `IMG_TAG`**.
+- Un repush du même tag peut être ignoré par les nœuds Kubernetes si l’image est déjà présente localement (`IfNotPresent`).
+- Si un changement touche uniquement les templates/values/chart, bump `CHART_VERSION` suffit.
+
 ### `premyom-code-server`
 
 ```bash

@@ -27,6 +27,12 @@ Service Onyxia **3D Slicer** (desktop web via noVNC/websockify), orienté POC CP
 
 ## Release (dockerbuild -> Harbor -> ChartMuseum)
 
+Règle de release (critique) :
+
+- Si tu modifies **l’image** (`premyom-slicer/image/Dockerfile`, `onyxia-init.sh`, scripts image), **bump `IMG_TAG`**.
+- Sinon Kubernetes peut réutiliser une image déjà présente sur le nœud (`imagePullPolicy: IfNotPresent`) même si le même tag a été repush.
+- Si tu modifies seulement le chart/templates/values, un bump `CHART_VERSION` suffit.
+
 ```bash
 IMG_TAG=0.1.0 CHART_VERSION=0.1.0 ./premyom-slicer/release_chartmuseum.sh
 ```

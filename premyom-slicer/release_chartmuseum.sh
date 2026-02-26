@@ -59,6 +59,7 @@ echo "[INFO] git dirty files: ${GIT_DIRTY_COUNT}"
 echo "[INFO] image: ${IMAGE_REF}"
 echo "[INFO] chart: premyom-slicer:${CHART_VERSION}"
 echo "[INFO] chartmuseum: ${CHARTMUSEUM_URL}"
+echo "[INFO] release rule: si l'image change (Dockerfile / onyxia-init.sh / scripts image), bump IMG_TAG (imagePullPolicy=IfNotPresent peut réutiliser une ancienne image locale pour le même tag)."
 
 if [ "${ALLOW_DIRTY_RELEASE}" != "1" ] && [ "${GIT_DIRTY_COUNT}" != "0" ]; then
   echo "[ERROR] Refusing release from dirty repo (git dirty files: ${GIT_DIRTY_COUNT})." >&2
