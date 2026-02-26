@@ -18,6 +18,8 @@ RUN apt-get update \
     procps \
     xpra \
     libjs-jquery \
+    python3-pil \
+    python3-netifaces \
     dbus-x11 \
     xauth \
     xvfb \
