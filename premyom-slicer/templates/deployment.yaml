@@ -62,9 +62,9 @@ spec:
             - name: SLICER_WEB_DEFAULT_PATH
               {{- $resizeMode := (default "scale" .Values.slicer.web.resizeMode) -}}
               {{- if eq $resizeMode "scale" }}
-              value: "/?desktop_scaling=auto"
+              value: "/?desktop_scaling=auto&floating_menu=false&clipboard=false"
               {{- else }}
-              value: "/"
+              value: "/?floating_menu=false&clipboard=false"
               {{- end }}
             - name: SLICER_XPRA_DESKTOP_SCALING
               {{- if eq (default "scale" .Values.slicer.web.resizeMode) "scale" }}
