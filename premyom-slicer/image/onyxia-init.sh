@@ -259,6 +259,10 @@ start_slicer_web_session() {
 
   local xvfb_cmd
   xvfb_cmd="Xvfb -screen 0 ${width}x${height}x${depth} -nolisten tcp -noreset +extension GLX +extension RANDR"
+  local xdg_runtime_dir="/tmp/xdg-runtime-onyxia"
+  mkdir -p "${xdg_runtime_dir}"
+  chmod 700 "${xdg_runtime_dir}"
+  export XDG_RUNTIME_DIR="${xdg_runtime_dir}"
 
   echo "[INFO] Starting 3D Slicer on ${display_num} with Xpra HTML5 (${width}x${height}x${depth}, scaling=${scaling_mode})"
   exec xpra start "${display_num}" \
@@ -269,7 +273,7 @@ start_slicer_web_session() {
     --pulseaudio=no \
     --html=on \
     --exit-with-children=yes \
-    --bind-tcp=0.0.0.0:8080,auth=none \
+    --bind-tcp=0.0.0.0:8080 \
     --tcp-auth=none \
     --resize-display=no \
     --xvfb="${xvfb_cmd}" \
