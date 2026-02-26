@@ -100,6 +100,10 @@ grep -n "resizeMode" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json
 grep -n "autoconnect" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
 grep -n "name: SLICER_WEB_DEFAULT_PATH" "${CHART_DIR}/templates/deployment.yaml"
 grep -n "scale=%s" "${CHART_DIR}/templates/deployment.yaml"
+grep -n "oauth.apps.datalab.arkam-group.com" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
+grep -n "\.apps.datalab.arkam-group.com" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
+grep -n "apps.{{k8s.domain}}" "${CHART_DIR}/values.schema.json"
+grep -n "X-Auth-Request-Redirect" "${CHART_DIR}/templates/oauth2-proxy-redirect-middleware.yaml"
 
 echo "[STEP] building and pushing image"
 (
@@ -137,6 +141,10 @@ grep -n "resizeMode" "${TMP_DIR}/premyom-slicer/values.yaml" "${TMP_DIR}/premyom
 grep -n "autoconnect" "${TMP_DIR}/premyom-slicer/values.yaml" "${TMP_DIR}/premyom-slicer/values.schema.json"
 grep -n "name: SLICER_WEB_DEFAULT_PATH" "${TMP_DIR}/premyom-slicer/templates/deployment.yaml"
 grep -n "scale=%s" "${TMP_DIR}/premyom-slicer/templates/deployment.yaml"
+grep -n "oauth.apps.datalab.arkam-group.com" "${TMP_DIR}/premyom-slicer/values.yaml" "${TMP_DIR}/premyom-slicer/values.schema.json"
+grep -n "\.apps.datalab.arkam-group.com" "${TMP_DIR}/premyom-slicer/values.yaml" "${TMP_DIR}/premyom-slicer/values.schema.json"
+grep -n "apps.{{k8s.domain}}" "${TMP_DIR}/premyom-slicer/values.schema.json"
+grep -n "X-Auth-Request-Redirect" "${TMP_DIR}/premyom-slicer/templates/oauth2-proxy-redirect-middleware.yaml"
 
 echo "[STEP] validating KasmVNC source markers"
 grep -n "kasmvncserver" "${CHART_DIR}/image/Dockerfile"

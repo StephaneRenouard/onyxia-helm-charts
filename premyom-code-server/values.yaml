@@ -110,17 +110,18 @@ sso:
   # En embedded, le chart expose:
   #   https://<centralHost>/premyom-oauth2/<release>/callback
   #
-  # Côté Keycloak, il suffit d'autoriser:
-  #   https://datalab.arkam-group.com/premyom-oauth2/*
-  centralHost: datalab.arkam-group.com
+  # Côté Keycloak (pattern Premyom apps), autoriser:
+  #   https://oauth.apps.datalab.arkam-group.com/premyom-oauth2/*
+  centralHost: oauth.apps.datalab.arkam-group.com
 
   # Si vide, le chart calcule: https://<centralHost>/premyom-oauth2/<release>/callback
   redirectUrl: ""
-  cookieDomain: ""
-  whitelistDomain: .datalab.arkam-group.com
+  cookieDomain: .apps.datalab.arkam-group.com
+  whitelistDomain: .apps.datalab.arkam-group.com
   ingress:
     enabled: true
     tls: true
+    tlsSecretName: wildcard-datalab-apps-arkam
     ingressClassName: ""
     annotations: {}
     hostname: chart-example.local

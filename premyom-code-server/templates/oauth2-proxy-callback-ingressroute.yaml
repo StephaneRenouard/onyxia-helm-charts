@@ -22,6 +22,9 @@ spec:
         - name: {{ include "premyom-code-server.fullname" . }}-oauth2-proxy
           port: 8080
   tls:
+    {{- if .Values.sso.ingress.tlsSecretName }}
+    secretName: {{ .Values.sso.ingress.tlsSecretName | quote }}
+    {{- else }}
     certResolver: le
+    {{- end }}
 {{- end }}
-

@@ -90,6 +90,10 @@ rm -f "${CHART_DIR}/values.yaml.bak" "${CHART_DIR}/values.schema.json.bak" "${CH
 grep -n "version: ${IMAGE_REF}" "${CHART_DIR}/values.yaml"
 grep -n "\"default\": \"${IMAGE_REF}\"" "${CHART_DIR}/values.schema.json"
 grep -n "^version: ${CHART_VERSION}$" "${CHART_DIR}/Chart.yaml"
+grep -n "oauth.apps.datalab.arkam-group.com" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
+grep -n "\.apps.datalab.arkam-group.com" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
+grep -n "apps.{{k8s.domain}}" "${CHART_DIR}/values.schema.json"
+grep -n "X-Auth-Request-Redirect" "${CHART_DIR}/templates/oauth2-proxy-redirect-middleware.yaml"
 
 echo "[STEP] building and pushing image"
 (
@@ -121,6 +125,10 @@ tar -xzf "${REPO_DIR}/${TARBALL}" -C "${TMP_DIR}"
 grep -n "version: ${IMAGE_REF}" "${TMP_DIR}/premyom-code-server/values.yaml"
 grep -n "\"default\": \"${IMAGE_REF}\"" "${TMP_DIR}/premyom-code-server/values.schema.json"
 grep -n "^version: ${CHART_VERSION}$" "${TMP_DIR}/premyom-code-server/Chart.yaml"
+grep -n "oauth.apps.datalab.arkam-group.com" "${TMP_DIR}/premyom-code-server/values.yaml" "${TMP_DIR}/premyom-code-server/values.schema.json"
+grep -n "\.apps.datalab.arkam-group.com" "${TMP_DIR}/premyom-code-server/values.yaml" "${TMP_DIR}/premyom-code-server/values.schema.json"
+grep -n "apps.{{k8s.domain}}" "${TMP_DIR}/premyom-code-server/values.schema.json"
+grep -n "X-Auth-Request-Redirect" "${TMP_DIR}/premyom-code-server/templates/oauth2-proxy-redirect-middleware.yaml"
 
 echo "[STEP] pushing chart to ChartMuseum"
 curl --fail-with-body --data-binary "@${REPO_DIR}/${TARBALL}" "${CHARTMUSEUM_URL%/}/api/charts"

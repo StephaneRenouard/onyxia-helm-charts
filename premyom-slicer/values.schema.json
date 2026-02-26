@@ -29,15 +29,15 @@
         },
         "centralHost": {
           "type": "string",
-          "default": "datalab.arkam-group.com",
+          "default": "oauth.apps.datalab.arkam-group.com",
           "x-onyxia": { "hidden": true }
         },
         "redirectUrl": { "type": "string", "default": "", "x-onyxia": { "hidden": true } },
-        "cookieDomain": { "type": "string", "default": "" },
-        "whitelistDomain": { "type": "string", "default": ".datalab.arkam-group.com" },
+        "cookieDomain": { "type": "string", "default": ".apps.datalab.arkam-group.com" },
+        "whitelistDomain": { "type": "string", "default": ".apps.datalab.arkam-group.com" },
         "ingress": {
           "type": "object",
-          "x-onyxia": { "overwriteSchemaWith": "ide/ingress.json" },
+          "description": "Ingress SSO Premyom. Le hostname est forcé sur *.apps.<k8s.domain> pour isoler les cookies des services de l'app Onyxia.",
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -48,7 +48,7 @@
               "type": "string",
               "x-onyxia": {
                 "hidden": true,
-                "overwriteDefaultWith": "{{project.id}}-{{k8s.randomSubdomain}}-0.{{k8s.domain}}"
+                "overwriteDefaultWith": "{{project.id}}-{{k8s.randomSubdomain}}-0.apps.{{k8s.domain}}"
               }
             },
             "ingressClassName": {
@@ -58,6 +58,11 @@
                 "hidden": true,
                 "overwriteDefaultWith": "{{k8s.ingressClassName}}"
               }
+            },
+            "tlsSecretName": {
+              "type": "string",
+              "default": "wildcard-datalab-apps-arkam",
+              "x-onyxia": { "hidden": true }
             }
           }
         }
