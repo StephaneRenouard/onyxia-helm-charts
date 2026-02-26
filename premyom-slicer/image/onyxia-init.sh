@@ -290,6 +290,7 @@ start_slicer_web_session() {
     --mdns=no \
     --notifications=no \
     --printing=no \
+    --clipboard=no \
     --pulseaudio=no \
     --html=on \
     --exit-with-children=yes \

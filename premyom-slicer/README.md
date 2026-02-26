@@ -48,7 +48,7 @@ SLICER_VERSION=5.8 IMG_TAG=0.1.0 CHART_VERSION=0.1.0 ./premyom-slicer/release_ch
 - Le build télécharge 3D Slicer depuis `download.slicer.org` (release Linux).
 - Le service expose Xpra HTML5 sur le port `8080`.
 - Readiness/liveness probe sur `/`.
-- Le viewer HTML5 Xpra est servi sur `/` (redirection OAuth vers `/` ou `/?desktop_scaling=auto` selon `resizeMode`), avec menu flottant et clipboard client désactivés par défaut (`floating_menu=false&clipboard=false`) pour améliorer l'UX navigateur.
+- Le viewer HTML5 Xpra est servi sur `/` (redirection OAuth vers `/` ou `/?desktop_scaling=auto` selon `resizeMode`), avec menu flottant et clipboard client désactivés par défaut (`floating_menu=false&clipboard=false`) ; le serveur Xpra est lancé avec `--clipboard=no` pour limiter les toasts Safari “Coller”.
 - POC **CPU-only** (pas de GPU Kubernetes détecté sur `worker1` à date).
 
 ## Validation POC (Essilor)
