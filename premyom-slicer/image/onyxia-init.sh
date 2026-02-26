@@ -241,6 +241,65 @@ configure_xpra_html_client() {
         echo "[WARN] Xpra HTML5 asset fallback: jquery.js missing and no system jquery found" >&2
       fi
     fi
+    python3 - "${xpra_www}/index.html" <<'PY'
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+marker = "premyom-slicer-xpra-pasteboard-fix"
+if marker not in text:
+    patch = """<style id="premyom-slicer-xpra-pasteboard-fix-style">
+#pasteboard {
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+</style>
+<script id="premyom-slicer-xpra-pasteboard-fix">
+(function() {
+  function disablePasteboardFocus() {
+    var pb = document.getElementById("pasteboard");
+    if (!pb) return false;
+    try {
+      pb.setAttribute("readonly", "readonly");
+      pb.setAttribute("tabindex", "-1");
+      pb.setAttribute("autocomplete", "off");
+      pb.spellcheck = false;
+      pb.style.pointerEvents = "none";
+      pb.style.opacity = "0";
+    } catch (e) {}
+    try {
+      pb.addEventListener("focus", function() {
+        try { this.blur(); } catch (e) {}
+      }, true);
+    } catch (e) {}
+    try {
+      if (window.jQuery) {
+        window.jQuery(pb).off("blur");
+      }
+    } catch (e) {}
+    return true;
+  }
+  function run() {
+    disablePasteboardFocus();
+    setTimeout(disablePasteboardFocus, 300);
+    setTimeout(disablePasteboardFocus, 1000);
+    setTimeout(disablePasteboardFocus, 2500);
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", run, { once: true });
+  } else {
+    run();
+  }
+})();
+</script>"""
+    if "</body>" in text:
+        text = text.replace("</body>", patch + "\n</body>", 1)
+    else:
+        text += "\n" + patch + "\n"
+    path.write_text(text, encoding="utf-8")
+PY
+    echo "[INFO] Xpra HTML5 client patch applied: ${marker:-premyom-slicer-xpra-pasteboard-fix}"
     return 0
   fi
   if [ -f "/usr/lib/python3/dist-packages/xpra/net/http/html5/index.html" ]; then
