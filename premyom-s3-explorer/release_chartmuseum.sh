@@ -103,6 +103,7 @@ grep -n "/oauth2/callback" "${CHART_DIR}/templates/_helpers.tpl"
 grep -n "oauth2ProxyPrefix" "${CHART_DIR}/templates/_helpers.tpl" "${CHART_DIR}/templates/oauth2-proxy-deployment.yaml"
 grep -n "callbackMode" "${CHART_DIR}/templates/oauth2-proxy-callback-ingressroute.yaml"
 grep -n "apps.{{k8s.domain}}" "${CHART_DIR}/values.schema.json"
+grep -n "X-Auth-Request-Redirect" "${CHART_DIR}/templates/oauth2-proxy-redirect-middleware.yaml"
 
 echo "[STEP] building and pushing image"
 (
@@ -143,6 +144,7 @@ grep -n "/oauth2/callback" "${TMP_DIR}/premyom-s3-explorer/templates/_helpers.tp
 grep -n "oauth2ProxyPrefix" "${TMP_DIR}/premyom-s3-explorer/templates/_helpers.tpl" "${TMP_DIR}/premyom-s3-explorer/templates/oauth2-proxy-deployment.yaml"
 grep -n "callbackMode" "${TMP_DIR}/premyom-s3-explorer/templates/oauth2-proxy-callback-ingressroute.yaml"
 grep -n "apps.{{k8s.domain}}" "${TMP_DIR}/premyom-s3-explorer/values.schema.json"
+grep -n "X-Auth-Request-Redirect" "${TMP_DIR}/premyom-s3-explorer/templates/oauth2-proxy-redirect-middleware.yaml"
 
 echo "[STEP] pushing chart to ChartMuseum"
 curl --fail-with-body --data-binary "@${REPO_DIR}/${TARBALL}" "${CHARTMUSEUM_URL%/}/api/charts"
