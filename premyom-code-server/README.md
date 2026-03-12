@@ -34,16 +34,21 @@ Script recommandé (fait les contrôles bloquants avant upload):
 ```bash
 cd ~/onyxia-helm-charts
 git pull --ff-only
-IMG_TAG=0.1.21 CHART_VERSION=0.2.52 ./premyom-code-server/release_chartmuseum.sh
+IMG_TAG=0.1.27 CHART_VERSION=0.2.59 ./premyom-code-server/release_chartmuseum.sh
 ```
 
 Le script:
 - met à jour `values.yaml`, `values.schema.json`, `Chart.yaml`,
 - build/push l’image Harbor,
 - teste l’image (`python3.12`, `conda`, `nano`),
+- vérifie la provenance de l’image (`io.premyom.git-commit` + `io.premyom.image-source-sha`),
 - package le chart,
 - vérifie le contenu du `.tgz` (image/tag + version chart),
 - push vers ChartMuseum puis vérifie `index.yaml`.
+
+Par défaut, les scripts image tournent maintenant en `docker build --no-cache --pull`
+(`DOCKER_NO_CACHE=true`, `DOCKER_PULL=true`) pour éviter les faux positifs d’idempotence.
+Tu peux réactiver le cache explicitement avec `DOCKER_NO_CACHE=false`.
 
 Ensuite (arkam-master):
 

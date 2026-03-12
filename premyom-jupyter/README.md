@@ -37,6 +37,10 @@ Le script:
 - vérifie le contenu du `.tgz` (repository/tag image + version chart),
 - push vers ChartMuseum puis vérifie `index.yaml`.
 
+Par défaut, les scripts image tournent en `docker build --no-cache --pull`
+(`DOCKER_NO_CACHE=true`, `DOCKER_PULL=true`) pour éviter les builds incohérents.
+Tu peux forcer le cache avec `DOCKER_NO_CACHE=false`.
+
 Ensuite (arkam-master) :
 
 ```bash

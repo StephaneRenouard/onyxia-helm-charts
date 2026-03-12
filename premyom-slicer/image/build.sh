@@ -11,6 +11,10 @@ IMAGE_NAME="${IMAGE_NAME:-onyxia-slicer}"
 DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 SLICER_VERSION="${SLICER_VERSION:-5.8}"
 SLICER_DOWNLOAD_URL="${SLICER_DOWNLOAD_URL:-}"
+DOCKER_NO_CACHE="${DOCKER_NO_CACHE:-true}"
+DOCKER_PULL="${DOCKER_PULL:-true}"
+BUILD_GIT_COMMIT="${BUILD_GIT_COMMIT:-unknown}"
+BUILD_IMAGE_SOURCE_SHA="${BUILD_IMAGE_SOURCE_SHA:-unknown}"
 
 if [[ -z "${IMAGE_REPOSITORY}" ]]; then
   if [[ -n "${IMAGE_REGISTRY_HOST}" ]]; then
@@ -24,7 +28,18 @@ if [[ -z "${IMAGE_REPOSITORY}" ]]; then
   fi
 fi
 
+BUILD_FLAGS=()
+if [[ "${DOCKER_NO_CACHE}" == "true" ]]; then
+  BUILD_FLAGS+=(--no-cache)
+fi
+if [[ "${DOCKER_PULL}" == "true" ]]; then
+  BUILD_FLAGS+=(--pull)
+fi
+
 docker build \
+  "${BUILD_FLAGS[@]}" \
+  --label "io.premyom.git-commit=${BUILD_GIT_COMMIT}" \
+  --label "io.premyom.image-source-sha=${BUILD_IMAGE_SOURCE_SHA}" \
   --build-arg "SLICER_VERSION=${SLICER_VERSION}" \
   --build-arg "SLICER_DOWNLOAD_URL=${SLICER_DOWNLOAD_URL}" \
   -t "${IMAGE_REPOSITORY}:${IMAGE_TAG}" \

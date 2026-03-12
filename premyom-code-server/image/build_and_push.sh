@@ -12,6 +12,10 @@ DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 CODE_SERVER_VERSION="${CODE_SERVER_VERSION:-4.106.3}"
 MINIFORGE_VERSION="${MINIFORGE_VERSION:-latest}"
 DOCKER_LOGIN="${DOCKER_LOGIN:-false}"
+DOCKER_NO_CACHE="${DOCKER_NO_CACHE:-true}"
+DOCKER_PULL="${DOCKER_PULL:-true}"
+BUILD_GIT_COMMIT="${BUILD_GIT_COMMIT:-unknown}"
+BUILD_IMAGE_SOURCE_SHA="${BUILD_IMAGE_SOURCE_SHA:-unknown}"
 
 if [[ -z "${IMAGE_REPOSITORY}" ]]; then
   if [[ -n "${IMAGE_REGISTRY_HOST}" ]]; then
@@ -33,7 +37,18 @@ if [[ "${DOCKER_LOGIN}" == "true" ]]; then
   fi
 fi
 
+BUILD_FLAGS=()
+if [[ "${DOCKER_NO_CACHE}" == "true" ]]; then
+  BUILD_FLAGS+=(--no-cache)
+fi
+if [[ "${DOCKER_PULL}" == "true" ]]; then
+  BUILD_FLAGS+=(--pull)
+fi
+
 docker build \
+  "${BUILD_FLAGS[@]}" \
+  --label "io.premyom.git-commit=${BUILD_GIT_COMMIT}" \
+  --label "io.premyom.image-source-sha=${BUILD_IMAGE_SOURCE_SHA}" \
   --build-arg "CODE_SERVER_VERSION=${CODE_SERVER_VERSION}" \
   --build-arg "MINIFORGE_VERSION=${MINIFORGE_VERSION}" \
   -t "${IMAGE_REPOSITORY}:${IMAGE_TAG}" \

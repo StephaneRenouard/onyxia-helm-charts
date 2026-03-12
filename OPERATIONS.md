@@ -52,11 +52,28 @@ Règle de release (critique) :
 - Un repush du même tag peut être ignoré par les nœuds Kubernetes si l’image est déjà présente localement (`IfNotPresent`).
 - Si un changement touche uniquement les templates/values/chart, bump `CHART_VERSION` suffit.
 
+Durcissement process (global `premyom-*`) :
+
+- Les scripts image buildent par défaut en `docker build --no-cache --pull`.
+- Chaque image embarque les labels:
+  - `io.premyom.git-commit`
+  - `io.premyom.image-source-sha` (hash du dossier `image/`).
+- Chaque `release_chartmuseum.sh` vérifie ces labels après build.
+- Si les labels ne correspondent pas au code source courant, la release échoue avant packaging/push chart.
+- Objectif: éviter le cas “chart publié mais patch absent de l’image”.
+
 ### `premyom-code-server`
 
 ```bash
 cd ~/onyxia-helm-charts
-IMG_TAG=0.1.21 CHART_VERSION=0.2.52 ./premyom-code-server/release_chartmuseum.sh
+git pull --ff-only
+IMG_TAG=0.1.27 CHART_VERSION=0.2.59 ./premyom-code-server/release_chartmuseum.sh
+```
+
+Validation post-release (recommandée) :
+
+```bash
+curl -fsSL http://192.168.1.106:8081/index.yaml | grep -n 'premyom-code-server-0.2.59.tgz'
 ```
 
 ### `premyom-jupyter`

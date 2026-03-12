@@ -15,6 +15,8 @@ IMAGE_NAMESPACE="${IMAGE_NAMESPACE:-premyom}"
 IMAGE_NAME="${IMAGE_NAME:-onyxia-jupyter}"
 MINIFORGE_VERSION="${MINIFORGE_VERSION:-latest}"
 JUPYTERLAB_VERSION="${JUPYTERLAB_VERSION:-latest}"
+DOCKER_NO_CACHE="${DOCKER_NO_CACHE:-true}"
+DOCKER_PULL="${DOCKER_PULL:-true}"
 
 IMAGE_REF="${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}:${IMG_TAG}"
 TARBALL="premyom-jupyter-${CHART_VERSION}.tgz"
@@ -26,6 +28,35 @@ require_cmd() {
     echo "[ERROR] missing command: $1" >&2
     exit 1
   }
+}
+
+select_hash_cmd() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    HASH_CMD=(sha256sum)
+    return
+  fi
+  if command -v shasum >/dev/null 2>&1; then
+    HASH_CMD=(shasum -a 256)
+    return
+  fi
+  echo "[ERROR] missing command: sha256sum/shasum" >&2
+  exit 1
+}
+
+compute_dir_sha() {
+  local dir="$1"
+  local tmp_file
+  tmp_file="$(mktemp)"
+  (
+    cd "$dir"
+    find . -type f -print0 \
+      | LC_ALL=C sort -z \
+      | while IFS= read -r -d '' path; do
+          printf '%s  %s\n' "$("${HASH_CMD[@]}" "$path" | awk '{print $1}')" "${path#./}"
+        done
+  ) > "${tmp_file}"
+  "${HASH_CMD[@]}" "${tmp_file}" | awk '{print $1}'
+  rm -f "${tmp_file}"
 }
 
 cleanup() {
@@ -42,14 +73,16 @@ cleanup() {
 
 trap cleanup EXIT
 
-for cmd in docker helm curl tar grep sed mktemp git; do
+for cmd in docker helm curl tar grep sed mktemp git awk find sort; do
   require_cmd "$cmd"
 done
+select_hash_cmd
 
-GIT_COMMIT="$(git -C "${REPO_DIR}" rev-parse --short HEAD 2>/dev/null || echo unknown)"
+GIT_COMMIT="$(git -C "${REPO_DIR}" rev-parse HEAD 2>/dev/null || echo unknown)"
 GIT_DIRTY_COUNT="$(git -C "${REPO_DIR}" status --porcelain --untracked-files=no 2>/dev/null | wc -l | tr -d ' ')"
 GIT_BRANCH="$(git -C "${REPO_DIR}" rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
 ORIGIN_MAIN_SHA="$(git -C "${REPO_DIR}" rev-parse --short origin/main 2>/dev/null || echo unknown)"
+IMAGE_SOURCE_SHA="$(compute_dir_sha "${IMAGE_DIR}")"
 
 echo "[INFO] repo: ${REPO_DIR}"
 echo "[INFO] git branch: ${GIT_BRANCH}"
@@ -59,6 +92,7 @@ echo "[INFO] git dirty files: ${GIT_DIRTY_COUNT}"
 echo "[INFO] image: ${IMAGE_REF}"
 echo "[INFO] chart: premyom-jupyter:${CHART_VERSION}"
 echo "[INFO] chartmuseum: ${CHARTMUSEUM_URL}"
+echo "[INFO] image source sha: ${IMAGE_SOURCE_SHA}"
 
 if [ "${ALLOW_DIRTY_RELEASE}" != "1" ] && [ "${GIT_DIRTY_COUNT}" != "0" ]; then
   echo "[ERROR] Refusing release from dirty repo (git dirty files: ${GIT_DIRTY_COUNT})." >&2
@@ -107,12 +141,30 @@ echo "[STEP] building and pushing image"
   IMAGE_TAG="${IMG_TAG}" \
   MINIFORGE_VERSION="${MINIFORGE_VERSION}" \
   JUPYTERLAB_VERSION="${JUPYTERLAB_VERSION}" \
+  DOCKER_NO_CACHE="${DOCKER_NO_CACHE}" \
+  DOCKER_PULL="${DOCKER_PULL}" \
+  BUILD_GIT_COMMIT="${GIT_COMMIT}" \
+  BUILD_IMAGE_SOURCE_SHA="${IMAGE_SOURCE_SHA}" \
   ./build_and_push.sh
 )
 
 echo "[STEP] smoke-testing image"
 docker run --rm --entrypoint /bin/bash "${IMAGE_REF}" -lc \
   'python3.12 --version && source /opt/conda/etc/profile.d/conda.sh && conda --version && jupyter lab --version && nano --version | head -n1 && su -s /bin/bash -c "sudo -n true && echo sudo-nopasswd=OK" onyxia'
+
+echo "[STEP] validating image provenance"
+built_commit="$(docker image inspect "${IMAGE_REF}" --format '{{ index .Config.Labels "io.premyom.git-commit" }}')"
+built_source_sha="$(docker image inspect "${IMAGE_REF}" --format '{{ index .Config.Labels "io.premyom.image-source-sha" }}')"
+echo "[INFO] built label git-commit: ${built_commit}"
+echo "[INFO] built label image-source-sha: ${built_source_sha}"
+if [[ "${built_commit}" != "${GIT_COMMIT}" ]]; then
+  echo "[ERROR] built image git commit label mismatch: expected ${GIT_COMMIT}, got ${built_commit}" >&2
+  exit 1
+fi
+if [[ "${built_source_sha}" != "${IMAGE_SOURCE_SHA}" ]]; then
+  echo "[ERROR] built image source sha label mismatch: expected ${IMAGE_SOURCE_SHA}, got ${built_source_sha}" >&2
+  exit 1
+fi
 
 echo "[STEP] packaging chart"
 (

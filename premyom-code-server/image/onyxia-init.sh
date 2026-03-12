@@ -287,6 +287,17 @@ JSON
   chown -R onyxia:users "/home/onyxia/.local/share/code-server"
 }
 
+ensure_user_python_local_dirs() {
+  mkdir -p \
+    /home/onyxia/.local/lib \
+    /home/onyxia/.local/bin \
+    /home/onyxia/.cache/pip \
+    /home/onyxia/.config
+
+  chown onyxia:users /home/onyxia /home/onyxia/work
+  chown -R onyxia:users /home/onyxia/.local /home/onyxia/.cache /home/onyxia/.config
+}
+
 # --- Compat minimale avec les charts IDE Onyxia ------------------------------
 
 if [ "${CODE_SERVER_AUTH:-password}" = "none" ]; then
@@ -310,11 +321,12 @@ normalize_codeserver_args "$@" || true
 
 premyom_mount_s3 || true
 configure_codeserver_defaults || true
+ensure_user_python_local_dirs || true
 
 if [ "$(id -u)" -eq 0 ] && [ "$#" -ge 1 ] && [[ "${1}" == *"code-server" ]]; then
-  mkdir -p /home/onyxia/work /home/onyxia/.config/code-server
+  mkdir -p /home/onyxia/work /home/onyxia/.config/code-server /home/onyxia/.local/lib
   chown onyxia:users /home/onyxia /home/onyxia/work
-  chown -R onyxia:users /home/onyxia/.config
+  chown -R onyxia:users /home/onyxia/.local /home/onyxia/.config
   exec sudo -EHu onyxia -- "$@"
 fi
 

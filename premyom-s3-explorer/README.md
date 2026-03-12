@@ -32,6 +32,10 @@ helm package premyom-s3-explorer --version 0.1.50 --app-version latest
 curl --fail-with-body --data-binary "@premyom-s3-explorer-0.1.50.tgz" http://192.168.1.106:8081/api/charts
 ```
 
+Le build image est maintenant en `--no-cache --pull` par défaut
+(`DOCKER_NO_CACHE=true`, `DOCKER_PULL=true`) pour garantir un rebuild réel.
+Tu peux réactiver le cache avec `DOCKER_NO_CACHE=false`.
+
 Puis refresh catalogue Onyxia :
 
 ```bash

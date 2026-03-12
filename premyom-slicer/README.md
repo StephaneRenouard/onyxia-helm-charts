@@ -32,6 +32,7 @@ Règle de release (critique) :
 - Si tu modifies **l’image** (`premyom-slicer/image/Dockerfile`, `onyxia-init.sh`, scripts image), **bump `IMG_TAG`**.
 - Sinon Kubernetes peut réutiliser une image déjà présente sur le nœud (`imagePullPolicy: IfNotPresent`) même si le même tag a été repush.
 - Si tu modifies seulement le chart/templates/values, un bump `CHART_VERSION` suffit.
+- Le build image est forcé en `docker build --no-cache --pull` par défaut (`DOCKER_NO_CACHE=true`, `DOCKER_PULL=true`) pour éviter les faux rebuilds depuis le cache.
 
 ```bash
 IMG_TAG=0.1.0 CHART_VERSION=0.1.0 ./premyom-slicer/release_chartmuseum.sh
