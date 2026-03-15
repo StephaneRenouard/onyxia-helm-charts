@@ -156,18 +156,38 @@ setup_filebrowser_policies() {
   command -v filebrowser >/dev/null 2>&1 || return 0
 
   db_path="${FILEBROWSER_DB_PATH:-/tmp/filebrowser.db}"
+  root_path="${FILEBROWSER_ROOT_PATH:-/mnt/s3}"
+  admin_user="${FILEBROWSER_ADMIN_USER:-admin}"
+  admin_password="${FILEBROWSER_ADMIN_PASSWORD:-fbAdmin$(date +%s)}"
   # Important:
-  # - ne pas initialiser la DB ici: avec certaines versions filebrowser, cela force
-  #   un flow /api/login côté UI et casse le parcours SSO (oauth2-proxy).
-  # - on applique seulement la policy si une DB existe déjà.
+  # - auth.method=noauth est conservé pour rester compatible SSO oauth2-proxy.
+  # - il faut un utilisateur local présent en DB, sinon /api/login peut échouer.
+  if [ ! -s "${db_path}" ]; then
+    filebrowser config init \
+      --database "${db_path}" \
+      --root "${root_path}" \
+      --auth.method=noauth \
+      --perm.download=false \
+      --log stdout >/tmp/filebrowser-config.log 2>&1 || true
+  fi
+
   if [ -s "${db_path}" ]; then
+    filebrowser users add "${admin_user}" "${admin_password}" \
+      --database "${db_path}" \
+      --perm.admin=true \
+      --perm.download=false >/tmp/filebrowser-users.log 2>&1 || true
+    filebrowser users update "${admin_user}" \
+      --database "${db_path}" \
+      --perm.download=false >/tmp/filebrowser-users.log 2>&1 || true
+
     filebrowser config set \
       --database "${db_path}" \
       --perm.download=false \
       --log stdout >/tmp/filebrowser-config.log 2>&1 || true
+
     echo "[INFO] filebrowser policy applied (download=false): ${db_path}"
   else
-    echo "[INFO] filebrowser policy skipped (no db yet): ${db_path}"
+    echo "[WARN] filebrowser policy skipped (db missing): ${db_path}" >&2
   fi
 }
 
