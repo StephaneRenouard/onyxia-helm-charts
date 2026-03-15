@@ -10,6 +10,15 @@ Tunnel SSH (à lancer sur la machine locale) :
 ssh -N -L 6443:192.168.1.120:6443 stef@datalab.handco.fr
 ```
 
+Variante recommandée (datalab): `./open_tunnel.sh` ouvre aussi les forwards SSH utiles:
+
+- `22105` -> `dockerbuild` (`192.168.1.105`)
+- `22120` -> `arkam-master` (`192.168.1.120`)
+- `22130` -> `master-premyom` (`192.168.1.130`)
+- `22106` -> `harbor` (`192.168.1.106`)
+- `22200` -> `worker1` (`192.168.1.200`)
+- `22101` -> `HAProxy` (`192.168.1.101`)
+
 Vérification rapide :
 
 ```bash
@@ -55,6 +64,9 @@ Règle de release (critique) :
 Durcissement process (global `premyom-*`) :
 
 - Les scripts image buildent par défaut en `docker build --no-cache --pull`.
+- Les scripts release valident que `DOCKER_NO_CACHE` / `DOCKER_PULL` valent strictement `true|false`.
+- Les scripts release vérifient que le daemon Docker est disponible avant le build.
+- Les scripts release affichent explicitement les flags Docker effectivement appliqués.
 - Chaque image embarque les labels:
   - `io.premyom.git-commit`
   - `io.premyom.image-source-sha` (hash du dossier `image/`).
@@ -80,27 +92,34 @@ curl -fsSL http://192.168.1.106:8081/index.yaml | grep -n 'premyom-code-server-0
 
 ```bash
 cd ~/onyxia-helm-charts
-IMG_TAG=0.1.0 CHART_VERSION=0.1.0 ./premyom-jupyter/release_chartmuseum.sh
+IMG_TAG=0.1.5 CHART_VERSION=0.1.4 ./premyom-jupyter/release_chartmuseum.sh
 ```
 
 ### `premyom-rstudio`
 
 ```bash
 cd ~/onyxia-helm-charts
-IMG_TAG=0.1.0 CHART_VERSION=0.1.0 ./premyom-rstudio/release_chartmuseum.sh
+IMG_TAG=0.1.1 CHART_VERSION=0.1.0 ./premyom-rstudio/release_chartmuseum.sh
 ```
 
 ### `premyom-s3-explorer`
 
-Le service n’a pas encore de script `release_chartmuseum.sh` dédié.
+```bash
+cd ~/onyxia-helm-charts
+IMG_TAG=0.1.9 CHART_VERSION=0.1.58 ./premyom-s3-explorer/release_chartmuseum.sh
+```
+
+### `premyom-slicer`
 
 ```bash
-cd ~/onyxia-helm-charts/premyom-s3-explorer/image
-IMAGE_REGISTRY_HOST=harbor.lan IMAGE_NAMESPACE=premyom IMAGE_TAG=0.1.7 FILEBROWSER_VERSION=2.57.1 ./build_and_push.sh
-
 cd ~/onyxia-helm-charts
-helm package premyom-s3-explorer --version 0.1.50 --app-version latest
-curl --fail-with-body --data-binary "@premyom-s3-explorer-0.1.50.tgz" http://192.168.1.106:8081/api/charts
+IMG_TAG=0.1.39 CHART_VERSION=0.1.37 ./premyom-slicer/release_chartmuseum.sh
+```
+
+Option debug (réactiver le cache explicitement, déconseillé en release):
+
+```bash
+DOCKER_NO_CACHE=false DOCKER_PULL=false IMG_TAG=... CHART_VERSION=... ./premyom-*/release_chartmuseum.sh
 ```
 
 ## 4) Forcer le refresh catalogue Onyxia

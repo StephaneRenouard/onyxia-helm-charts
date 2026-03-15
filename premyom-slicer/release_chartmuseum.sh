@@ -30,6 +30,18 @@ require_cmd() {
   }
 }
 
+require_bool() {
+  local var_name="$1"
+  local value="${!var_name:-}"
+  case "$value" in
+    true|false) ;;
+    *)
+      echo "[ERROR] ${var_name} must be 'true' or 'false' (got: ${value})" >&2
+      exit 1
+      ;;
+  esac
+}
+
 select_hash_cmd() {
   if command -v sha256sum >/dev/null 2>&1; then
     HASH_CMD=(sha256sum)
@@ -77,6 +89,27 @@ for cmd in docker helm curl tar grep sed mktemp awk find sort; do
   require_cmd "$cmd"
 done
 select_hash_cmd
+require_bool DOCKER_NO_CACHE
+require_bool DOCKER_PULL
+
+if ! docker info >/dev/null 2>&1; then
+  echo "[ERROR] docker daemon unavailable (check docker service / permissions)." >&2
+  exit 1
+fi
+
+DOCKER_FLAGS=()
+if [ "${DOCKER_NO_CACHE}" = "true" ]; then
+  DOCKER_FLAGS+=(--no-cache)
+fi
+if [ "${DOCKER_PULL}" = "true" ]; then
+  DOCKER_FLAGS+=(--pull)
+fi
+if [ "${#DOCKER_FLAGS[@]}" -eq 0 ]; then
+  echo "[INFO] docker build flags: (none)"
+else
+  echo "[INFO] docker build flags: ${DOCKER_FLAGS[*]}"
+fi
+
 
 GIT_COMMIT="$(git -C "${REPO_DIR}" rev-parse HEAD 2>/dev/null || echo unknown)"
 GIT_DIRTY_COUNT="$(git -C "${REPO_DIR}" status --porcelain --untracked-files=no 2>/dev/null | wc -l | tr -d ' ')"
