@@ -28,7 +28,7 @@ RUN set -eux; \
     > /etc/apt/sources.list.d/cran-r.list; \
   apt-get update; \
   apt-get install -y --no-install-recommends r-base r-base-dev; \
-  R --version 2>&1 | head -n1 | grep -E '^R version 4\\.5\\.'; \
+  Rscript -e 'v <- as.character(getRversion()); if (!grepl("^4\\.5\\.", v)) { quit(status=1) }; cat(v, "\\n")'; \
   rm -rf "${GNUPGHOME}"; \
   rm -rf /var/lib/apt/lists/*
 

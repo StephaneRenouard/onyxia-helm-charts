@@ -150,7 +150,7 @@ echo "[STEP] building and pushing image"
 
 echo "[STEP] smoke-testing image"
 docker run --rm --entrypoint /bin/bash "${IMAGE_REF}" -lc \
-  'python3.12 --version && source /opt/conda/etc/profile.d/conda.sh && conda --version && jupyter lab --version && R --version 2>&1 | head -n1 | grep -E "^R version 4\\.5\\." && jupyter kernelspec list | grep -q ir && nano --version | head -n1 && su -s /bin/bash -c "sudo -n true && echo sudo-nopasswd=OK" onyxia'
+  'python3.12 --version && source /opt/conda/etc/profile.d/conda.sh && conda --version && jupyter lab --version && Rscript -e '\''v <- as.character(getRversion()); if (!grepl("^4\\.5\\.", v)) { quit(status=1) }; cat(v, "\\n")'\'' && jupyter kernelspec list | grep -q ir && nano --version | head -n1 && su -s /bin/bash -c "sudo -n true && echo sudo-nopasswd=OK" onyxia'
 
 echo "[STEP] validating image provenance"
 built_commit="$(docker image inspect "${IMAGE_REF}" --format '{{ index .Config.Labels "io.premyom.git-commit" }}')"
