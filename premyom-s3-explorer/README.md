@@ -1,7 +1,7 @@
 # premyom-s3-explorer
 
 Explorateur de fichiers basé sur Filebrowser, exposant le contenu monté sous `/mnt/s3`.
-Téléchargement désactivé (`--perm.download=false`).
+Téléchargement désactivé via `filebrowser config init/set --perm.download=false` dans `premyom-s3-explorer/image/onyxia-init.sh`.
 
 ## Image
 

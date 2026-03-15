@@ -152,6 +152,37 @@ premyom_mount_s3() {
   done
 }
 
+setup_filebrowser_policies() {
+  command -v filebrowser >/dev/null 2>&1 || return 0
+
+  db_path="${FILEBROWSER_DB_PATH:-/tmp/filebrowser.db}"
+  root_path="${FILEBROWSER_ROOT_PATH:-/mnt/s3}"
+  mkdir -p "$(dirname "${db_path}")"
+
+  if [ -s "${db_path}" ]; then
+    filebrowser config set \
+      --database "${db_path}" \
+      --auth.method=noauth \
+      --perm.download=false \
+      --log stdout >/tmp/filebrowser-config.log 2>&1 || true
+  else
+    filebrowser config init \
+      --database "${db_path}" \
+      --root "${root_path}" \
+      --auth.method=noauth \
+      --perm.download=false \
+      --log stdout >/tmp/filebrowser-config.log 2>&1 || true
+  fi
+
+  if [ -s "${db_path}" ]; then
+    echo "[INFO] filebrowser policy applied (download=false, auth=noauth): ${db_path}"
+  else
+    echo "[WARN] filebrowser policy could not be applied (db missing: ${db_path})" >&2
+    [ -f /tmp/filebrowser-config.log ] && tail -n 20 /tmp/filebrowser-config.log >&2 || true
+  fi
+}
+
 premyom_mount_s3 || true
+setup_filebrowser_policies || true
 
 exec "$@"
