@@ -2,23 +2,22 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CHART_DIR="${REPO_DIR}/premyom-s3-explorer"
+CHART_DIR="${REPO_DIR}/premyom-rstudio"
 IMAGE_DIR="${CHART_DIR}/image"
 
-IMG_TAG="${IMG_TAG:-0.1.7}"
-CHART_VERSION="${CHART_VERSION:-0.1.50}"
+IMG_TAG="${IMG_TAG:-0.1.0}"
+CHART_VERSION="${CHART_VERSION:-0.1.0}"
 CHART_APP_VERSION="${CHART_APP_VERSION:-latest}"
 CHARTMUSEUM_URL="${CHARTMUSEUM_URL:-http://192.168.1.106:8081}"
 
 IMAGE_REGISTRY_HOST="${IMAGE_REGISTRY_HOST:-harbor.lan}"
 IMAGE_NAMESPACE="${IMAGE_NAMESPACE:-premyom}"
-IMAGE_NAME="${IMAGE_NAME:-onyxia-s3-explorer}"
-FILEBROWSER_VERSION="${FILEBROWSER_VERSION:-2.57.1}"
+IMAGE_NAME="${IMAGE_NAME:-onyxia-rstudio}"
 DOCKER_NO_CACHE="${DOCKER_NO_CACHE:-true}"
 DOCKER_PULL="${DOCKER_PULL:-true}"
 
 IMAGE_REF="${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}:${IMG_TAG}"
-TARBALL="premyom-s3-explorer-${CHART_VERSION}.tgz"
+TARBALL="premyom-rstudio-${CHART_VERSION}.tgz"
 ALLOW_DIRTY_RELEASE="${ALLOW_DIRTY_RELEASE:-0}"
 SKIP_GIT_SYNC_CHECK="${SKIP_GIT_SYNC_CHECK:-0}"
 
@@ -64,9 +63,9 @@ cleanup() {
   fi
   if [ "${RESTORE_CHART_FILES:-0}" = "1" ]; then
     git -C "${REPO_DIR}" checkout -- \
-      "premyom-s3-explorer/values.yaml" \
-      "premyom-s3-explorer/values.schema.json" \
-      "premyom-s3-explorer/Chart.yaml" >/dev/null 2>&1 || true
+      "premyom-rstudio/values.yaml" \
+      "premyom-rstudio/values.schema.json" \
+      "premyom-rstudio/Chart.yaml" >/dev/null 2>&1 || true
   fi
 }
 
@@ -89,7 +88,7 @@ echo "[INFO] git commit: ${GIT_COMMIT}"
 echo "[INFO] origin/main: ${ORIGIN_MAIN_SHA}"
 echo "[INFO] git dirty files: ${GIT_DIRTY_COUNT}"
 echo "[INFO] image: ${IMAGE_REF}"
-echo "[INFO] chart: premyom-s3-explorer:${CHART_VERSION}"
+echo "[INFO] chart: premyom-rstudio:${CHART_VERSION}"
 echo "[INFO] chartmuseum: ${CHARTMUSEUM_URL}"
 echo "[INFO] image source sha: ${IMAGE_SOURCE_SHA}"
 
@@ -127,18 +126,10 @@ grep -n "tag: ${IMG_TAG}" "${CHART_DIR}/values.yaml"
 grep -n "\"default\": \"${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}\"" "${CHART_DIR}/values.schema.json"
 grep -n "\"default\": \"${IMG_TAG}\"" "${CHART_DIR}/values.schema.json"
 grep -n "^version: ${CHART_VERSION}$" "${CHART_DIR}/Chart.yaml"
-
-echo "[STEP] validating source content guardrails"
-grep -n "redirectUrl" "${CHART_DIR}/templates/_helpers.tpl" "${CHART_DIR}/templates/oauth2-proxy-deployment.yaml"
-grep -n "cookieDomain" "${CHART_DIR}/templates/_helpers.tpl" "${CHART_DIR}/templates/oauth2-proxy-deployment.yaml" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
-grep -n "whitelistDomain" "${CHART_DIR}/templates/_helpers.tpl" "${CHART_DIR}/templates/oauth2-proxy-deployment.yaml" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
-grep -n "callbackMode" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
-grep -n "/oauth2/callback" "${CHART_DIR}/templates/_helpers.tpl"
-grep -n "oauth2ProxyPrefix" "${CHART_DIR}/templates/_helpers.tpl" "${CHART_DIR}/templates/oauth2-proxy-deployment.yaml"
-grep -n "callbackMode" "${CHART_DIR}/templates/oauth2-proxy-callback-ingressroute.yaml"
+grep -n "oauth.apps.datalab.arkam-group.com" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
+grep -n "\.apps.datalab.arkam-group.com" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
 grep -n "apps.{{k8s.domain}}" "${CHART_DIR}/values.schema.json"
 grep -n "X-Auth-Request-Redirect" "${CHART_DIR}/templates/oauth2-proxy-redirect-middleware.yaml"
-grep -n -- "--perm.download=false" "${CHART_DIR}/image/Dockerfile"
 
 echo "[STEP] building and pushing image"
 (
@@ -146,7 +137,6 @@ echo "[STEP] building and pushing image"
   IMAGE_REGISTRY_HOST="${IMAGE_REGISTRY_HOST}" \
   IMAGE_NAMESPACE="${IMAGE_NAMESPACE}" \
   IMAGE_TAG="${IMG_TAG}" \
-  FILEBROWSER_VERSION="${FILEBROWSER_VERSION}" \
   DOCKER_NO_CACHE="${DOCKER_NO_CACHE}" \
   DOCKER_PULL="${DOCKER_PULL}" \
   BUILD_GIT_COMMIT="${GIT_COMMIT}" \
@@ -156,7 +146,7 @@ echo "[STEP] building and pushing image"
 
 echo "[STEP] smoke-testing image"
 docker run --rm --entrypoint /bin/bash "${IMAGE_REF}" -lc \
-  'command -v filebrowser >/dev/null && filebrowser version >/dev/null 2>&1 || true && test -x /opt/onyxia-init.sh'
+  'R --version | head -n1 | grep -E "^R version 4\\.5\\." && [ -x /usr/lib/rstudio-server/bin/rserver ] && nano --version | head -n1 && su -s /bin/bash -c "sudo -n true && echo sudo-nopasswd=OK" onyxia'
 
 echo "[STEP] validating image provenance"
 built_commit="$(docker image inspect "${IMAGE_REF}" --format '{{ index .Config.Labels "io.premyom.git-commit" }}')"
@@ -175,40 +165,34 @@ fi
 echo "[STEP] packaging chart"
 (
   TMP_DIR="$(mktemp -d)"
-  cp -a "${CHART_DIR}" "${TMP_DIR}/premyom-s3-explorer"
+  cp -a "${CHART_DIR}" "${TMP_DIR}/premyom-rstudio"
   cd "${TMP_DIR}"
-  helm package premyom-s3-explorer --version "${CHART_VERSION}" --app-version "${CHART_APP_VERSION}"
+  helm package premyom-rstudio --version "${CHART_VERSION}" --app-version "${CHART_APP_VERSION}"
   mv "${TMP_DIR}/${TARBALL}" "${REPO_DIR}/${TARBALL}"
 )
 
 echo "[STEP] validating packaged chart content"
 TMP_DIR="$(mktemp -d)"
 tar -xzf "${REPO_DIR}/${TARBALL}" -C "${TMP_DIR}"
-grep -n "repository: ${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}" "${TMP_DIR}/premyom-s3-explorer/values.yaml"
-grep -n "tag: ${IMG_TAG}" "${TMP_DIR}/premyom-s3-explorer/values.yaml"
-grep -n "\"default\": \"${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}\"" "${TMP_DIR}/premyom-s3-explorer/values.schema.json"
-grep -n "\"default\": \"${IMG_TAG}\"" "${TMP_DIR}/premyom-s3-explorer/values.schema.json"
-grep -n "^version: ${CHART_VERSION}$" "${TMP_DIR}/premyom-s3-explorer/Chart.yaml"
-grep -n "redirectUrl" "${TMP_DIR}/premyom-s3-explorer/templates/_helpers.tpl" "${TMP_DIR}/premyom-s3-explorer/templates/oauth2-proxy-deployment.yaml"
-grep -n "cookieDomain" "${TMP_DIR}/premyom-s3-explorer/templates/_helpers.tpl" "${TMP_DIR}/premyom-s3-explorer/templates/oauth2-proxy-deployment.yaml" "${TMP_DIR}/premyom-s3-explorer/values.yaml" "${TMP_DIR}/premyom-s3-explorer/values.schema.json"
-grep -n "whitelistDomain" "${TMP_DIR}/premyom-s3-explorer/templates/_helpers.tpl" "${TMP_DIR}/premyom-s3-explorer/templates/oauth2-proxy-deployment.yaml" "${TMP_DIR}/premyom-s3-explorer/values.yaml" "${TMP_DIR}/premyom-s3-explorer/values.schema.json"
-grep -n "callbackMode" "${TMP_DIR}/premyom-s3-explorer/values.yaml" "${TMP_DIR}/premyom-s3-explorer/values.schema.json"
-grep -n "/oauth2/callback" "${TMP_DIR}/premyom-s3-explorer/templates/_helpers.tpl"
-grep -n "oauth2ProxyPrefix" "${TMP_DIR}/premyom-s3-explorer/templates/_helpers.tpl" "${TMP_DIR}/premyom-s3-explorer/templates/oauth2-proxy-deployment.yaml"
-grep -n "callbackMode" "${TMP_DIR}/premyom-s3-explorer/templates/oauth2-proxy-callback-ingressroute.yaml"
-grep -n "apps.{{k8s.domain}}" "${TMP_DIR}/premyom-s3-explorer/values.schema.json"
-grep -n "X-Auth-Request-Redirect" "${TMP_DIR}/premyom-s3-explorer/templates/oauth2-proxy-redirect-middleware.yaml"
-grep -n -- "--perm.download=false" "${TMP_DIR}/premyom-s3-explorer/image/Dockerfile"
+grep -n "repository: ${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}" "${TMP_DIR}/premyom-rstudio/values.yaml"
+grep -n "tag: ${IMG_TAG}" "${TMP_DIR}/premyom-rstudio/values.yaml"
+grep -n "\"default\": \"${IMAGE_REGISTRY_HOST}/${IMAGE_NAMESPACE}/${IMAGE_NAME}\"" "${TMP_DIR}/premyom-rstudio/values.schema.json"
+grep -n "\"default\": \"${IMG_TAG}\"" "${TMP_DIR}/premyom-rstudio/values.schema.json"
+grep -n "^version: ${CHART_VERSION}$" "${TMP_DIR}/premyom-rstudio/Chart.yaml"
+grep -n "oauth.apps.datalab.arkam-group.com" "${TMP_DIR}/premyom-rstudio/values.yaml" "${TMP_DIR}/premyom-rstudio/values.schema.json"
+grep -n "\.apps.datalab.arkam-group.com" "${TMP_DIR}/premyom-rstudio/values.yaml" "${TMP_DIR}/premyom-rstudio/values.schema.json"
+grep -n "apps.{{k8s.domain}}" "${TMP_DIR}/premyom-rstudio/values.schema.json"
+grep -n "X-Auth-Request-Redirect" "${TMP_DIR}/premyom-rstudio/templates/oauth2-proxy-redirect-middleware.yaml"
 
 echo "[STEP] pushing chart to ChartMuseum"
 curl --fail-with-body --data-binary "@${REPO_DIR}/${TARBALL}" "${CHARTMUSEUM_URL%/}/api/charts"
 
 echo "[STEP] verifying index.yaml"
-curl -fsSL "${CHARTMUSEUM_URL%/}/index.yaml" | grep -n "premyom-s3-explorer-${CHART_VERSION}.tgz"
+curl -fsSL "${CHARTMUSEUM_URL%/}/index.yaml" | grep -n "premyom-rstudio-${CHART_VERSION}.tgz"
 
-cat <<EOF
+cat <<EOFMSG
 [DONE] release published.
 Next commands (arkam-master):
   k -n onyxia rollout restart deploy/onyxia-api
   k -n onyxia rollout status deploy/onyxia-api --timeout=180s
-EOF
+EOFMSG

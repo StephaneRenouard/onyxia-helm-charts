@@ -83,6 +83,13 @@ cd ~/onyxia-helm-charts
 IMG_TAG=0.1.0 CHART_VERSION=0.1.0 ./premyom-jupyter/release_chartmuseum.sh
 ```
 
+### `premyom-rstudio`
+
+```bash
+cd ~/onyxia-helm-charts
+IMG_TAG=0.1.0 CHART_VERSION=0.1.0 ./premyom-rstudio/release_chartmuseum.sh
+```
+
 ### `premyom-s3-explorer`
 
 Le service n’a pas encore de script `release_chartmuseum.sh` dédié.

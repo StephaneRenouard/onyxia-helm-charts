@@ -9,6 +9,7 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
+    gnupg \
     jq \
     fuse3 \
     s3fs \
@@ -17,6 +18,16 @@ RUN apt-get update \
     sudo \
     tini \
   && rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+  curl -fsSL https://cloud.r-project.org/bin/linux/debian/marutter_pubkey.asc \
+    | gpg --dearmor -o /usr/share/keyrings/cran-archive-keyring.gpg; \
+  echo "deb [signed-by=/usr/share/keyrings/cran-archive-keyring.gpg] https://cloud.r-project.org/bin/linux/debian bookworm-cran40/" \
+    > /etc/apt/sources.list.d/cran-r.list; \
+  apt-get update; \
+  apt-get install -y --no-install-recommends r-base r-base-dev; \
+  R --version | head -n1 | grep -E '^R version 4\\.5\\.'; \
+  rm -rf /var/lib/apt/lists/*
 
 RUN set -eux; \
   arch="$(dpkg --print-architecture)"; \
@@ -39,6 +50,8 @@ RUN set -eux; \
   else \
     /opt/conda/bin/pip install --no-cache-dir "jupyterlab==${JUPYTERLAB_VERSION}"; \
   fi; \
+  R -q -e "install.packages('IRkernel', repos='https://cloud.r-project.org')"; \
+  R -q -e "IRkernel::installspec(user = FALSE)"; \
   /opt/conda/bin/python --version; \
   /opt/conda/bin/conda --version; \
   /opt/conda/bin/jupyter lab --version; \

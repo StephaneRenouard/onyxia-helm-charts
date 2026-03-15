@@ -1,13 +1,15 @@
-# premyom-jupyter
+# premyom-rstudio
 
-Service JupyterLab "Premyom" pour Onyxia.
+> WIP: premier scaffold du service RStudio Premyom (SSO + montages S3 + image dédiée).
+
+Service RStudio Server "Premyom" pour Onyxia.
 
 ## Image
 
-- Image: `harbor.lan/premyom/onyxia-jupyter:<tag>`
-- Sources image: `premyom-jupyter/image/`
-- Runtime inclus: `python3.12`, `pip`, `conda` (Miniforge), `jupyterlab`, `R 4.5`, kernel Jupyter `ir`
-- Démarrage service: process Jupyter lancé sous l'utilisateur `onyxia`
+- Image: `harbor.lan/premyom/onyxia-rstudio:<tag>`
+- Sources image: `premyom-rstudio/image/`
+- Runtime inclus: `R 4.5` + `RStudio Server`
+- Démarrage service: process `rserver` (port `8080`)
 
 ## SSO
 
@@ -26,13 +28,13 @@ Script recommandé:
 ```bash
 cd ~/onyxia-helm-charts
 git pull --ff-only
-IMG_TAG=0.1.0 CHART_VERSION=0.1.0 ./premyom-jupyter/release_chartmuseum.sh
+IMG_TAG=0.1.0 CHART_VERSION=0.1.0 ./premyom-rstudio/release_chartmuseum.sh
 ```
 
 Le script:
 - met à jour `values.yaml`, `values.schema.json`, `Chart.yaml`,
 - build/push l'image Harbor,
-- teste l'image (`python3.12`, `conda`, `jupyter lab`, `R 4.5`, kernel `ir`, `nano`),
+- teste l'image (`R --version`, `rserver`, `nano`),
 - package le chart,
 - vérifie le contenu du `.tgz` (repository/tag image + version chart),
 - push vers ChartMuseum puis vérifie `index.yaml`.
@@ -51,7 +53,7 @@ k -n onyxia rollout status deploy/onyxia-api --timeout=180s
 ## Contrôle rapide après lancement
 
 ```bash
-kubectl -n onyxia get pods --sort-by=.metadata.creationTimestamp | grep premyom-jupyter | tail -n 4
+kubectl -n onyxia get pods --sort-by=.metadata.creationTimestamp | grep premyom-rstudio | tail -n 4
 kubectl -n onyxia logs deploy/<release> --since=10m | tail -n 120
 kubectl -n onyxia logs deploy/<release>-oauth2-proxy --since=10m | tail -n 120
 ```
