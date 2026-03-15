@@ -16,7 +16,7 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 RUN if ! getent group users >/dev/null 2>&1; then groupadd -g 100 users; fi \
-  && if ! id -u onyxia >/dev/null 2>&1; then useradd -m -s /bin/bash -u 1000 -g users onyxia; fi \
+  && if ! id -u onyxia >/dev/null 2>&1; then useradd -m -s /bin/bash -g users onyxia; fi \
   && mkdir -p /home/onyxia/work \
   && chown -R onyxia:users /home/onyxia \
   && printf 'onyxia ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/onyxia \
