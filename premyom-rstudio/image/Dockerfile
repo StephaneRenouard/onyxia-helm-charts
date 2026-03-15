@@ -28,4 +28,4 @@ RUN chmod +x /opt/onyxia-init.sh
 EXPOSE 8080
 
 ENTRYPOINT ["tini", "--", "/opt/onyxia-init.sh"]
-CMD ["/usr/lib/rstudio-server/bin/rserver", "--server-daemonize=0", "--www-address=0.0.0.0", "--www-port=8080", "--auth-none=1", "--server-user=onyxia", "--session-default-working-dir=/home/onyxia/work"]
+CMD ["/usr/lib/rstudio-server/bin/rserver", "--server-daemonize=0", "--www-address=0.0.0.0", "--www-port=8080", "--auth-none=1", "--server-user=onyxia", "--server-working-dir=/home/onyxia/work"]

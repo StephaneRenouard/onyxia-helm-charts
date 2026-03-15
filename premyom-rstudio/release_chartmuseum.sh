@@ -179,7 +179,7 @@ echo "[STEP] building and pushing image"
 
 echo "[STEP] smoke-testing image"
 docker run --rm --entrypoint /bin/bash "${IMAGE_REF}" -lc \
-  'R --version | head -n1 | grep -E "^R version 4\\.5\\." && [ -x /usr/lib/rstudio-server/bin/rserver ] && nano --version | head -n1 && su -s /bin/bash -c "sudo -n true && echo sudo-nopasswd=OK" onyxia'
+  'R --version | head -n1 | grep -E "^R version 4\\.5\\." && [ -x /usr/lib/rstudio-server/bin/rserver ] && /usr/lib/rstudio-server/bin/rserver --help | grep -q -- "--server-working-dir" && nano --version | head -n1 && su -s /bin/bash -c "sudo -n true && echo sudo-nopasswd=OK" onyxia'
 
 echo "[STEP] validating image provenance"
 built_commit="$(docker image inspect "${IMAGE_REF}" --format '{{ index .Config.Labels "io.premyom.git-commit" }}')"
