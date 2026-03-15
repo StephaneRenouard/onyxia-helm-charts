@@ -43,7 +43,7 @@ rstudio:
   darkTheme: "RStudio Dark"
 
 sso:
-  mode: embedded
+  mode: forwardAuth
   forwardAuth:
     middleware: onyxia-workspace-sso-chain@kubernetescrd
 

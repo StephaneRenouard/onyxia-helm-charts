@@ -9,7 +9,7 @@
         "mode": {
           "title": "Mode",
           "type": "string",
-          "default": "embedded",
+          "default": "forwardAuth",
           "enum": ["forwardAuth", "embedded"],
           "x-onyxia": { "hidden": true }
         },
