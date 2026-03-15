@@ -53,6 +53,7 @@ RUN set -eux; \
   else \
     /opt/conda/bin/pip install --no-cache-dir "jupyterlab==${JUPYTERLAB_VERSION}"; \
   fi; \
+  export PATH="/opt/conda/bin:${PATH}"; \
   R -q -e "install.packages('IRkernel', repos='https://cloud.r-project.org')"; \
   R -q -e "IRkernel::installspec(user = FALSE)"; \
   /opt/conda/bin/python --version; \
