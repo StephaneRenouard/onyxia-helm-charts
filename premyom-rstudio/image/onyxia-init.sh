@@ -221,8 +221,23 @@ JSON
   chown -R onyxia:users /home/onyxia
 }
 
+prepare_rstudio_runtime_keys() {
+  local key_dir="/var/lib/rstudio-server"
+  mkdir -p "${key_dir}"
+
+  for key_file in secure-cookie-key session-rpc-key; do
+    local key_path="${key_dir}/${key_file}"
+    if [ ! -s "${key_path}" ]; then
+      head -c 32 /dev/urandom > "${key_path}"
+    fi
+    chown onyxia:users "${key_path}"
+    chmod 600 "${key_path}"
+  done
+}
+
 RSTUDIO_CMD=("$@")
 premyom_mount_s3 || true
 configure_rstudio_defaults || true
+prepare_rstudio_runtime_keys || true
 
 exec "${RSTUDIO_CMD[@]}"
