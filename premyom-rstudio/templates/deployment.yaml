@@ -59,10 +59,10 @@ spec:
             - --www-address=0.0.0.0
             - --www-port=8080
             - --auth-none=1
-            - --server-user={{ (.Values.rstudio.server.user | default "onyxia") | quote }}
-            - --server-working-dir={{ (.Values.rstudio.server.workingDir | default "/home/onyxia/work") | quote }}
-            - --www-same-site={{ (.Values.rstudio.server.sameSite | default "none") | quote }}
-            - --auth-cookies-force-secure={{ ternary "1" "0" (.Values.rstudio.server.forceSecureCookies | default true) | quote }}
+            - --server-user={{ .Values.rstudio.server.user | default "onyxia" }}
+            - --server-working-dir={{ .Values.rstudio.server.workingDir | default "/home/onyxia/work" }}
+            - --www-same-site={{ .Values.rstudio.server.sameSite | default "none" }}
+            - --auth-cookies-force-secure={{ ternary 1 0 (.Values.rstudio.server.forceSecureCookies | default true) }}
           readinessProbe:
             httpGet:
               path: /

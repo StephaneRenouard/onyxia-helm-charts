@@ -165,6 +165,10 @@ grep -n "apps.{{k8s.domain}}" "${CHART_DIR}/values.schema.json"
 grep -n "X-Auth-Request-Redirect" "${CHART_DIR}/templates/oauth2-proxy-redirect-middleware.yaml"
 grep -n "www-same-site" "${CHART_DIR}/templates/deployment.yaml"
 grep -n "auth-cookies-force-secure" "${CHART_DIR}/templates/deployment.yaml"
+if grep -q '| quote' "${CHART_DIR}/templates/deployment.yaml"; then
+  echo "[ERROR] deployment args must not use '| quote' (it breaks rserver flags)." >&2
+  exit 1
+fi
 
 echo "[STEP] building and pushing image"
 (
@@ -220,6 +224,10 @@ grep -n "apps.{{k8s.domain}}" "${TMP_DIR}/premyom-rstudio/values.schema.json"
 grep -n "X-Auth-Request-Redirect" "${TMP_DIR}/premyom-rstudio/templates/oauth2-proxy-redirect-middleware.yaml"
 grep -n "www-same-site" "${TMP_DIR}/premyom-rstudio/templates/deployment.yaml"
 grep -n "auth-cookies-force-secure" "${TMP_DIR}/premyom-rstudio/templates/deployment.yaml"
+if grep -q '| quote' "${TMP_DIR}/premyom-rstudio/templates/deployment.yaml"; then
+  echo "[ERROR] packaged deployment args contain '| quote' (invalid release)." >&2
+  exit 1
+fi
 
 echo "[STEP] pushing chart to ChartMuseum"
 curl --fail-with-body --data-binary "@${REPO_DIR}/${TARBALL}" "${CHARTMUSEUM_URL%/}/api/charts"
