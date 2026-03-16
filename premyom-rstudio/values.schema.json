@@ -23,6 +23,17 @@
             }
           }
         },
+        "oauth2Proxy": {
+          "type": "object",
+          "x-onyxia": { "hidden": true },
+          "properties": {
+            "cookieSameSite": {
+              "type": "string",
+              "default": "none",
+              "enum": ["none", "lax", "strict"]
+            }
+          }
+        },
         "secretName": {
           "type": "string",
           "default": "oauth2-proxy"

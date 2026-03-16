@@ -52,6 +52,8 @@ sso:
   mode: forwardAuth
   forwardAuth:
     middleware: onyxia-workspace-sso-chain@kubernetescrd
+  oauth2Proxy:
+    cookieSameSite: "none"
 
   secretName: oauth2-proxy
   issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia

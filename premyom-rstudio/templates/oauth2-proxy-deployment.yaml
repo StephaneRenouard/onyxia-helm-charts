@@ -34,7 +34,7 @@ spec:
             {{- if .Values.sso.cookieDomain }}
             - "--cookie-domain={{ .Values.sso.cookieDomain }}"
             {{- end }}
-            - --cookie-samesite=lax
+            - "--cookie-samesite={{ .Values.sso.oauth2Proxy.cookieSameSite | default "none" }}"
             - --cookie-csrf-per-request=true
             - --skip-auth-preflight=true
             - "--whitelist-domain={{ include "premyom-rstudio.whitelistDomain" . }}"
