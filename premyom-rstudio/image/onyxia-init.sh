@@ -240,4 +240,9 @@ premyom_mount_s3 || true
 configure_rstudio_defaults || true
 prepare_rstudio_runtime_keys || true
 
+export HOME="/home/onyxia"
+export USER="onyxia"
+export LOGNAME="onyxia"
+export DEFAULT_USER="onyxia"
+
 exec "${RSTUDIO_CMD[@]}"
