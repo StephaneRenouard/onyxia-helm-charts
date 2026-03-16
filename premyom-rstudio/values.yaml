@@ -49,7 +49,7 @@ rstudio:
     verifyUserAgent: false
 
 sso:
-  mode: forwardAuth
+  mode: embedded
   forwardAuth:
     middleware: onyxia-workspace-sso-chain@kubernetescrd
   oauth2Proxy:

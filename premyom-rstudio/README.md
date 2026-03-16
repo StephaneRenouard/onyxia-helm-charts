@@ -13,8 +13,8 @@ Service RStudio Server "Premyom" pour Onyxia.
 
 ## SSO
 
-Par défaut ce chart utilise `sso.mode=forwardAuth` (middleware SSO Traefik).
-Le mode `embedded` (oauth2-proxy dédié) reste disponible mais peut provoquer des boucles de redirection avec RStudio.
+Par défaut ce chart utilise `sso.mode=embedded` (oauth2-proxy dédié au service).
+Ce choix évite les boucles de redirection observées en Safari + iframe avec `forwardAuth`.
 En mode `embedded`, le chart force `oauth2-proxy --cookie-samesite=none` pour Safari/iframe.
 
 Le chart force aussi des options `rserver` compatibles iframe Safari:
