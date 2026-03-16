@@ -54,7 +54,9 @@ spec:
             - name: http
               containerPort: 8080
           args:
-            {{- $forceSecureCookies := eq (lower (toString (.Values.rstudio.server.forceSecureCookies | default false))) "true" }}
+            {{- $sameSite := lower (toString (.Values.rstudio.server.sameSite | default "none")) }}
+            {{- $forceSecureCookiesRaw := eq (lower (toString (.Values.rstudio.server.forceSecureCookies | default true))) "true" }}
+            {{- $forceSecureCookies := or $forceSecureCookiesRaw (eq $sameSite "none") }}
             {{- $verifyUserAgent := eq (lower (toString (.Values.rstudio.server.verifyUserAgent | default false))) "true" }}
             - /usr/lib/rstudio-server/bin/rserver
             - --server-daemonize=0
@@ -63,7 +65,7 @@ spec:
             - --auth-none=1
             - --server-user={{ .Values.rstudio.server.user | default "onyxia" }}
             - --server-working-dir={{ .Values.rstudio.server.workingDir | default "/home/onyxia/work" }}
-            - --www-same-site={{ .Values.rstudio.server.sameSite | default "none" }}
+            - --www-same-site={{ $sameSite }}
             - --auth-cookies-force-secure={{ ternary 1 0 $forceSecureCookies }}
             - --www-verify-user-agent={{ ternary 1 0 $verifyUserAgent }}
           readinessProbe:

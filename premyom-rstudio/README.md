@@ -19,10 +19,11 @@ En mode `embedded`, le chart force `oauth2-proxy --cookie-samesite=none` pour Sa
 
 Le chart force aussi des options `rserver` compatibles iframe Safari:
 - `--www-same-site=none`
-- `--auth-cookies-force-secure=0` (par défaut)
+- `--auth-cookies-force-secure=1` (par défaut, requis avec `SameSite=None` en HTTPS)
 - `--www-verify-user-agent=0` (évite les faux "unsupported browser" sur versions Safari récentes)
 
 Ces options sont pilotables via `rstudio.server.sameSite`, `rstudio.server.forceSecureCookies` et `rstudio.server.verifyUserAgent`.
+Si `sameSite=none`, le template force `auth-cookies-force-secure=1` pour éviter le rejet navigateur des cookies de session.
 
 Les probes Kubernetes utilisent `/unsupported_browser.htm` (200 statique), pour éviter les boucles de redirection `/` quand les cookies `Secure` sont activés.
 
