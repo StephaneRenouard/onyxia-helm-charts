@@ -66,13 +66,13 @@ spec:
             - --www-verify-user-agent={{ ternary 1 0 (.Values.rstudio.server.verifyUserAgent | default false) }}
           readinessProbe:
             httpGet:
-              path: /
+              path: /unsupported_browser.htm
               port: 8080
             initialDelaySeconds: 5
             periodSeconds: 5
           livenessProbe:
             httpGet:
-              path: /
+              path: /unsupported_browser.htm
               port: 8080
             initialDelaySeconds: 20
             periodSeconds: 10

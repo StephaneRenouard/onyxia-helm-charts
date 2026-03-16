@@ -23,6 +23,8 @@ Le chart force aussi des options `rserver` compatibles iframe Safari:
 
 Ces options sont pilotables via `rstudio.server.sameSite`, `rstudio.server.forceSecureCookies` et `rstudio.server.verifyUserAgent`.
 
+Les probes Kubernetes utilisent `/unsupported_browser.htm` (200 statique), pour éviter les boucles de redirection `/` quand les cookies `Secure` sont activés.
+
 Le callback OIDC est centralisé sur:
 
 `https://datalab.arkam-group.com/premyom-oauth2/<release>/callback`
