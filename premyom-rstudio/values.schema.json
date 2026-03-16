@@ -123,7 +123,8 @@
             "user": { "type": "string", "default": "onyxia" },
             "workingDir": { "type": "string", "default": "/home/onyxia/work" },
             "sameSite": { "type": "string", "default": "none", "enum": ["none", "lax"] },
-            "forceSecureCookies": { "type": "boolean", "default": true }
+            "forceSecureCookies": { "type": "boolean", "default": true },
+            "verifyUserAgent": { "type": "boolean", "default": false }
           }
         }
       }

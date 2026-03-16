@@ -19,8 +19,9 @@ Le mode `embedded` (oauth2-proxy dédié) reste disponible mais peut provoquer d
 Le chart force aussi des options `rserver` compatibles iframe Safari:
 - `--www-same-site=none`
 - `--auth-cookies-force-secure=1`
+- `--www-verify-user-agent=0` (évite les faux "unsupported browser" sur versions Safari récentes)
 
-Ces options sont pilotables via `rstudio.server.sameSite` et `rstudio.server.forceSecureCookies`.
+Ces options sont pilotables via `rstudio.server.sameSite`, `rstudio.server.forceSecureCookies` et `rstudio.server.verifyUserAgent`.
 
 Le callback OIDC est centralisé sur:
 

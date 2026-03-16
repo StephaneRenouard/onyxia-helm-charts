@@ -63,6 +63,7 @@ spec:
             - --server-working-dir={{ .Values.rstudio.server.workingDir | default "/home/onyxia/work" }}
             - --www-same-site={{ .Values.rstudio.server.sameSite | default "none" }}
             - --auth-cookies-force-secure={{ ternary 1 0 (.Values.rstudio.server.forceSecureCookies | default true) }}
+            - --www-verify-user-agent={{ ternary 1 0 (.Values.rstudio.server.verifyUserAgent | default false) }}
           readinessProbe:
             httpGet:
               path: /

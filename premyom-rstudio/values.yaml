@@ -46,6 +46,7 @@ rstudio:
     workingDir: "/home/onyxia/work"
     sameSite: "none"
     forceSecureCookies: true
+    verifyUserAgent: false
 
 sso:
   mode: forwardAuth
