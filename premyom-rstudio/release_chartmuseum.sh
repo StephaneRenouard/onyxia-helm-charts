@@ -163,6 +163,8 @@ grep -n "oauth.apps.datalab.arkam-group.com" "${CHART_DIR}/values.yaml" "${CHART
 grep -n "\.apps.datalab.arkam-group.com" "${CHART_DIR}/values.yaml" "${CHART_DIR}/values.schema.json"
 grep -n "apps.{{k8s.domain}}" "${CHART_DIR}/values.schema.json"
 grep -n "X-Auth-Request-Redirect" "${CHART_DIR}/templates/oauth2-proxy-redirect-middleware.yaml"
+grep -n "www-same-site" "${CHART_DIR}/templates/deployment.yaml"
+grep -n "auth-cookies-force-secure" "${CHART_DIR}/templates/deployment.yaml"
 
 echo "[STEP] building and pushing image"
 (
@@ -216,6 +218,8 @@ grep -n "oauth.apps.datalab.arkam-group.com" "${TMP_DIR}/premyom-rstudio/values.
 grep -n "\.apps.datalab.arkam-group.com" "${TMP_DIR}/premyom-rstudio/values.yaml" "${TMP_DIR}/premyom-rstudio/values.schema.json"
 grep -n "apps.{{k8s.domain}}" "${TMP_DIR}/premyom-rstudio/values.schema.json"
 grep -n "X-Auth-Request-Redirect" "${TMP_DIR}/premyom-rstudio/templates/oauth2-proxy-redirect-middleware.yaml"
+grep -n "www-same-site" "${TMP_DIR}/premyom-rstudio/templates/deployment.yaml"
+grep -n "auth-cookies-force-secure" "${TMP_DIR}/premyom-rstudio/templates/deployment.yaml"
 
 echo "[STEP] pushing chart to ChartMuseum"
 curl --fail-with-body --data-binary "@${REPO_DIR}/${TARBALL}" "${CHARTMUSEUM_URL%/}/api/charts"

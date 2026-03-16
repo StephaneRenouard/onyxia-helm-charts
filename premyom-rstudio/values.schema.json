@@ -115,7 +115,17 @@
     "rstudio": {
       "type": "object",
       "properties": {
-        "darkTheme": { "type": "string", "default": "RStudio Dark", "x-onyxia": { "hidden": true } }
+        "darkTheme": { "type": "string", "default": "RStudio Dark", "x-onyxia": { "hidden": true } },
+        "server": {
+          "type": "object",
+          "x-onyxia": { "hidden": true },
+          "properties": {
+            "user": { "type": "string", "default": "onyxia" },
+            "workingDir": { "type": "string", "default": "/home/onyxia/work" },
+            "sameSite": { "type": "string", "default": "none", "enum": ["none", "lax"] },
+            "forceSecureCookies": { "type": "boolean", "default": true }
+          }
+        }
       }
     },
     "image": {

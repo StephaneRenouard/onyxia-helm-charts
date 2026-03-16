@@ -16,6 +16,12 @@ Service RStudio Server "Premyom" pour Onyxia.
 Par défaut ce chart utilise `sso.mode=forwardAuth` (middleware SSO Traefik).
 Le mode `embedded` (oauth2-proxy dédié) reste disponible mais peut provoquer des boucles de redirection avec RStudio.
 
+Le chart force aussi des options `rserver` compatibles iframe Safari:
+- `--www-same-site=none`
+- `--auth-cookies-force-secure=1`
+
+Ces options sont pilotables via `rstudio.server.sameSite` et `rstudio.server.forceSecureCookies`.
+
 Le callback OIDC est centralisé sur:
 
 `https://datalab.arkam-group.com/premyom-oauth2/<release>/callback`

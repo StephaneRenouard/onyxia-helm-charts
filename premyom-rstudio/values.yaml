@@ -41,6 +41,11 @@ premyom:
 
 rstudio:
   darkTheme: "RStudio Dark"
+  server:
+    user: "onyxia"
+    workingDir: "/home/onyxia/work"
+    sameSite: "none"
+    forceSecureCookies: true
 
 sso:
   mode: forwardAuth
