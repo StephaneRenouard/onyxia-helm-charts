@@ -19,7 +19,7 @@ En mode `embedded`, le chart force `oauth2-proxy --cookie-samesite=none` pour Sa
 
 Le chart force aussi des options `rserver` compatibles iframe Safari:
 - `--www-same-site=none`
-- `--auth-cookies-force-secure=1`
+- `--auth-cookies-force-secure=0` (par défaut)
 - `--www-verify-user-agent=0` (évite les faux "unsupported browser" sur versions Safari récentes)
 
 Ces options sont pilotables via `rstudio.server.sameSite`, `rstudio.server.forceSecureCookies` et `rstudio.server.verifyUserAgent`.

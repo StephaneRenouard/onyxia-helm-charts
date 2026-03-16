@@ -54,6 +54,8 @@ spec:
             - name: http
               containerPort: 8080
           args:
+            {{- $forceSecureCookies := eq (lower (toString (.Values.rstudio.server.forceSecureCookies | default false))) "true" }}
+            {{- $verifyUserAgent := eq (lower (toString (.Values.rstudio.server.verifyUserAgent | default false))) "true" }}
             - /usr/lib/rstudio-server/bin/rserver
             - --server-daemonize=0
             - --www-address=0.0.0.0
@@ -62,8 +64,8 @@ spec:
             - --server-user={{ .Values.rstudio.server.user | default "onyxia" }}
             - --server-working-dir={{ .Values.rstudio.server.workingDir | default "/home/onyxia/work" }}
             - --www-same-site={{ .Values.rstudio.server.sameSite | default "none" }}
-            - --auth-cookies-force-secure={{ ternary 1 0 (.Values.rstudio.server.forceSecureCookies | default true) }}
-            - --www-verify-user-agent={{ ternary 1 0 (.Values.rstudio.server.verifyUserAgent | default false) }}
+            - --auth-cookies-force-secure={{ ternary 1 0 $forceSecureCookies }}
+            - --www-verify-user-agent={{ ternary 1 0 $verifyUserAgent }}
           readinessProbe:
             httpGet:
               path: /unsupported_browser.htm

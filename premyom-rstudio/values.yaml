@@ -45,7 +45,7 @@ rstudio:
     user: "onyxia"
     workingDir: "/home/onyxia/work"
     sameSite: "none"
-    forceSecureCookies: true
+    forceSecureCookies: false
     verifyUserAgent: false
 
 sso:
