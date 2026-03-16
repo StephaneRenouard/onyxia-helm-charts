@@ -225,11 +225,11 @@ prepare_rstudio_runtime_keys() {
   local key_dir="/var/lib/rstudio-server"
   mkdir -p "${key_dir}"
 
+  rm -f "${key_dir}/rstudio-os.sqlite" "${key_dir}/rstudio-os.sqlite-shm" "${key_dir}/rstudio-os.sqlite-wal"
+
   for key_file in secure-cookie-key session-rpc-key; do
     local key_path="${key_dir}/${key_file}"
-    if [ ! -s "${key_path}" ]; then
-      head -c 32 /dev/urandom > "${key_path}"
-    fi
+    head -c 32 /dev/urandom > "${key_path}"
     chown onyxia:users "${key_path}"
     chmod 600 "${key_path}"
   done
