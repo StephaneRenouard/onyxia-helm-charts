@@ -194,4 +194,22 @@ setup_filebrowser_policies() {
 premyom_mount_s3 || true
 setup_filebrowser_policies || true
 
+if [ "${PREMYOM_S3_TABULAR_EDITOR_ENABLED:-true}" = "true" ] && [ "${1:-}" = "/usr/local/bin/filebrowser" ]; then
+  export FILEBROWSER_DB_PATH="${FILEBROWSER_DB_PATH:-/tmp/filebrowser.db}"
+  export FILEBROWSER_ROOT_PATH="${FILEBROWSER_ROOT_PATH:-/mnt/s3}"
+  export PREMYOM_S3_MOUNT_ROOT="${PREMYOM_S3_MOUNT_ROOT:-${FILEBROWSER_ROOT_PATH}}"
+
+  /usr/local/bin/filebrowser \
+    --noauth \
+    --address 127.0.0.1 \
+    --port 8081 \
+    --root "${FILEBROWSER_ROOT_PATH}" \
+    --database "${FILEBROWSER_DB_PATH}" \
+    --log stdout &
+
+  python3 /opt/tabular-editor.py >/tmp/tabular-editor.log 2>&1 &
+
+  exec nginx -g 'daemon off;'
+fi
+
 exec "$@"

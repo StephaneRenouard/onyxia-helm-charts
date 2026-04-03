@@ -11,6 +11,12 @@ RUN apt-get update \
     jq \
     fuse3 \
     s3fs \
+    python3 \
+    python3-flask \
+    python3-openpyxl \
+    python3-xlrd \
+    python3-xlwt \
+    nginx-light \
     tini \
   && rm -rf /var/lib/apt/lists/*
 
@@ -28,9 +34,11 @@ RUN set -eux; \
   chmod +x /usr/local/bin/filebrowser
 
 COPY premyom-s3-explorer/image/onyxia-init.sh /opt/onyxia-init.sh
+COPY premyom-s3-explorer/image/tabular-editor.py /opt/tabular-editor.py
+COPY premyom-s3-explorer/image/nginx.conf /etc/nginx/nginx.conf
 RUN chmod +x /opt/onyxia-init.sh
 
-EXPOSE 8080
+EXPOSE 8080 8090
 
 ENTRYPOINT ["tini", "--", "/opt/onyxia-init.sh"]
 # Défense en profondeur: noauth + auth.method=noauth (selon versions filebrowser)

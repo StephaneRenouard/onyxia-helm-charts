@@ -1,31 +1,45 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "premyom-s3-explorer.fullname" . }}
+  name: {{ include "premyom-sofa.fullname" . }}
   labels:
-    {{- include "premyom-s3-explorer.labels" . | nindent 4 }}
+    {{- include "premyom-sofa.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/component: filebrowser
+      app.kubernetes.io/component: sofa
   template:
     metadata:
       labels:
         app.kubernetes.io/instance: {{ .Release.Name }}
-        app.kubernetes.io/component: filebrowser
+        app.kubernetes.io/component: sofa
     spec:
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml .Values.imagePullSecrets | nindent 8 }}
       {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
-        - name: filebrowser
+        - name: sofa
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           env:
             - name: VAULT_ADDR
               value: {{ .Values.extraVault.addr | default "http://vault.vault.svc.cluster.local:8200" | quote }}
@@ -45,17 +59,36 @@ spec:
               value: {{ (.Values.premyom.s3Mount.vaultHdsPath | default "") | quote }}
             - name: PREMYOM_S3_MOUNT_ROOT
               value: {{ (.Values.premyom.s3Mount.mountRoot | default "/mnt/s3") | quote }}
-            - name: PREMYOM_S3_TABULAR_EDITOR_ENABLED
-              value: {{ (.Values.premyom.tabularEditor.enabled | default "true") | quote }}
+            - name: SOFA_WEB_DEFAULT_PATH
+              {{- $resizeMode := (default "scale" .Values.sofa.web.resizeMode) -}}
+              {{- if eq $resizeMode "scale" }}
+              value: "/?desktop_scaling=auto&floating_menu=false&clipboard=false"
+              {{- else }}
+              value: "/?floating_menu=false&clipboard=false"
+              {{- end }}
+            - name: SOFA_XPRA_DESKTOP_SCALING
+              {{- if eq (default "scale" .Values.sofa.web.resizeMode) "scale" }}
+              value: "auto"
+              {{- else }}
+              value: "off"
+              {{- end }}
+            - name: SOFA_APP_PATH
+              value: {{ (.Values.sofa.appPath | default "/opt/sofa/bin/runSofa") | quote }}
+            - name: SOFA_SCREEN_WIDTH
+              value: {{ (.Values.sofa.display.width | default "1920") | quote }}
+            - name: SOFA_SCREEN_HEIGHT
+              value: {{ (.Values.sofa.display.height | default "1080") | quote }}
+            - name: SOFA_SCREEN_DEPTH
+              value: {{ (.Values.sofa.display.depth | default "24") | quote }}
             {{- with .Values.extraEnvVars }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+          volumeMounts:
+            - name: workspace
+              mountPath: {{ (.Values.workspace.mountPath | default "/home/onyxia/work") | quote }}
           ports:
             - name: http
               containerPort: 8080
-          volumeMounts:
-            - name: filebrowser-db
-              mountPath: /var/lib/filebrowser
           readinessProbe:
             httpGet:
               path: /
@@ -66,8 +99,15 @@ spec:
             httpGet:
               path: /
               port: 8080
-            initialDelaySeconds: 20
+            initialDelaySeconds: 30
             periodSeconds: 10
       volumes:
-        - name: filebrowser-db
+        - name: workspace
+          {{- if and .Values.workspace.emptyDir .Values.workspace.emptyDir.enabled }}
+          emptyDir:
+            {{- if .Values.workspace.emptyDir.sizeLimit }}
+            sizeLimit: {{ .Values.workspace.emptyDir.sizeLimit | quote }}
+            {{- end }}
+          {{- else }}
           emptyDir: {}
+          {{- end }}

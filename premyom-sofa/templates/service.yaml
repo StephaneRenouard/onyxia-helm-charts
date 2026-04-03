@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "premyom-sofa.fullname" . }}-sofa
+  labels:
+    {{- include "premyom-sofa.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: sofa
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

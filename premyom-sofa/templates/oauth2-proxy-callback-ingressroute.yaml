@@ -1,0 +1,23 @@
+{{- if and (eq (default "forwardAuth" .Values.sso.mode) "embedded") (default true .Values.sso.ingress.enabled) -}}
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "premyom-sofa.fullname" . }}-oauth2-callback
+  labels:
+    {{- include "premyom-sofa.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: {{ printf "Host(`%s`) && PathPrefix(`/premyom-oauth2/%s`)" (include "premyom-sofa.centralHost" .) .Release.Name | quote }}
+      kind: Rule
+      services:
+        - name: {{ include "premyom-sofa.fullname" . }}-oauth2-proxy
+          port: 8080
+  tls:
+    {{- if .Values.sso.ingress.tlsSecretName }}
+    secretName: {{ .Values.sso.ingress.tlsSecretName | quote }}
+    {{- else }}
+    certResolver: le
+    {{- end }}
+{{- end }}

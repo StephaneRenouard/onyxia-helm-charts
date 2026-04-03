@@ -1,0 +1,18 @@
+{{- if and (eq (default "forwardAuth" .Values.sso.mode) "embedded") (default true .Values.sso.ingress.enabled) -}}
+{{- $scheme := ternary "https" "http" (default false .Values.sso.ingress.tls) -}}
+{{- $mode := default "scale" .Values.sofa.web.resizeMode -}}
+{{- $defaultPath := "/?floating_menu=false&clipboard=false" -}}
+{{- if eq $mode "scale" -}}
+{{- $defaultPath = "/?desktop_scaling=auto&floating_menu=false&clipboard=false" -}}
+{{- end -}}
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "premyom-sofa.fullname" . }}-oauth2-redirect
+  labels:
+    {{- include "premyom-sofa.labels" . | nindent 4 }}
+spec:
+  headers:
+    customRequestHeaders:
+      X-Auth-Request-Redirect: {{ printf "%s://%s%s" $scheme .Values.sso.ingress.hostname $defaultPath | quote }}
+{{- end }}

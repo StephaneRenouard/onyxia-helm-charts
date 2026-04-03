@@ -125,6 +125,13 @@
           "default": [],
           "x-onyxia": { "hidden": true, "overwriteDefaultWith": "{{user.decodedIdToken.groups}}" }
         },
+        "tabularEditor": {
+          "title": "Éditeur tabulaire",
+          "type": "object",
+          "properties": {
+            "enabled": { "title": "Enable CSV/XLS(X) editor", "type": "string", "default": "true", "x-onyxia": { "hidden": true } }
+          }
+        },
         "s3Mount": {
           "title": "S3 mounts",
           "type": "object",

@@ -1,0 +1,417 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+json_get() {
+  local expr="$1"
+  jq -r "$expr // empty" 2>/dev/null || true
+}
+
+vault_login_kubernetes() {
+  if [ -n "${VAULT_TOKEN:-}" ]; then
+    return 0
+  fi
+  if [ -z "${VAULT_ADDR:-}" ]; then
+    return 1
+  fi
+  local jwt_file="/var/run/secrets/kubernetes.io/serviceaccount/token"
+  if [ ! -r "${jwt_file}" ]; then
+    return 1
+  fi
+  local role="${VAULT_K8S_ROLE:-premyom-s3-read}"
+  local login_url="${VAULT_ADDR%/}/v1/auth/kubernetes/login"
+
+  local jwt
+  jwt="$(cat "${jwt_file}")"
+  [ -n "${jwt}" ] || return 1
+
+  local body
+  body="$(jq -cn --arg role "${role}" --arg jwt "${jwt}" '{role:$role,jwt:$jwt}')"
+
+  local resp
+  resp="$(curl -fsSL -X POST -H 'Content-Type: application/json' --data "${body}" "${login_url}" 2>/dev/null || true)"
+  [ -n "${resp}" ] || return 1
+
+  local token
+  token="$(printf '%s' "${resp}" | json_get '.auth.client_token')"
+  [ -n "${token}" ] || return 1
+
+  export VAULT_TOKEN="${token}"
+  return 0
+}
+
+vault_read_kv() {
+  local path="$1"
+  local key="$2"
+  if [ -z "${VAULT_ADDR:-}" ]; then
+    return 1
+  fi
+  if [ -z "${VAULT_TOKEN:-}" ]; then
+    vault_login_kubernetes >/dev/null 2>&1 || true
+  fi
+  if [ -z "${VAULT_TOKEN:-}" ]; then
+    return 1
+  fi
+  local url="${VAULT_ADDR%/}/v1/${path#/}"
+  local payload
+  payload="$(curl -fsSL -H "X-Vault-Token: ${VAULT_TOKEN}" "${url}" 2>/dev/null || true)"
+  if [ -z "${payload}" ]; then
+    return 1
+  fi
+  printf '%s' "${payload}" | json_get ".data.data[\"${key}\"]" | grep -q . && {
+    printf '%s' "${payload}" | json_get ".data.data[\"${key}\"]"
+    return 0
+  }
+  printf '%s' "${payload}" | json_get ".data[\"${key}\"]"
+}
+
+s3fs_mount_bucket() {
+  local bucket="$1"
+  local mount_point="$2"
+  local endpoint_url="$3"
+  local access_key="$4"
+  local secret_key="$5"
+  local mode="${6:-rw}"
+
+  mkdir -p "${mount_point}"
+
+  local passwd_file="/tmp/passwd-s3fs-${bucket}"
+  printf '%s:%s' "${access_key}" "${secret_key}" > "${passwd_file}"
+  chmod 600 "${passwd_file}"
+
+  local opts=(
+    -o "passwd_file=${passwd_file}"
+    -o "url=${endpoint_url}"
+    -o "use_path_request_style"
+    -o "nonempty"
+    -o "allow_other"
+    -o "uid=$(id -u onyxia 2>/dev/null || echo 1000)"
+    -o "gid=$(id -g onyxia 2>/dev/null || echo 100)"
+    -o "umask=0002"
+    -o "mp_umask=0002"
+  )
+  if [ "${mode}" = "ro" ]; then
+    opts+=(-o "ro")
+  fi
+
+  echo "[INFO] s3fs mount: ${bucket} -> ${mount_point} (${mode})"
+  s3fs "${bucket}" "${mount_point}" "${opts[@]}"
+}
+
+premyom_mount_s3() {
+  if [ "${PREMYOM_S3_MOUNT_ENABLED:-false}" != "true" ]; then
+    return 0
+  fi
+
+  local nonhds_host="${PREMYOM_S3_NONHDS_ENDPOINT_HOST:-}"
+  local hds_host="${PREMYOM_S3_HDS_ENDPOINT_HOST:-}"
+  local nonhds_path="${PREMYOM_S3_VAULT_NONHDS_PATH:-}"
+  local hds_path="${PREMYOM_S3_VAULT_HDS_PATH:-}"
+  local root="${PREMYOM_S3_MOUNT_ROOT:-/mnt/s3}"
+
+  if [ -z "${nonhds_host}" ] || [ -z "${hds_host}" ] || [ -z "${nonhds_path}" ] || [ -z "${hds_path}" ]; then
+    echo "[WARN] PREMYOM_S3_MOUNT_ENABLED=true but missing endpoint/path vars; skipping mounts." >&2
+    return 0
+  fi
+
+  local nonhds_access_key nonhds_secret_key hds_access_key hds_secret_key
+  nonhds_access_key="$(vault_read_kv "${nonhds_path}" "AWS_ACCESS_KEY_ID" || true)"
+  nonhds_secret_key="$(vault_read_kv "${nonhds_path}" "AWS_SECRET_ACCESS_KEY" || true)"
+  hds_access_key="$(vault_read_kv "${hds_path}" "AWS_ACCESS_KEY_ID" || true)"
+  hds_secret_key="$(vault_read_kv "${hds_path}" "AWS_SECRET_ACCESS_KEY" || true)"
+
+  if [ -z "${nonhds_access_key}" ] || [ -z "${nonhds_secret_key}" ] || [ -z "${hds_access_key}" ] || [ -z "${hds_secret_key}" ]; then
+    echo "[WARN] Vault read failed for S3 credentials; skipping mounts." >&2
+    return 0
+  fi
+
+  local nonhds_url="https://${nonhds_host}"
+  local hds_url="https://${hds_host}"
+
+  local groups_json="${ONYXIA_USER_GROUPS:-[]}"
+  if ! echo "${groups_json}" | jq -e . >/dev/null 2>&1; then
+    groups_json="$(printf '%s' "${groups_json}" | tr ', ' '\n' | awk 'NF{print}' | jq -Rsc 'split("\n")[:-1]')"
+  fi
+
+  local mounts_json
+  mounts_json="$(echo "${groups_json}" | jq -c '
+    map(tostring | ltrimstr("/") | ascii_downcase) |
+    map(select(test("^(hds-|nonhds-)?[a-z0-9.-]+(_(ro|rw))?$"))) |
+    map(
+      (sub("_(ro|rw)$";"")) as $raw |
+      {
+        scope: (if ($raw | startswith("hds-")) then "hds" else "nonhds" end),
+        bucket: $raw,
+        name: (
+          if ($raw | startswith("hds-")) then ($raw | sub("^hds-";""))
+          elif ($raw | startswith("nonhds-")) then ($raw | sub("^nonhds-";""))
+          else $raw
+          end
+        ),
+        mode: (if test("_(ro|rw)$") then capture("_(?<m>ro|rw)$").m else "rw" end)
+      }
+    ) |
+    reduce .[] as $g (
+      {};
+      ($g.scope + "/" + $g.name) as $k |
+      .[$k] = {
+        bucket: (
+          if $g.scope == "nonhds" then
+            if ((.[$k].bucket // "") | startswith("nonhds-")) then .[$k].bucket
+            elif ($g.bucket | startswith("nonhds-")) then $g.bucket
+            else $g.bucket
+            end
+          else $g.bucket
+          end
+        ),
+        mode: (if ((.[$k].mode // "ro") == "rw") or ($g.mode == "rw") then "rw" else "ro" end)
+      }
+    )
+  ')"
+
+  mapfile -t _mount_lines < <(echo "${mounts_json}" | jq -r 'to_entries[] | "\(.key)\t\(.value.bucket)\t\(.value.mode)"')
+
+  declare -A _dotted_orgs=()
+  for _line in "${_mount_lines[@]}"; do
+    IFS=$'\t' read -r _key _bucket _mode <<< "${_line}"
+    _name="${_key#*/}"
+    if [[ "${_name}" == *.* ]]; then
+      _org="${_name%%.*}"
+      _dotted_orgs["${_org}"]=1
+    fi
+  done
+
+  for _line in "${_mount_lines[@]}"; do
+    IFS=$'\t' read -r key bucket mode <<< "${_line}"
+    scope="${key%%/*}"
+    name="${key#*/}"
+
+    if [[ "${name}" != *.* ]] && [[ -n "${_dotted_orgs[${name}]:-}" ]]; then
+      mount_suffix="${name}/_bucket"
+    else
+      mount_suffix="${name//./\/}"
+    fi
+
+    if [ "${scope}" = "hds" ]; then
+      s3fs_mount_bucket "${bucket}" "${root}/hds/${mount_suffix}" "${hds_url}" "${hds_access_key}" "${hds_secret_key}" "${mode}"
+    else
+      s3fs_mount_bucket "${bucket}" "${root}/nonhds/${mount_suffix}" "${nonhds_url}" "${nonhds_access_key}" "${nonhds_secret_key}" "${mode}"
+    fi
+  done
+}
+
+configure_sofa_workspace() {
+  local workdir="/home/onyxia/work"
+
+  mkdir -p "${workdir}" "/home/onyxia/.config/fluxbox"
+
+  if [ -d "/mnt/s3" ]; then
+    ln -sfn "/mnt/s3" "${workdir}/s3" || true
+    [ -d "/mnt/s3/nonhds" ] && ln -sfn "/mnt/s3/nonhds" "${workdir}/s3-nonhds" || true
+    [ -d "/mnt/s3/hds" ] && ln -sfn "/mnt/s3/hds" "${workdir}/s3-hds" || true
+  fi
+
+  cat > /home/onyxia/.config/fluxbox/startup <<'EOF'
+#!/bin/sh
+xsetroot -solid "#1e1e1e"
+EOF
+  chmod +x /home/onyxia/.config/fluxbox/startup
+  chown -R onyxia:users /home/onyxia
+}
+
+configure_xpra_html_client() {
+  local xpra_www="/usr/share/xpra/www"
+  if [ -f "${xpra_www}/index.html" ]; then
+    echo "[INFO] Xpra HTML5 client detected: ${xpra_www}/index.html"
+    mkdir -p "${xpra_www}/js/lib" || true
+    if [ ! -f "${xpra_www}/js/lib/jquery.js" ]; then
+      local jquery_src=""
+      for candidate in \
+        /usr/share/javascript/jquery/jquery.js \
+        /usr/share/javascript/jquery/jquery.min.js
+      do
+        if [ -f "${candidate}" ]; then
+          jquery_src="${candidate}"
+          break
+        fi
+      done
+      if [ -n "${jquery_src}" ]; then
+        ln -sfn "${jquery_src}" "${xpra_www}/js/lib/jquery.js"
+        echo "[INFO] Xpra HTML5 asset fallback: linked jquery.js -> ${jquery_src}"
+      else
+        echo "[WARN] Xpra HTML5 asset fallback: jquery.js missing and no system jquery found" >&2
+      fi
+    fi
+    python3 - "${xpra_www}/index.html" <<'PY'
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+marker = "premyom-sofa-xpra-pasteboard-fix"
+if marker not in text:
+    text = text.replace("init_tablet_input(client);", "/* premyom-sofa-xpra-pasteboard-fix: disable tablet pasteboard capture */ // init_tablet_input(client);", 1)
+    patch = """<style id="premyom-sofa-xpra-pasteboard-fix-style">
+#pasteboard {
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+</style>
+<script id="premyom-sofa-xpra-pasteboard-fix">
+(function() {
+  function disablePasteboardFocus() {
+    var pb = document.getElementById("pasteboard");
+    if (!pb) return false;
+    try {
+      pb.setAttribute("readonly", "readonly");
+      pb.setAttribute("tabindex", "-1");
+      pb.setAttribute("autocomplete", "off");
+      pb.spellcheck = false;
+      pb.readOnly = true;
+      pb.style.pointerEvents = "none";
+      pb.style.opacity = "0";
+    } catch (e) {}
+    try {
+      pb.focus = function() { return false; };
+      pb.select = function() { return false; };
+    } catch (e) {}
+    try {
+      pb.addEventListener("focus", function() {
+        try { this.blur(); } catch (e) {}
+      }, true);
+    } catch (e) {}
+    try {
+      if (window.jQuery) {
+        window.jQuery(pb).off("blur paste copy cut input");
+        window.jQuery("#screen").off("click");
+      }
+    } catch (e) {}
+    return true;
+  }
+  function run() {
+    disablePasteboardFocus();
+    setTimeout(disablePasteboardFocus, 300);
+    setTimeout(disablePasteboardFocus, 1000);
+    setTimeout(disablePasteboardFocus, 2500);
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", run, { once: true });
+  } else {
+    run();
+  }
+})();
+</script>"""
+    if "</body>" in text:
+        text = text.replace("</body>", patch + "\n</body>", 1)
+    else:
+        text += "\n" + patch + "\n"
+    path.write_text(text, encoding="utf-8")
+PY
+    echo "[INFO] Xpra HTML5 client patch applied: ${marker:-premyom-sofa-xpra-pasteboard-fix}"
+    if [ -f "${xpra_www}/js/Client.js" ]; then
+      python3 - "${xpra_www}/js/Client.js" <<'PY'
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+marker = "premyom-sofa-xpra-clipboard-guard"
+if marker not in text:
+    needle = "XpraClient.prototype._poll_clipboard = function(e) {"
+    replacement = needle + "\n\t// " + marker + "\n\tif (!this.clipboard_enabled) {\n\t\treturn;\n\t}"
+    if needle in text:
+        text = text.replace(needle, replacement, 1)
+        path.write_text(text, encoding="utf-8")
+PY
+      echo "[INFO] Xpra HTML5 client patch applied: premyom-sofa-xpra-clipboard-guard"
+    fi
+    return 0
+  fi
+  if [ -f "/usr/lib/python3/dist-packages/xpra/net/http/html5/index.html" ]; then
+    echo "[INFO] Xpra HTML5 client detected (python package html5 assets)"
+    return 0
+  fi
+  echo "[WARN] Xpra HTML5 assets not found in expected locations." >&2
+}
+
+start_sofa_web_session() {
+  local display_num="${SOFA_DISPLAY:-:1}"
+  local width="${SOFA_SCREEN_WIDTH:-1920}"
+  local height="${SOFA_SCREEN_HEIGHT:-1080}"
+  local depth="${SOFA_SCREEN_DEPTH:-24}"
+  local app_path="${SOFA_APP_PATH:-/opt/sofa/bin/runSofa}"
+
+  export LIBGL_ALWAYS_SOFTWARE="${LIBGL_ALWAYS_SOFTWARE:-1}"
+  export HOME="/home/onyxia"
+  export USER="onyxia"
+  export DISPLAY="${display_num}"
+
+  [ -x "${app_path}" ] || {
+    echo "[ERROR] SOFA binary not found/executable: ${app_path}" >&2
+    exit 1
+  }
+
+  mkdir -p /home/onyxia/.xpra
+  rm -f "/tmp/.X${display_num#:}-lock" || true
+
+  local scaling_mode="off"
+  if [ "${SOFA_XPRA_DESKTOP_SCALING:-}" = "auto" ]; then
+    scaling_mode="auto"
+  elif [ "${SOFA_XPRA_DESKTOP_SCALING:-}" = "off" ]; then
+    scaling_mode="off"
+  fi
+
+  local xvfb_cmd
+  xvfb_cmd="Xvfb -screen 0 ${width}x${height}x${depth} -nolisten tcp -noreset +extension GLX +extension RANDR"
+  local start_child_cmd
+  start_child_cmd="/bin/sh -lc '(
+    for i in \$(seq 1 60); do
+      wmctrl -r \"runSofa\" -b add,maximized_vert,maximized_horz >/dev/null 2>&1 && break
+      sleep 1
+    done
+  ) >/tmp/wmctrl.log 2>&1 & exec \"${app_path}\" >>/tmp/sofa.log 2>&1'"
+  local xdg_runtime_dir="/tmp/xdg-runtime-onyxia"
+  mkdir -p "${xdg_runtime_dir}"
+  chmod 700 "${xdg_runtime_dir}"
+  export XDG_RUNTIME_DIR="${xdg_runtime_dir}"
+
+  echo "[INFO] Starting SOFA on ${display_num} with Xpra HTML5 (${width}x${height}x${depth}, scaling=${scaling_mode})"
+  exec xpra start "${display_num}" \
+    --daemon=no \
+    --mdns=no \
+    --notifications=no \
+    --printing=no \
+    --clipboard=no \
+    --pulseaudio=no \
+    --html=on \
+    --exit-with-children=yes \
+    --bind-tcp=0.0.0.0:8080 \
+    --tcp-auth=none \
+    --resize-display=no \
+    --xvfb="${xvfb_cmd}" \
+    --start-child="${start_child_cmd}" \
+    --env=LIBGL_ALWAYS_SOFTWARE="${LIBGL_ALWAYS_SOFTWARE}"
+}
+
+main() {
+  if [ "${1:-}" != "--as-onyxia" ]; then
+    premyom_mount_s3 || true
+    configure_sofa_workspace || true
+    configure_xpra_html_client || true
+    mkdir -p /tmp/.X11-unix || true
+    chown root:root /tmp/.X11-unix || true
+    chmod 1777 /tmp/.X11-unix || true
+  fi
+
+  if [ "$(id -u)" -eq 0 ]; then
+    exec sudo -EHu onyxia -- "$0" --as-onyxia
+  fi
+
+  if [ "${1:-}" = "--as-onyxia" ]; then
+    shift || true
+    configure_sofa_workspace || true
+  fi
+
+  start_sofa_web_session "$@"
+}
+
+main "$@"

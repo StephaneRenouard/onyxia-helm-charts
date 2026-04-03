@@ -1,12 +1,11 @@
 image:
-  repository: harbor.lan/premyom/onyxia-s3-explorer
-  tag: 0.1.6
+  repository: harbor.lan/premyom/onyxia-sofa
+  tag: 0.1.0
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
   - name: harbor-regcred
 
-# s3fs en pod Kubernetes nécessite FUSE: /dev/fuse + droits.
 securityContext:
   privileged: true
   allowPrivilegeEscalation: true
@@ -18,27 +17,28 @@ securityContext:
 
 resources:
   limits:
-    cpu: "1"
-    memory: 2Gi
+    cpu: "12"
+    memory: 16Gi
+    ephemeral-storage: 50Gi
   requests:
-    cpu: "0.2"
-    memory: 256Mi
+    cpu: "8"
+    memory: 16Gi
+    ephemeral-storage: 20Gi
 
-# Vault (optionnel): laisse par défaut pour Arkam.
+nodeSelector:
+  kubernetes.io/hostname: worker1
+
+tolerations: []
+affinity: {}
+
 extraVault:
   addr: "http://vault.vault.svc.cluster.local:8200"
   k8sRole: "premyom-s3-read"
 
-# Variables d'environnement additionnelles (optionnel).
-# Les variables Premyom (Vault + S3 + groupes) sont définies directement dans le template Helm.
 extraEnvVars: []
 
 premyom:
-  # Array attendu (x-onyxia: overwriteDefaultWith user.decodedIdToken.groups).
-  # Le template convertit en JSON via `toJson`.
   userGroupsJson: []
-  tabularEditor:
-    enabled: "true"
   s3Mount:
     enabled: "true"
     nonHdsEndpointHost: "cellar-c2.services.clever-cloud.com"
@@ -47,26 +47,32 @@ premyom:
     vaultHdsPath: "secret/data/premyom/s3/hds"
     mountRoot: "/mnt/s3"
 
+sofa:
+  releaseSeries: "25.12.00"
+  downloadUrl: ""
+  appPath: "/opt/sofa/bin/runSofa"
+  web:
+    resizeMode: "scale"
+    autoconnect: true
+  display:
+    width: "1920"
+    height: "1080"
+    depth: "24"
+
+workspace:
+  mountPath: "/home/onyxia/work"
+  emptyDir:
+    enabled: true
+    sizeLimit: "50Gi"
+
 sso:
-  # SSO peut être géré de 2 façons :
-  # - forwardAuth : s'appuie sur le oauth2-proxy central via middleware Traefik.
-  # - embedded : déploie un oauth2-proxy par service.
-  #
-  # En embedded (pattern Premyom), on privilégie un callback same-host:
-  #   https://<service-host>/oauth2/callback
-  # => cookies host-only compatibles (pas de cookieDomain global)
-  # Mode legacy possible: callback central sur datalab via callbackMode=central
   mode: embedded
   forwardAuth:
     middleware: onyxia-workspace-sso-chain@kubernetescrd
 
   secretName: oauth2-proxy
   issuerUrl: https://auth.datalab.arkam-group.com/auth/realms/onyxia
-  callbackMode: central # central (Premyom apps subdomain) | sameHost (si KC accepte les redirect dynamiques)
   centralHost: oauth.apps.datalab.arkam-group.com
-  # Si vide, le chart calcule selon callbackMode:
-  # - sameHost: https://<service-host>/oauth2/callback
-  # - central:  https://<centralHost>/premyom-oauth2/<release>/callback
   redirectUrl: ""
   cookieDomain: .apps.datalab.arkam-group.com
   whitelistDomain: .apps.datalab.arkam-group.com
@@ -79,6 +85,5 @@ sso:
       kubernetes.io/ingress.class: arkam-traefik
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
-      traefik.ingress.kubernetes.io/router.tls.certresolver: le
     hostname: chart-example.local
     path: /
