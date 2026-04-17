@@ -4,6 +4,8 @@ Explorateur de fichiers basé sur Filebrowser, exposant le contenu monté sous `
 Téléchargement désactivé via `filebrowser config init/set --perm.download=false` dans `premyom-s3-explorer/image/onyxia-init.sh`.
 Un éditeur tabulaire intégré est exposé sur `/tabular/` pour lire/éditer `csv`, `xls`, `xlsx`.
 L’écriture dépend des droits du mount S3 (`_rw` modifiable, `_ro` lecture seule).
+Depuis l’UI Filebrowser, un bouton flottant `Éditeur CSV/XLS/XLSX` est injecté.
+Quand l’URL contient un fichier `csv/xls/xlsx`, redirection automatique vers l’éditeur tabulaire.
 
 ## Image
 

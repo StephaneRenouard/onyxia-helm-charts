@@ -35,6 +35,7 @@ RUN set -eux; \
 
 COPY premyom-s3-explorer/image/onyxia-init.sh /opt/onyxia-init.sh
 COPY premyom-s3-explorer/image/tabular-editor.py /opt/tabular-editor.py
+COPY premyom-s3-explorer/image/filebrowser-tabular-bridge.js /opt/filebrowser-tabular-bridge.js
 COPY premyom-s3-explorer/image/nginx.conf /etc/nginx/nginx.conf
 RUN chmod +x /opt/onyxia-init.sh
 
